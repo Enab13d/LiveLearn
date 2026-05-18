@@ -484,6 +484,7 @@ $RECYCLE.BIN/
 *.swp
 
 # Claude Code local settings and overrides
+plan.md
 CLAUDE.md
 CLAUDE.local.md
 .claude/settings.local.json
