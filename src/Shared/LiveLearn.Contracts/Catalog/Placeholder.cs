@@ -1,0 +1,1 @@
+namespace LiveLearn.Contracts.Catalog;
