@@ -20,7 +20,7 @@ where TResponse : Result
         }
         else
         {
-            _logger.LogWarning("Handled request: {RequestName} with errors {Errors}", typeof(TRequest).Name, string.Join(',', response.Errors ?? []));
+            _logger.LogWarning("Handled request: {RequestName} with errors {Errors}", typeof(TRequest).Name, string.Join(", ", response.Errors.Select(e => $"{e.Code}: {e.Message}")));
         }
 
         return response;

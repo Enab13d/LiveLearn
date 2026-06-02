@@ -5,16 +5,19 @@ public class Result
     private readonly bool _isSuccess;
 
     public bool IsSuccess => _isSuccess;
-    public string[]? Errors { get; }
+    public Error[] Errors { get; }
+    public Error FirstError => !IsSuccess && Errors.Length > 0
+        ? Errors[0]
+        : throw new InvalidOperationException("Cannot access FirstError on a successful result.");
 
-    protected Result(bool isSuccess, string[]? errors = null)
+    protected Result(bool isSuccess, Error[]? errors = null)
     {
         _isSuccess = isSuccess;
-        Errors = errors;
+        Errors = errors ?? [];
     }
 
     public static Result Success() => new(true);
-    public static Result Failure(params string[] errors) => new(false, errors);
+    public static Result Failure(params Error[] errors) => new(false, errors);
 }
 
 public sealed class Result<T> : Result
@@ -25,14 +28,14 @@ public sealed class Result<T> : Result
         ? _value!
         : throw new InvalidOperationException("Cannot access Value on a failed result.");
 
-    private Result(bool isSuccess, T? value = default, string[]? errors = null)
+    private Result(bool isSuccess, T? value = default, Error[]? errors = null)
         : base(isSuccess, errors)
     {
         _value = value;
     }
 
     public static Result<T> Success(T value) => new(true, value);
-    public static new Result<T> Failure(params string[] errors) => new(false, errors: errors);
+    public static new Result<T> Failure(params Error[] errors) => new(false, errors: errors);
 
     public static implicit operator Result<T>(T value) => Success(value);
 }

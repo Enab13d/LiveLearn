@@ -18,7 +18,7 @@ public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TReq
             .Select(v => v.Validate(context))
             .SelectMany(r => r.Errors)
             .Where(f => f != null)
-            .Select(f => f.ErrorMessage)
+            .Select(f => new Error(f.PropertyName, f.ErrorMessage, ErrorType.Validation))
             .ToArray();
 
         if (errors.Length > 0)
