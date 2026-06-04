@@ -1,4 +1,17 @@
 services:
+
+  gateway:
+    image: ${DOCKER_REGISTRY-}gateway
+    build:
+      context: .
+      dockerfile: src/gateway/LiveLearn.Gateway/Dockerfile
+    ports:
+      - "5001:5001"
+    environment:
+      - ASPNETCORE_URLS=http://0.0.0.0:5001
+    networks:
+      - livelearn-private-network
+
   postgres:
     image: postgres:18
     restart: unless-stopped
@@ -14,9 +27,11 @@ services:
       PGTZ: Europe/Kyiv
     volumes:
       - pgdata:/var/lib/postgresql
-      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./src/infrastructure/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
       - "5432:5432"
+    networks:
+      - livelearn-private-network
 
   mongo:
     image: mongo:8.0
@@ -32,6 +47,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+    networks:
+      - livelearn-private-network
 
   redis:
     image: redis:7-alpine
@@ -43,6 +60,8 @@ services:
       retries: 5
     ports:
       - "6379:6379"
+    networks:
+      - livelearn-private-network
 
   rabbitmq:
     image: rabbitmq:4.3.1-management
@@ -60,6 +79,8 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    networks:
+      - livelearn-private-network
 
   minio:
     image: minio/minio:latest
@@ -78,18 +99,23 @@ services:
     ports:
       - "9000:9000"
       - "9001:9001"
+    networks:
+      - livelearn-private-network
+      - livelearn-public-network
   minio-init:
     image: minio/mc:latest
     depends_on:
       minio:
         condition: service_healthy
     volumes:
-      - ./minio/init.sh:/init.sh
+      - ./src/infrastructure/minio/init.sh:/init.sh
     entrypoint: /bin/sh /init.sh
     environment:
       MINIO_ENDPOINT_URL: http://minio:9000
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    networks:
+      - livelearn-private-network
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
@@ -112,9 +138,12 @@ services:
       KC_HOSTNAME_STRICT: false
       KC_HOSTNAME_STRICT_HTTPS: false
     volumes:
-      - ./keycloak:/opt/keycloak/data/import:ro
+      - ./src/infrastructure/keycloak:/opt/keycloak/data/import:ro
     ports:
       - "18080:8080"
+    networks:
+      - livelearn-private-network
+      - livelearn-public-network
 
   nginx:
     image: nginx:1.30-alpine
@@ -123,13 +152,21 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/certs:/etc/nginx/certs:ro
-    # depends_on:
-    #   - gateway
+      - ./src/infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./src/infrastructure/nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      - gateway
+    networks:
+      - livelearn-public-network
+      - livelearn-private-network
 
 volumes:
   pgdata:
   mongo-data:
   rabbitmq-data:
   minio-data:
+
+networks:
+  livelearn-public-network:
+  livelearn-private-network:
+    driver: bridge
