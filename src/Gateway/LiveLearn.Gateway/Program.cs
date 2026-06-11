@@ -1,15 +1,19 @@
 ﻿using System.Net;
 using System.Threading.RateLimiting;
 using LiveLearn.Gateway.Infrastructure.Authentication;
+using LiveLearn.Gateway.Infrastructure.Health;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
+builder.Services.AddHttpClient();
 builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(nameof(JwtOptions)));
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
@@ -35,15 +39,17 @@ builder.Services.AddRateLimiter(options =>
     );
 
 });
+var jwtOptions = builder.Configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()
+       ?? throw new InvalidOperationException("JWT options not defined");
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        var jwtOptions = builder.Configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()
-         ?? throw new InvalidOperationException("JWT options not defined");
+
 
         options.Authority = jwtOptions.Authority;
         options.MapInboundClaims = false;
-        options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
+        options.RequireHttpsMetadata = false;
         options.TokenValidationParameters = new()
         {
             ValidateIssuer = true,
@@ -58,6 +64,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("onlyAuthenticated", policy => policy.RequireAuthenticatedUser());
 
+
+builder.Services.AddHealthChecks()
+    .AddCheck<AuthorizationServerHealthCheck>("keycloak", HealthStatus.Unhealthy);
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -70,6 +80,6 @@ app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapReverseProxy();
-
+app.MapHealthChecks("/health").AllowAnonymous();
 
 app.Run();

@@ -140,7 +140,7 @@ services:
     volumes:
       - ./src/infrastructure/keycloak:/opt/keycloak/data/import:ro
     ports:
-      - "18080:8080"
+      - "8080:8080"
     networks:
       - livelearn-private-network
       - livelearn-public-network
