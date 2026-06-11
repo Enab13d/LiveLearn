@@ -1,5 +1,7 @@
 ﻿using System.Text.Json;
+using LiveLearn.Gateway.Infrastructure.Authentication;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Options;
 
 namespace LiveLearn.Gateway.Infrastructure.Health;
 
@@ -7,7 +9,8 @@ namespace LiveLearn.Gateway.Infrastructure.Health;
 
 internal class AuthorizationServerHealthCheck(
     IHttpClientFactory httpClientFactory,
-    ILogger<AuthorizationServerHealthCheck> logger) : IHealthCheck
+    ILogger<AuthorizationServerHealthCheck> logger,
+    IOptions<KeycloakOptions> options) : IHealthCheck
 {
     private static readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
 
@@ -16,7 +19,7 @@ internal class AuthorizationServerHealthCheck(
         try
         {
             using var client = httpClientFactory.CreateClient();
-            var response = await client.GetAsync(new Uri("http://keycloak:9000/health"), cancellationToken);
+            var response = await client.GetAsync(options.Value.ManagementUrl, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
                 return HealthCheckResult.Unhealthy("Authorization server is unhealthy");

@@ -1,0 +1,12 @@
+
+services:
+
+  keycloak:
+    environment:
+      KC_HTTP_ENABLED: true
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+    
+  gateway:
+      environment:
+        - ASPNETCORE_ENVIRONMENT=Development

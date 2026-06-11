@@ -13,7 +13,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
-builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(nameof(JwtOptions)));
+builder.Services.Configure<KeycloakOptions>(builder.Configuration.GetSection(KeycloakOptions.SectionName));
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
@@ -39,7 +39,7 @@ builder.Services.AddRateLimiter(options =>
     );
 
 });
-var jwtOptions = builder.Configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()
+var keycloakOptions = builder.Configuration.GetRequiredSection(KeycloakOptions.SectionName).Get<KeycloakOptions>()
        ?? throw new InvalidOperationException("JWT options not defined");
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -47,17 +47,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     {
 
 
-        options.Authority = jwtOptions.Authority;
+        options.Authority = keycloakOptions.Authority;
         options.MapInboundClaims = false;
-        options.RequireHttpsMetadata = false;
+        options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
         options.TokenValidationParameters = new()
         {
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtOptions.ValidIssuer,
-            ValidAudience = jwtOptions.ValidAudience,
+            ValidIssuer = keycloakOptions.ValidIssuer,
+            ValidAudience = keycloakOptions.ValidAudience,
         };
     });
 
