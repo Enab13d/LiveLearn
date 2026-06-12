@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="../../../Shared/LiveLearn.BuildingBlocks/LiveLearn.BuildingBlocks.csproj" />
+    <ProjectReference Include="../LiveLearn.Identity.Application/LiveLearn.Identity.Application.csproj" />
+  </ItemGroup>
+
 </Project>
