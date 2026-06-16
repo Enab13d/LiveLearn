@@ -9,6 +9,20 @@ services:
       - ASPNETCORE_URLS=http://0.0.0.0:5001
     networks:
       - livelearn-private-network
+  
+  identity-service:
+    image: ${DOCKER_REGISTRY-}identity-service
+    build:
+      context: .
+      dockerfile: src/services/Identity/LiveLearn.Identity.API/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - ASPNETCORE_URLS=http://0.0.0.0:5002
+      - ConnectionStrings__UsersDb=Host=postgres;Port=5432;Database=livelearn_identity;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+    networks:
+      - livelearn-private-network
 
   postgres:
     image: postgres:18
@@ -165,3 +179,4 @@ networks:
   livelearn-public-network:
   livelearn-private-network:
     driver: bridge
+    internal: true

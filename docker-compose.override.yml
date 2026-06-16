@@ -10,3 +10,10 @@ services:
   gateway:
       environment:
         - ASPNETCORE_ENVIRONMENT=Development
+  identity-service:
+      environment:
+        - ASPNETCORE_ENVIRONMENT=Development
+
+networks:
+  livelearn-private-network:
+    internal: false
