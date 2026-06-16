@@ -19,7 +19,7 @@ internal class AuthorizationServerHealthCheck(
         try
         {
             using var client = httpClientFactory.CreateClient();
-            var response = await client.GetAsync(options.Value.ManagementUrl, cancellationToken);
+            var response = await client.GetAsync($"{options.Value.ManagementUrl}/health", cancellationToken);
 
             if (!response.IsSuccessStatusCode)
                 return HealthCheckResult.Unhealthy("Authorization server is unhealthy");
