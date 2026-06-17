@@ -1,6 +1,8 @@
 ﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Identity.Application.Repositories;
+using LiveLearn.Identity.Domain.Entities;
 using LiveLearn.Identity.Infrastructure.Authentication;
+using LiveLearn.Identity.Application.Authorization;
 using LiveLearn.Identity.Infrastructure.Context;
 using LiveLearn.Identity.Infrastructure.Repositories;
 using MediatR;
@@ -13,7 +15,7 @@ namespace LiveLearn.Identity.Infrastructure;
 
 public static class DependencyInjectionExtensions
 {
-    public static IServiceCollection AddIdentityInfrastructure(this IServiceCollection services, IConfiguration configuration, bool isDevelopment = true)
+    public static IServiceCollection AddIdentityInfrastructure(this IServiceCollection services, IConfiguration configuration, bool isDevelopment)
     {
         services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
         var jwtOptions = configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()
@@ -38,7 +40,13 @@ public static class DependencyInjectionExtensions
                 ValidAudience = jwtOptions.ValidAudience,
             };
         });
-        services.AddAuthorization();
+        services.AddAuthorizationBuilder()
+            .AddPolicy(AuthorizationPolicies.AdminPolicy, policy =>
+                policy.RequireRole(nameof(Role.Admin)))
+            .AddPolicy(AuthorizationPolicies.TutorPolicy, policy =>
+                policy.RequireRole(nameof(Role.Tutor)))
+            .AddPolicy(AuthorizationPolicies.StudentPolicy, policy =>
+                policy.RequireRole(nameof(Role.Student)));
 
         var connectionString = configuration.GetConnectionString("UsersDb")
             ?? throw new InvalidOperationException("Connection string 'UsersDb' is not configured.");
