@@ -11,7 +11,7 @@ namespace LiveLearn.Identity.API.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("api/identity/[controller]")]
+[Route("api/[controller]")]
 public sealed class UsersController(ISender mediator) : ControllerBase
 {
     [HttpGet("{id:guid}")]
@@ -25,22 +25,22 @@ public sealed class UsersController(ISender mediator) : ControllerBase
     public async Task<IActionResult> SyncAuthData(CancellationToken ct)
     {
         var claims = HttpContext.User;
-        var roleValue = claims.FindFirstValue("role");
+        var role = User.FindAll("role")
+            .Select(c => Enum.TryParse<Role>(c.Value, out var r) ? (Role?)r : null)
+            .FirstOrDefault(r => r.HasValue);
 
+        if (role is null)
+            return Problem("Token contains no valid application role. Check Keycloak role mapper configuration.");
 
-        if (!Enum.TryParse<Role>(roleValue, out var role))
-        {
-            return BadRequest($"Role {roleValue} is unsupported");
-        }
         string sub = claims.FindFirstValue("sub") ?? "";
         string firstName = claims.FindFirstValue("given_name") ?? "";
         string lastName = claims.FindFirstValue("family_name") ?? "";
         string email = claims.FindFirstValue("email") ?? "";
         if (!Guid.TryParse(sub, out var id))
         {
-            return BadRequest($"Sub claim {sub} is not a valid Guid");
+            return Problem($"Sub claim {sub} is not a valid Guid");
         }
-        var result = await mediator.Send(new ProvisionUserCommand(id, email, firstName, lastName, role), ct);
+        var result = await mediator.Send(new ProvisionUserCommand(id, email, firstName, lastName, role.Value), ct);
         return result.IsSuccess ? NoContent() : this.ToProblemResult(result.Errors);
     }
 }

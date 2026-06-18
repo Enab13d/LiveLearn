@@ -19,7 +19,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      - ASPNETCORE_URLS=http://0.0.0.0:5002
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
       - ConnectionStrings__UsersDb=Host=postgres;Port=5432;Database=livelearn_identity;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
     networks:
       - livelearn-private-network

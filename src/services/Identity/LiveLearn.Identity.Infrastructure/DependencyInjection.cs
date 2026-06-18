@@ -27,6 +27,7 @@ public static class DependencyInjectionExtensions
 
 
             options.Authority = jwtOptions.Authority;
+            options.MetadataAddress = jwtOptions.MetadataAddress ?? throw new InvalidOperationException("Metadata address not specified");
             options.MapInboundClaims = false;
             options.RequireHttpsMetadata = !isDevelopment;
             options.TokenValidationParameters = new()
