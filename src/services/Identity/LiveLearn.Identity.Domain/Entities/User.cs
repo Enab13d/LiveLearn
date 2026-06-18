@@ -43,6 +43,13 @@ public sealed class User : AggregateRoot<Guid>
         Bio = bio ?? string.Empty;
         RaiseDomainEvent(new UserProfileUpdatedDomainEvent(Id, DisplayName, AvatarUrl, Bio));
     }
+
+    public void UpdateAuthData(string email, Role role)
+    {
+        Email = email;
+        Role = role;
+        RaiseDomainEvent(new AuthDataUpdatedDomainEvent(Email, Role));
+    }
 }
 
 
