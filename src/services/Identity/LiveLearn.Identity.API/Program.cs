@@ -1,5 +1,7 @@
 ﻿using LiveLearn.Identity.Application;
 using LiveLearn.Identity.Infrastructure;
+using LiveLearn.Identity.Infrastructure.Context;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +18,10 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+
+    using var scope = app.Services.CreateAsyncScope();
+    var db = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
+    await db.Database.MigrateAsync();
 }
 
 app.UseHttpsRedirection();

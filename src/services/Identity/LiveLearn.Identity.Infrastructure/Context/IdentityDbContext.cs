@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LiveLearn.Identity.Infrastructure.Context;
 
-internal sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> options) : DbContext(options)
+public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> options) : DbContext(options)
 {
     public DbSet<User> Users { get; set; } = null!;
 
