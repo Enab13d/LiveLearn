@@ -59,6 +59,7 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(DomainEventDispatchBehavior<,>));
+        services.AddHealthChecks().AddNpgSql(connectionString);
 
         return services;
     }

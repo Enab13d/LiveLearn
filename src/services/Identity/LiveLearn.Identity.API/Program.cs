@@ -6,6 +6,8 @@ using LiveLearn.Identity.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Formatting.Compact;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using HealthChecks.UI.Client;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -56,5 +58,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseSerilogRequestLogging();
 app.MapControllers();
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+});
 
 app.Run();
