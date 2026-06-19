@@ -1,4 +1,5 @@
-﻿using LiveLearn.Identity.Application;
+﻿using System.Text.Json.Serialization;
+using LiveLearn.Identity.Application;
 using LiveLearn.Identity.Infrastructure;
 using LiveLearn.Identity.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddIdentityApplication();
 builder.Services.AddIdentityInfrastructure(builder.Configuration, builder.Environment.IsDevelopment());
 
