@@ -20,12 +20,12 @@ services:
         condition: service_healthy
     environment:
       - ASPNETCORE_URLS=http://0.0.0.0:8080
-      - ConnectionStrings__UsersDb=Host=postgres;Port=5432;Database=livelearn_identity;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      - ConnectionStrings__UsersDb=Host=postgres;Port=5432;Database=livelearn_identity;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};GSS Encryption Mode=Disable
     networks:
       - livelearn-private-network
 
   postgres:
-    image: postgres:18
+    image: postgres
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
