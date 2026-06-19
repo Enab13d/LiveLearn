@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using LiveLearn.Identity.Application;
+using LiveLearn.Identity.API.ExceptionHandlers;
 using LiveLearn.Identity.Infrastructure;
 using LiveLearn.Identity.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +31,8 @@ builder.Host.UseSerilog((context, services, config) =>
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddControllers()
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddIdentityApplication();
@@ -47,6 +50,8 @@ if (app.Environment.IsDevelopment())
     await db.Database.MigrateAsync();
 }
 
+app.UseExceptionHandler();
+app.UseStatusCodePages();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseSerilogRequestLogging();
