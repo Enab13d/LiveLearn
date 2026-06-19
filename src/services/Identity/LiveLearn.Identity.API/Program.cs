@@ -3,8 +3,29 @@ using LiveLearn.Identity.Application;
 using LiveLearn.Identity.Infrastructure;
 using LiveLearn.Identity.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Formatting.Compact;
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, services, config) =>
+{
+    config
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext()
+        .Enrich.WithProperty("Service", "identity");
+
+    if (context.HostingEnvironment.IsDevelopment())
+        config.WriteTo.Console(outputTemplate:
+      "[{Timestamp:HH:mm:ss} {Level:u3}] [{Service}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
+    else
+        config.WriteTo.Console(new CompactJsonFormatter());
+});
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -26,10 +47,9 @@ if (app.Environment.IsDevelopment())
     await db.Database.MigrateAsync();
 }
 
-app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseSerilogRequestLogging();
 app.MapControllers();
 
 app.Run();
