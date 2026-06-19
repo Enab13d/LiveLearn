@@ -53,6 +53,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     volumes:
       - mongo-data:/data/db
+      - mongo-configdb:/data/configdb
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping').ok", "--quiet"]
       interval: 10s
@@ -70,6 +71,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    volumes:
+      - redis-data:/data
     # ports:
     #   - "6379:6379"
     networks:
@@ -172,6 +175,8 @@ services:
 volumes:
   pgdata:
   mongo-data:
+  mongo-configdb:
+  redis-data:
   rabbitmq-data:
   minio-data:
 
