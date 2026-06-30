@@ -10,4 +10,9 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="../LiveLearn.Catalog.Application/LiveLearn.Catalog.Application.csproj" />
+    <ProjectReference Include="../LiveLearn.Catalog.Infrastructure/LiveLearn.Catalog.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

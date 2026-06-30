@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="../LiveLearn.Catalog.Application/LiveLearn.Catalog.Application.csproj" />
+  </ItemGroup>
+
 </Project>
