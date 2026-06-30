@@ -27,6 +27,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiveLearn.Identity.Domain",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiveLearn.Identity.Infrastructure", "src\services\Identity\LiveLearn.Identity.Infrastructure\LiveLearn.Identity.Infrastructure.csproj", "{CD79D4E6-0B37-446D-9683-75C6729BF673}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Catalog", "Catalog", "{C91C1CF1-1625-0789-F869-53D87D6277BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiveLearn.Catalog.Domain", "src\services\Catalog\LiveLearn.Catalog.Domain\LiveLearn.Catalog.Domain.csproj", "{AF7FEECD-D465-43C3-A1CE-691D917AC9E5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -121,6 +125,18 @@ Global
 		{CD79D4E6-0B37-446D-9683-75C6729BF673}.Release|x64.Build.0 = Release|Any CPU
 		{CD79D4E6-0B37-446D-9683-75C6729BF673}.Release|x86.ActiveCfg = Release|Any CPU
 		{CD79D4E6-0B37-446D-9683-75C6729BF673}.Release|x86.Build.0 = Release|Any CPU
+		{AF7FEECD-D465-43C3-A1CE-691D917AC9E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF7FEECD-D465-43C3-A1CE-691D917AC9E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF7FEECD-D465-43C3-A1CE-691D917AC9E5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AF7FEECD-D465-43C3-A1CE-691D917AC9E5}.Debug|x64.Build.0 = Debug|Any CPU
+		{AF7FEECD-D465-43C3-A1CE-691D917AC9E5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AF7FEECD-D465-43C3-A1CE-691D917AC9E5}.Debug|x86.Build.0 = Debug|Any CPU
+		{AF7FEECD-D465-43C3-A1CE-691D917AC9E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF7FEECD-D465-43C3-A1CE-691D917AC9E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF7FEECD-D465-43C3-A1CE-691D917AC9E5}.Release|x64.ActiveCfg = Release|Any CPU
+		{AF7FEECD-D465-43C3-A1CE-691D917AC9E5}.Release|x64.Build.0 = Release|Any CPU
+		{AF7FEECD-D465-43C3-A1CE-691D917AC9E5}.Release|x86.ActiveCfg = Release|Any CPU
+		{AF7FEECD-D465-43C3-A1CE-691D917AC9E5}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -137,5 +153,7 @@ Global
 		{68715CD5-29E3-4669-933A-40EF19862719} = {1BFC9479-12BF-35C3-06B8-42D89D95092B}
 		{9D9175FA-55D6-4A16-8EDD-1A1A3961C41C} = {1BFC9479-12BF-35C3-06B8-42D89D95092B}
 		{CD79D4E6-0B37-446D-9683-75C6729BF673} = {1BFC9479-12BF-35C3-06B8-42D89D95092B}
+		{C91C1CF1-1625-0789-F869-53D87D6277BA} = {984BB9B3-3FA3-BE33-9484-CAC21695A33C}
+		{AF7FEECD-D465-43C3-A1CE-691D917AC9E5} = {C91C1CF1-1625-0789-F869-53D87D6277BA}
 	EndGlobalSection
 EndGlobal
