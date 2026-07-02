@@ -1,4 +1,4 @@
-﻿namespace LiveLearn.Catalog.Domain.Entities;
+﻿namespace LiveLearn.Catalog.Domain.Enums;
 
 
 public enum LectureType

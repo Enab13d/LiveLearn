@@ -1,4 +1,5 @@
 ﻿using LiveLearn.BuildingBlocks;
+using LiveLearn.Catalog.Domain.Enums;
 
 namespace LiveLearn.Catalog.Domain.Entities;
 

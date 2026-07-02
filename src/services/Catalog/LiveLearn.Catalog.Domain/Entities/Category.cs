@@ -12,14 +12,12 @@ public sealed class Category : AggregateRoot<Guid>
 
     public static Category Create(Guid id, string name, string slug)
     {
-        var category = new Category()
+        return new()
         {
             Id = id,
             Name = name,
             Slug = slug
         };
-
-        return category;
     }
 
 }
