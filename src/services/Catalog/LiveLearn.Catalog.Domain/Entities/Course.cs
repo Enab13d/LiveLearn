@@ -1,6 +1,7 @@
 ﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Catalog.Domain.DomainEvents;
 using LiveLearn.Catalog.Domain.Enums;
+using LiveLearn.Catalog.Domain.Errors;
 
 namespace LiveLearn.Catalog.Domain.Entities;
 
@@ -46,7 +47,7 @@ public sealed class Course : AggregateRoot<Guid>
 
     public Result Publish()
     {
-        if (Status != CourseStatus.Draft) return Result.Failure();
+        if (Status != CourseStatus.Draft) return Result.Failure(CourseErrors.PublishFailed);
 
         Status = CourseStatus.Published;
         RaiseDomainEvent(new CoursePublishedDomainEvent(Id));
@@ -56,7 +57,7 @@ public sealed class Course : AggregateRoot<Guid>
     public Result AddLecture(Guid sectionId, Guid lectureId, string title, LectureType lectureType, int order, TimeSpan duration)
     {
         var section = _sections.FirstOrDefault(s => s.Id == sectionId);
-        if (section is null) return Result.Failure();
+        if (section is null) return Result.Failure(CourseErrors.SectionNotFound);
         var lecture = section.AddLecture(lectureId, title, lectureType, order, duration);
         RaiseDomainEvent(new LectureAddedDomainEvent(Id, sectionId, lecture.Id));
         return Result.Success();
