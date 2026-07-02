@@ -6,6 +6,15 @@ namespace LiveLearn.Catalog.Domain.Entities;
 public sealed class Lecture : Entity<Guid>
 {
     private Lecture() { }
+    internal Lecture(Guid id, Guid sectionId, string title, LectureType type, int order, TimeSpan duration)
+    {
+        Id = id;
+        SectionId = sectionId;
+        Title = title;
+        Type = type;
+        Order = order;
+        Duration = duration;
+    }
 
     public Guid SectionId { get; private set; }
 

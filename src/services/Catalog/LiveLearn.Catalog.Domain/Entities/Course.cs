@@ -53,6 +53,15 @@ public sealed class Course : AggregateRoot<Guid>
         return Result.Success();
     }
 
+    public Result AddLecture(Guid sectionId, Guid lectureId, string title, LectureType lectureType, int order, TimeSpan duration)
+    {
+        var section = _sections.FirstOrDefault(s => s.Id == sectionId);
+        if (section is null) return Result.Failure();
+        var lecture = section.AddLecture(lectureId, title, lectureType, order, duration);
+        RaiseDomainEvent(new LectureAddedDomainEvent(Id, sectionId, lecture.Id));
+        return Result.Success();
+    }
+
 
 
 }
