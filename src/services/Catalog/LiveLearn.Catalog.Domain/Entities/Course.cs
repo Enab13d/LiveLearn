@@ -44,6 +44,15 @@ public sealed class Course : AggregateRoot<Guid>
         return course;
     }
 
+    public Result Publish()
+    {
+        if (Status != CourseStatus.Draft) return Result.Failure();
+
+        Status = CourseStatus.Published;
+        RaiseDomainEvent(new CoursePublishedDomainEvent(Id));
+        return Result.Success();
+    }
+
 
 
 }
