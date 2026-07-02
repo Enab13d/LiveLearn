@@ -1,4 +1,5 @@
 ﻿using LiveLearn.BuildingBlocks;
+using LiveLearn.Catalog.Domain.DomainEvents;
 using LiveLearn.Catalog.Domain.Enums;
 
 namespace LiveLearn.Catalog.Domain.Entities;
@@ -38,6 +39,7 @@ public sealed class Course : AggregateRoot<Guid>
             Price = price,
             Status = CourseStatus.Draft
         };
+        course.RaiseDomainEvent(new CourseCreatedDomainEvent(id, tutorId, categoryId, title));
 
         return course;
     }
