@@ -2,6 +2,7 @@
 using LiveLearn.Catalog.Application.Dto;
 using LiveLearn.Catalog.Application.Repositories;
 using LiveLearn.Catalog.Domain.Entities;
+using LiveLearn.Catalog.Domain.Errors;
 
 namespace LiveLearn.Catalog.Application.Commands;
 
@@ -11,7 +12,7 @@ internal sealed class CreateCourseCommandHandler(ICourseRepository courseReposit
     {
         var category = await categoryRepository.GetByIdAsync(request.CategoryId, ct);
         if(category is null)
-            return Result<CourseDto>.Failure();
+            return Result<CourseDto>.Failure(CategoryErrors.NotFound);
 
         var course = Course.Create(Guid.NewGuid(), request.TutorId, request.CategoryId, request.Title, request.Description, request.Price);
         await courseRepository.AddAsync(course, ct);
