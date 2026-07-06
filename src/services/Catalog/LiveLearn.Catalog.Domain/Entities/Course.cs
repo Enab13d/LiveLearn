@@ -45,6 +45,14 @@ public sealed class Course : AggregateRoot<Guid>
         return course;
     }
 
+    public void Update(string title, string description, decimal price, Guid categoryId)
+    {
+        Title = title;
+        Description = description;
+        Price = price;
+        CategoryId = categoryId;
+    }
+
     public Result Publish()
     {
         if (Status != CourseStatus.Draft) return Result.Failure(CourseErrors.PublishFailed);
