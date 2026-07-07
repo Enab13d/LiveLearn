@@ -1,5 +1,6 @@
 ﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Catalog.Domain.Enums;
+using LiveLearn.Catalog.Domain.Errors;
 
 namespace LiveLearn.Catalog.Domain.Entities;
 
@@ -29,5 +30,26 @@ public sealed class Section : Entity<Guid>
         _lectures.Add(lecture);
         return lecture;
     }
+
+    internal Result UpdateLectureOrder(Guid lectureId, int order)
+    {
+        var lecture = _lectures.FirstOrDefault(l => l.Id == lectureId);
+
+        if (lecture is null) return Result.Failure(LectureErrors.NotFound);
+
+        var lectureAtGivenOrder = _lectures.FirstOrDefault(l => l.Order == order);
+
+        if (lectureAtGivenOrder is not null)
+        {
+            lectureAtGivenOrder.SetOrder(lecture.Order);
+        }
+        lecture.SetOrder(order);
+
+        return Result.Success();
+
+
+
+    }
+
 
 }

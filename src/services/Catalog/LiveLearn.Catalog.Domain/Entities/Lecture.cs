@@ -26,6 +26,10 @@ public sealed class Lecture : Entity<Guid>
 
     public TimeSpan Duration { get; private set; }
 
+    internal void SetOrder(int order)
+    {
+        Order = order;
+    }
 
 
 }

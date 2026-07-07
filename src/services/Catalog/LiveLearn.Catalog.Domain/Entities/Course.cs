@@ -79,6 +79,19 @@ public sealed class Course : AggregateRoot<Guid>
         return Result.Success();
     }
 
+    public Result UpdateLectureOrder(Guid sectionId, Guid lectureId, int order)
+    {
+        var section = _sections.FirstOrDefault(s => s.Id == sectionId);
+
+        if (section is null) return Result.Failure(CourseErrors.SectionNotFound);
+
+        var result = section.UpdateLectureOrder(lectureId, order);
+
+        return result;
+
+    }
+
+
 
 
 }
