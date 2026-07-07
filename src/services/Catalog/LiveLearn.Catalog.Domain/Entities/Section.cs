@@ -8,6 +8,14 @@ public sealed class Section : Entity<Guid>
 {
     private Section() { }
 
+    internal Section(Guid id, Guid courseId, string title, int order)
+    {
+        Id = id;
+        CourseId = courseId;
+        Title = title;
+        Order = order;
+    }
+
     public Guid CourseId { get; private set; }
     public string Title { get; private set; } = string.Empty;
     public int Order { get; private set; }
