@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../../Shared/LiveLearn.BuildingBlocks/LiveLearn.BuildingBlocks.csproj" />
+    <ProjectReference Include="../../../Shared/LiveLearn.Contracts/LiveLearn.Contracts.csproj" />
     <ProjectReference Include="../LiveLearn.Catalog.Domain/LiveLearn.Catalog.Domain.csproj" />
   </ItemGroup>
 
