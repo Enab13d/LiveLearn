@@ -71,6 +71,14 @@ public sealed class Course : AggregateRoot<Guid>
         return Result.Success();
     }
 
+    public Result AddSection(Guid sectionId, string title, int order)
+    {
+        Section section = new(sectionId, Id, title, order);
+        _sections.Add(section);
+        RaiseDomainEvent(new SectionAddedDomainEvent(sectionId, Id));
+        return Result.Success();
+    }
+
 
 
 }
