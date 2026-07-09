@@ -20,7 +20,8 @@ internal sealed class AddLectureCommandHandler(ICourseRepository courseRepositor
             request.Title,
             request.LectureType,
             request.Order,
-            request.Duration
+            request.Duration,
+            request.Description
         );
 
         if (!result.IsSuccess) return Result<Guid>.Failure(result.FirstError);
