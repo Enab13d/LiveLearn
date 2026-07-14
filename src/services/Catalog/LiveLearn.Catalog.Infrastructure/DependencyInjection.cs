@@ -1,8 +1,11 @@
 ﻿using LiveLearn.BuildingBlocks;
+using LiveLearn.Catalog.Application.Repositories;
 using LiveLearn.Catalog.Infrastructure.Configuration;
 using LiveLearn.Catalog.Infrastructure.Contexts;
 using LiveLearn.Catalog.Infrastructure.Messaging;
+using LiveLearn.Catalog.Infrastructure.Repositories;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -41,6 +44,19 @@ public static class DependencyInjectionExtensions
                 o.UseBusOutbox();
             });
         });
+
+        var connectionString = configuration.GetConnectionString("CatalogDb")
+            ?? throw new InvalidOperationException("Connection string 'CatalogDb' is not configured.");
+
+        services.AddDbContext<WriteDbContext>(options =>
+            options.UseNpgsql(connectionString));
+
+        services.AddDbContext<ReadDbContext>(options =>
+            options.UseNpgsql(connectionString).UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
+
+        services.AddScoped<ICourseRepository, CourseRepository>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }
