@@ -27,7 +27,7 @@
   </ItemGroup>
   <!-- Caching / Storage -->
   <ItemGroup>
-    <PackageVersion Include="StackExchange.Redis" Version="2.13.1" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.9" />
     <PackageVersion Include="AWSSDK.S3" Version="4.0.0" />
   </ItemGroup>
   <!-- Documents / Email -->

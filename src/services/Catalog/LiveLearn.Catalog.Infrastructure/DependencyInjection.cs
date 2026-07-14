@@ -1,5 +1,6 @@
 ﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Catalog.Application.Repositories;
+using LiveLearn.Catalog.Infrastructure.Caching;
 using LiveLearn.Catalog.Infrastructure.Configuration;
 using LiveLearn.Catalog.Infrastructure.Contexts;
 using LiveLearn.Catalog.Infrastructure.Messaging;
@@ -57,6 +58,16 @@ public static class DependencyInjectionExtensions
         services.AddScoped<ICourseRepository, CourseRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        services.AddScoped<ICacheService, CacheService>();
+        
+        var redisConnectionString = configuration.GetConnectionString("Redis")
+            ?? throw new InvalidOperationException("Connection string 'Redis' is not configured.");
+
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = redisConnectionString;
+        });
 
         return services;
     }
