@@ -60,13 +60,21 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         services.AddScoped<ICacheService, CacheService>();
-        
+
         var redisConnectionString = configuration.GetConnectionString("Redis")
             ?? throw new InvalidOperationException("Connection string 'Redis' is not configured.");
 
         services.AddStackExchangeRedisCache(options =>
         {
             options.Configuration = redisConnectionString;
+        });
+
+        services.AddMediatR(cfg =>
+        {
+           cfg.RegisterServicesFromAssembly(typeof(DependencyInjectionExtensions).Assembly);
+           cfg.AddOpenBehavior(typeof(DomainEventDispatchBehavior<,>));
+           cfg.AddOpenBehavior(typeof(CachingBehavior<,>));
+           cfg.AddOpenBehavior(typeof(CacheInvalidationBehavior<,>));
         });
 
         return services;
