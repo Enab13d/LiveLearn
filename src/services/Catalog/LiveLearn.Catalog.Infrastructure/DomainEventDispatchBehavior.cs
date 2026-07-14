@@ -1,13 +1,13 @@
 ﻿using LiveLearn.BuildingBlocks;
-using LiveLearn.Identity.Infrastructure.Context;
+using LiveLearn.Catalog.Infrastructure.Contexts;
 using MediatR;
 
-namespace LiveLearn.Identity.Infrastructure;
+namespace LiveLearn.Catalog.Infrastructure;
 
 
 internal sealed class DomainEventDispatchBehavior<TRequest, TResponse>(
-    IdentityDbContext dbContext,
-    IPublisher publisher) 
+    WriteDbContext dbContext,
+    IPublisher publisher)
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
@@ -28,7 +28,7 @@ internal sealed class DomainEventDispatchBehavior<TRequest, TResponse>(
             .Entries<AggregateRoot<Guid>>()
             .ToList()
             .ForEach(e => e.Entity.ClearDomainEvents());
-        
+
         return response;
 
 
