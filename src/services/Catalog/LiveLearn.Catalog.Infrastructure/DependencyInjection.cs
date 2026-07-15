@@ -110,6 +110,8 @@ public static class DependencyInjectionExtensions
             cfg.AddOpenBehavior(typeof(CacheInvalidationBehavior<,>));
         });
 
+        services.AddHealthChecks().AddNpgSql(connectionString).AddRedis(redisConnectionString);
+
         return services;
     }
 }
