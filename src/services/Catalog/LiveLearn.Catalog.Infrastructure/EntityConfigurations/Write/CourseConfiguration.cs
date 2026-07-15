@@ -1,6 +1,7 @@
 ﻿using LiveLearn.Catalog.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using NpgsqlTypes;
 
 namespace LiveLearn.Catalog.Infrastructure.EntityConfigurations.Write;
 
@@ -19,6 +20,10 @@ internal sealed class CourseConfiguration : IEntityTypeConfiguration<Course>
 
         builder.HasOne<Category>().WithMany().HasForeignKey(e => e.CategoryId);
 
+        builder.Property<NpgsqlTsVector>("SearchVector")
+                .IsGeneratedTsVectorColumn("english", "Title", "Description");
+
+        builder.HasIndex("SearchVector").HasMethod("GIN");
 
     }
 
