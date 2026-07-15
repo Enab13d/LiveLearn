@@ -12,4 +12,9 @@
     <ProjectReference Include="../LiveLearn.Catalog.Domain/LiveLearn.Catalog.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+  </ItemGroup>
+
 </Project>
