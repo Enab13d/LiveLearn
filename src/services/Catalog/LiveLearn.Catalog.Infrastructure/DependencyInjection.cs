@@ -1,11 +1,14 @@
 ﻿using LiveLearn.BuildingBlocks;
+using LiveLearn.Catalog.Application.Authorization;
 using LiveLearn.Catalog.Application.Repositories;
+using LiveLearn.Catalog.Infrastructure.Authentication;
 using LiveLearn.Catalog.Infrastructure.Caching;
 using LiveLearn.Catalog.Infrastructure.Configuration;
 using LiveLearn.Catalog.Infrastructure.Contexts;
 using LiveLearn.Catalog.Infrastructure.Messaging;
 using LiveLearn.Catalog.Infrastructure.Repositories;
 using MassTransit;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,9 +18,39 @@ namespace LiveLearn.Catalog.Infrastructure;
 
 public static class DependencyInjectionExtensions
 {
-    public static IServiceCollection AddCatalogInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddCatalogInfrastructure(this IServiceCollection services, IConfiguration configuration, bool isDevelopment)
     {
+        services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
+        var jwtOptions = configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()
+            ?? throw new InvalidOperationException("JWT options not defined");
 
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+
+
+            options.Authority = jwtOptions.Authority;
+            options.MetadataAddress = jwtOptions.MetadataAddress ?? throw new InvalidOperationException("Metadata address not specified");
+            options.MapInboundClaims = false;
+            options.RequireHttpsMetadata = !isDevelopment;
+            options.TokenValidationParameters = new()
+            {
+                RoleClaimType = "role",
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = jwtOptions.ValidIssuer,
+                ValidAudience = jwtOptions.ValidAudience,
+            };
+        });
+        services.AddAuthorizationBuilder()
+            .AddPolicy(AuthorizationPolicies.AdminPolicy, policy =>
+                policy.RequireRole(nameof(Role.Admin)))
+            .AddPolicy(AuthorizationPolicies.TutorPolicy, policy =>
+                policy.RequireRole(nameof(Role.Tutor)))
+            .AddPolicy(AuthorizationPolicies.StudentPolicy, policy =>
+                policy.RequireRole(nameof(Role.Student)));
         services.Configure<RabbitMQOptions>(configuration.GetSection(nameof(RabbitMQOptions)));
 
         var rabbitMQOptions = configuration.GetRequiredSection(nameof(RabbitMQOptions)).Get<RabbitMQOptions>()
@@ -71,10 +104,10 @@ public static class DependencyInjectionExtensions
 
         services.AddMediatR(cfg =>
         {
-           cfg.RegisterServicesFromAssembly(typeof(DependencyInjectionExtensions).Assembly);
-           cfg.AddOpenBehavior(typeof(DomainEventDispatchBehavior<,>));
-           cfg.AddOpenBehavior(typeof(CachingBehavior<,>));
-           cfg.AddOpenBehavior(typeof(CacheInvalidationBehavior<,>));
+            cfg.RegisterServicesFromAssembly(typeof(DependencyInjectionExtensions).Assembly);
+            cfg.AddOpenBehavior(typeof(DomainEventDispatchBehavior<,>));
+            cfg.AddOpenBehavior(typeof(CachingBehavior<,>));
+            cfg.AddOpenBehavior(typeof(CacheInvalidationBehavior<,>));
         });
 
         return services;
