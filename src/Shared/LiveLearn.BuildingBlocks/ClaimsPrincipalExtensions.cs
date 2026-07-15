@@ -7,9 +7,10 @@ namespace LiveLearn.BuildingBlocks;
 public static class ClaimsPrincipalExtensions
 {
 
-    public static string? GetUserId(this ClaimsPrincipal principal)
+    public static Guid? GetUserId(this ClaimsPrincipal principal)
     {
 
-        return principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        var sub = principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        return Guid.TryParse(sub, out var id) ? id : null;
     }
 }
