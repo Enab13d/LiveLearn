@@ -8,5 +8,6 @@ public sealed record GetCatalogQuery(
     int PageSize,
     Guid? CategoryId = null,
     Guid? TutorId = null,
-    decimal? MaxPrice = null
+    decimal? MaxPrice = null,
+    string? Query = null
 ) : IQuery<PagedResult<CatalogItemDto>>;
