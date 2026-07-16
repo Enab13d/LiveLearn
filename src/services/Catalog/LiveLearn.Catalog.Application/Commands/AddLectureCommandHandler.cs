@@ -14,9 +14,11 @@ internal sealed class AddLectureCommandHandler(ICourseRepository courseRepositor
 
         if (course.TutorId != request.TutorId) return Result<Guid>.Failure(CourseErrors.Forbidden);
 
+        var lectureId = Guid.NewGuid();
+
         var result = course.AddLecture(
             request.SectionId,
-            request.LectureId,
+            lectureId,
             request.Title,
             request.LectureType,
             request.Order,
@@ -28,7 +30,7 @@ internal sealed class AddLectureCommandHandler(ICourseRepository courseRepositor
 
         await unitOfWork.CommitAsync(ct);
 
-        return Result<Guid>.Success(request.LectureId);
+        return Result<Guid>.Success(lectureId);
 
     }
 }
