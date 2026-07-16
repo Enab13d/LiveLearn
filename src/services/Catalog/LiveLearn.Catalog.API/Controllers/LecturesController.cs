@@ -31,4 +31,17 @@ public sealed class LecturesController(ISender mediator) : ControllerBase
 
         return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
     }
+
+    [Authorize(Policy = AuthorizationPolicies.TutorPolicy)]
+    [HttpPatch("{lectureId:guid}/order")]
+    public async Task<IActionResult> UpdateLectureOrder([FromBody] RequestLectureUpdateOrder request, Guid courseId, Guid sectionId, Guid lectureId, CancellationToken ct)
+    {
+        if (User.GetUserId() is not Guid tutorId)
+            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
+
+        var result = await mediator.Send(
+            new UpdateLectureOrderCommand(courseId, tutorId, sectionId, lectureId, request.Order), ct);
+
+        return result.IsSuccess ? NoContent() : this.ToProblemResult(result.Errors);
+    }
 }
