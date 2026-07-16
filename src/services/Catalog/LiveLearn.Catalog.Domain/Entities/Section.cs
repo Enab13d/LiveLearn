@@ -24,9 +24,10 @@ public sealed class Section : Entity<Guid>
 
     public IReadOnlyCollection<Lecture> Lectures => _lectures.AsReadOnly();
 
-    internal Lecture AddLecture(Guid lectureId, string title, LectureType lectureType, int order, TimeSpan duration, string description)
+    internal Lecture AddLecture(Guid lectureId, string title, LectureType lectureType, string description)
     {
-        var lecture = new Lecture(lectureId, Id, title, lectureType, order, duration, description);
+        int lectureOrder = _lectures.Count + 1;
+        var lecture = new Lecture(lectureId, Id, title, lectureType, lectureOrder, description);
         _lectures.Add(lecture);
         return lecture;
     }

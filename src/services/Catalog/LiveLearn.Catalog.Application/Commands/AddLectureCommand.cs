@@ -10,7 +10,5 @@ public sealed record AddLectureCommand
     Guid TutorId,
     string Title,
     LectureType LectureType,
-    int Order,
-    string Description,
-    TimeSpan Duration
+    string Description
 ) : ICommand<Guid>;

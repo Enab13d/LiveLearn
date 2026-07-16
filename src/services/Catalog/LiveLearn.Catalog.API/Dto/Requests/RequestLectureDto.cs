@@ -7,7 +7,5 @@ public sealed record RequestLectureDto
 (
     string Title,
     LectureType LectureType,
-    int Order,
-    string Description,
-    int DurationInSeconds
+    string Description
 );

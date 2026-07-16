@@ -1,4 +1,4 @@
-﻿using LiveLearn.BuildingBlocks;
+using LiveLearn.BuildingBlocks;
 using LiveLearn.Catalog.Application.Repositories;
 using LiveLearn.Catalog.Domain.Errors;
 
@@ -21,8 +21,6 @@ internal sealed class AddLectureCommandHandler(ICourseRepository courseRepositor
             lectureId,
             request.Title,
             request.LectureType,
-            request.Order,
-            request.Duration,
             request.Description
         );
 

@@ -6,14 +6,13 @@ namespace LiveLearn.Catalog.Domain.Entities;
 public sealed class Lecture : Entity<Guid>
 {
     private Lecture() { }
-    internal Lecture(Guid id, Guid sectionId, string title, LectureType type, int order, TimeSpan duration, string description)
+    internal Lecture(Guid id, Guid sectionId, string title, LectureType type, int order, string description)
     {
         Id = id;
         SectionId = sectionId;
         Title = title;
         Type = type;
         Order = order;
-        Duration = duration;
         Description = description;
     }
 
@@ -25,7 +24,7 @@ public sealed class Lecture : Entity<Guid>
 
     public int Order { get; private set; }
 
-    public TimeSpan Duration { get; private set; }
+    public TimeSpan? Duration { get; private set; }
 
     public string Description { get; private set; } = string.Empty;
 

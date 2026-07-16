@@ -22,10 +22,7 @@ public sealed class LecturesController(ISender mediator) : ControllerBase
         if (User.GetUserId() is not Guid tutorId)
             return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
 
-        AddLectureCommand command = new(
-            courseId, sectionId, tutorId,
-            request.Title, request.LectureType, request.Order,
-            request.Description, TimeSpan.FromSeconds(request.DurationInSeconds));
+        AddLectureCommand command = new(courseId, sectionId, tutorId, request.Title, request.LectureType, request.Description);
 
         var result = await mediator.Send(command, ct);
 
