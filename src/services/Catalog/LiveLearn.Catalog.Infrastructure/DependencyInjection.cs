@@ -51,9 +51,9 @@ public static class DependencyInjectionExtensions
                 policy.RequireRole(nameof(Role.Tutor)))
             .AddPolicy(AuthorizationPolicies.StudentPolicy, policy =>
                 policy.RequireRole(nameof(Role.Student)));
-        services.Configure<RabbitMQOptions>(configuration.GetSection(nameof(RabbitMQOptions)));
+        services.Configure<RabbitMQOptions>(configuration.GetSection(RabbitMQOptions.SectionName));
 
-        var rabbitMQOptions = configuration.GetRequiredSection(nameof(RabbitMQOptions)).Get<RabbitMQOptions>()
+        var rabbitMQOptions = configuration.GetRequiredSection(RabbitMQOptions.SectionName).Get<RabbitMQOptions>()
             ?? throw new InvalidOperationException("RabbitMQOptions options not defined");
 
         services.AddScoped<IEventBus, MassTransitEventBus>();
