@@ -1,4 +1,5 @@
 ﻿using LiveLearn.Catalog.Domain.Entities;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 namespace LiveLearn.Catalog.Infrastructure.Contexts;
@@ -15,6 +16,8 @@ public sealed class WriteDbContext(DbContextOptions<WriteDbContext> options) : D
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(WriteDbContext).Assembly,
             a => a.AssemblyQualifiedName?.Contains("EntityConfigurations.Write") == true);
+        
+        modelBuilder.AddTransactionalOutboxEntities();
     }
 
 }
