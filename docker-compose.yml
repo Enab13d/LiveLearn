@@ -24,6 +24,24 @@ services:
     networks:
       - livelearn-private-network
 
+  catalog-service:
+    image: ${DOCKER_REGISTRY-}catalog-service
+    build:
+      context: .
+      dockerfile: src/services/Catalog/LiveLearn.Catalog.API/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
+      - ConnectionStrings__CatalogDb=Host=postgres;Port=5432;Database=livelearn_catalog;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};GSS Encryption Mode=Disable
+    networks:
+      - livelearn-private-network
+
   postgres:
     image: postgres
     restart: unless-stopped
