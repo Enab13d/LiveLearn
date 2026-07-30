@@ -10,6 +10,7 @@ using LiveLearn.Catalog.Infrastructure.Repositories;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -94,6 +95,14 @@ public static class DependencyInjectionExtensions
 
         services.AddScoped<ICacheService, CacheService>();
 
+        services.AddHybridCache(options =>
+        {
+            options.DefaultEntryOptions = new HybridCacheEntryOptions
+            {
+                Expiration = TimeSpan.FromMinutes(10),
+                LocalCacheExpiration = TimeSpan.FromMinutes(5)
+            };
+        });
         var redisConnectionString = configuration.GetConnectionString("Redis")
             ?? throw new InvalidOperationException("Connection string 'Redis' is not configured.");
 
@@ -106,7 +115,6 @@ public static class DependencyInjectionExtensions
         {
             cfg.RegisterServicesFromAssembly(typeof(DependencyInjectionExtensions).Assembly);
             cfg.AddOpenBehavior(typeof(DomainEventDispatchBehavior<,>));
-            cfg.AddOpenBehavior(typeof(CachingBehavior<,>));
             cfg.AddOpenBehavior(typeof(CacheInvalidationBehavior<,>));
         });
 
