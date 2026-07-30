@@ -10,8 +10,8 @@ where TResponse : Result
     {
         var result = await next(ct);
         if (result.IsSuccess)
-            foreach (var key in request.CacheKeys)
-                await cache.RemoveAsync(key.ToLower(), ct);
+            foreach (var tag in request.Tags)
+                await cache.RemoveByTagAsync(tag, ct);
 
         return result;
     }

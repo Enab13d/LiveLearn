@@ -2,5 +2,5 @@
 
 public interface ICacheInvalidationCommand
 {
-    IEnumerable<string> CacheKeys { get; }
+    IEnumerable<string> Tags { get; }
 }
