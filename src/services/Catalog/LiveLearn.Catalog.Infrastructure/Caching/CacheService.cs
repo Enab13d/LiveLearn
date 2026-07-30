@@ -1,17 +1,38 @@
-﻿using System.Text.Json;
-using LiveLearn.BuildingBlocks;
-using Microsoft.Extensions.Caching.Distributed;
+﻿using LiveLearn.BuildingBlocks;
+using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.Options;
 
 namespace LiveLearn.Catalog.Infrastructure.Caching;
 
 
-internal sealed class CacheService(IDistributedCache cache) : ICacheService
+internal sealed class CacheService(HybridCache cache, IOptions<HybridCacheOptions> hybridCacheOptions) : ICacheService
 {
-    public async Task<T?> GetAsync<T>(string cacheKey, CancellationToken ct = default)
+
+    public async Task<T> GetOrCreateAsync<T>(
+        string cacheKey,
+        Func<CancellationToken, ValueTask<T>> factory,
+        CacheEntryOptions? options = null,
+        IEnumerable<string>? tags = null,
+        CancellationToken ct = default
+    )
     {
-        var cachedItem = await cache.GetAsync(cacheKey, ct);
-        if (cachedItem is null) return default;
-        return JsonSerializer.Deserialize<T>(cachedItem);
+        var defaults = hybridCacheOptions.Value.DefaultEntryOptions;
+
+        var entryOptions = options is null
+            ? null
+            : new HybridCacheEntryOptions
+            {
+                Expiration = options.Expiration ?? defaults?.Expiration,
+                LocalCacheExpiration = options.LocalCacheExpiration ?? defaults?.LocalCacheExpiration,
+            };
+
+        return await cache.GetOrCreateAsync(
+            cacheKey,
+            async cancel => await factory(cancel), 
+            entryOptions,
+            tags,
+            ct
+        );
     }
 
     public async Task RemoveAsync(string cacheKey, CancellationToken ct = default)
@@ -19,14 +40,8 @@ internal sealed class CacheService(IDistributedCache cache) : ICacheService
         await cache.RemoveAsync(cacheKey, ct);
     }
 
-    public async Task SetAsync<T>(string cacheKey, T data, CacheEntryOptions? options = null, CancellationToken ct = default)
+    public async Task RemoveByTagAsync(string tag, CancellationToken ct = default)
     {
-        var serializedEntry = JsonSerializer.SerializeToUtf8Bytes(data);
-        await cache.SetAsync(cacheKey, serializedEntry, new DistributedCacheEntryOptions()
-        {
-            AbsoluteExpirationRelativeToNow = options?.AbsoluteExpiration,
-            SlidingExpiration = options?.SlidingExpiration
-
-        }, ct);
+        await cache.RemoveByTagAsync(tag, ct);
     }
 }
