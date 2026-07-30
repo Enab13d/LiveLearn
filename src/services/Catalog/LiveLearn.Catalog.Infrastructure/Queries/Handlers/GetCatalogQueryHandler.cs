@@ -8,9 +8,22 @@ using NpgsqlTypes;
 namespace LiveLearn.Catalog.Infrastructure.Queries.Handlers;
 
 
-internal sealed class GetCatalogQueryHandler(ReadDbContext dbContext) : IQueryHandler<GetCatalogQuery, PagedResult<CatalogItemDto>>
+internal sealed class GetCatalogQueryHandler(ReadDbContext dbContext, ICacheService cacheService) : IQueryHandler<GetCatalogQuery, PagedResult<CatalogItemDto>>
 {
     public async Task<Result<PagedResult<CatalogItemDto>>> Handle(GetCatalogQuery request, CancellationToken ct)
+    {
+        if (request.BypassCache) return await QueryAsync(request, ct);
+
+        return await cacheService.GetOrCreateAsync(
+            request.CacheKey,
+            cancel => QueryAsync(request, cancel),
+            request.Options,
+            request.Tags,
+            ct);
+
+    }
+
+    private async ValueTask<PagedResult<CatalogItemDto>> QueryAsync(GetCatalogQuery request, CancellationToken ct)
     {
         var query = dbContext.Courses.AsQueryable();
 
