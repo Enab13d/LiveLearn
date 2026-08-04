@@ -5,6 +5,7 @@ using LiveLearn.Gateway.Infrastructure.Health;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -76,6 +77,22 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference(options =>
+    {
+        options.AddDocument("catalog", "Catalog", "/catalog/openapi/v1.json");
+        options.AddDocument("identity", "Identity", "/identity/openapi/v1.json");
+        options
+        .AddPreferredSecuritySchemes("OAuth2")
+        .AddAuthorizationCodeFlow("OAuth2", flow =>
+        {
+            flow.ClientId = jwtOptions.ValidAudience;
+            flow.Pkce = Pkce.Sha256;
+            flow.SelectedScopes = ["openid"];
+            flow.AuthorizationUrl = jwtOptions.AuthorizationUrl;
+            flow.TokenUrl = jwtOptions.TokenUrl;
+        });
+
+    });
 }
 app.UseForwardedHeaders();
 app.UseHttpsRedirection();
