@@ -8,6 +8,8 @@ using Serilog;
 using Serilog.Formatting.Compact;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using HealthChecks.UI.Client;
+using LiveLearn.Identity.Infrastructure.Authentication;
+using Microsoft.OpenApi;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -30,11 +32,45 @@ builder.Host.UseSerilog((context, services, config) =>
         config.WriteTo.Console(new CompactJsonFormatter());
 });
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+var jwtOptions = builder.Configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()
+   ?? throw new InvalidOperationException("JWT options not defined");
+
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((document, context, ct) =>
+    {
+        document.Servers = [new OpenApiServer { Url = "/identity" }];
+        var scheme = new OpenApiSecurityScheme()
+        {
+            Type = SecuritySchemeType.OAuth2,
+            Flows = new OpenApiOAuthFlows
+            {
+                AuthorizationCode = new OpenApiOAuthFlow
+                {
+                    AuthorizationUrl = new Uri(jwtOptions.AuthorizationUrl!),
+                    TokenUrl = new Uri(jwtOptions.TokenUrl!),
+                    Scopes = new Dictionary<string, string>
+                    {
+                             { "openid", "OpenID Connect" }
+                    }
+                }
+            }
+        };
+        document.Components ??= new OpenApiComponents();
+        var securitySchemes = new Dictionary<string, IOpenApiSecurityScheme>
+        {
+            ["OAuth2"] = scheme
+        };
+        document.Components.SecuritySchemes = securitySchemes;
+        return Task.CompletedTask;
+    });
+});
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.Configure<RouteOptions>(options =>
+ {
+     options.LowercaseUrls = true;
+ });
 builder.Services.AddControllers()
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddIdentityApplication();
