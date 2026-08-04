@@ -44,6 +44,10 @@ internal sealed class GetCatalogQueryHandler(ReadDbContext dbContext, ICacheServ
                     .OrderByDescending(e => EF.Property<NpgsqlTsVector>(e, "SearchVector")
                         .Rank(EF.Functions.WebSearchToTsQuery("english", request.Query)));
         }
+        else
+        {
+            query = query.OrderBy(e => e.Id);
+        }
 
 
 
