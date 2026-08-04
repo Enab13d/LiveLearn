@@ -15,88 +15,99 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateBootstrapLogger();
 
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Host.UseSerilog((context, services, config) =>
+try
 {
-    config
-        .ReadFrom.Configuration(context.Configuration)
-        .ReadFrom.Services(services)
-        .Enrich.FromLogContext()
-        .Enrich.WithProperty("Service", "identity");
+    var builder = WebApplication.CreateBuilder(args);
 
-    if (context.HostingEnvironment.IsDevelopment())
-        config.WriteTo.Console(outputTemplate:
-      "[{Timestamp:HH:mm:ss} {Level:u3}] [{Service}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
-    else
-        config.WriteTo.Console(new CompactJsonFormatter());
-});
-
-var jwtOptions = builder.Configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()
-   ?? throw new InvalidOperationException("JWT options not defined");
-
-builder.Services.AddOpenApi(options =>
-{
-    options.AddDocumentTransformer((document, context, ct) =>
+    builder.Host.UseSerilog((context, services, config) =>
     {
-        document.Servers = [new OpenApiServer { Url = "/identity" }];
-        var scheme = new OpenApiSecurityScheme()
+        config
+            .ReadFrom.Configuration(context.Configuration)
+            .ReadFrom.Services(services)
+            .Enrich.FromLogContext()
+            .Enrich.WithProperty("Service", "identity");
+
+        if (context.HostingEnvironment.IsDevelopment())
+            config.WriteTo.Console(outputTemplate:
+          "[{Timestamp:HH:mm:ss} {Level:u3}] [{Service}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
+        else
+            config.WriteTo.Console(new CompactJsonFormatter());
+    });
+
+    var jwtOptions = builder.Configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()
+       ?? throw new InvalidOperationException("JWT options not defined");
+
+    builder.Services.AddOpenApi(options =>
+    {
+        options.AddDocumentTransformer((document, context, ct) =>
         {
-            Type = SecuritySchemeType.OAuth2,
-            Flows = new OpenApiOAuthFlows
+            document.Servers = [new OpenApiServer { Url = "/identity" }];
+            var scheme = new OpenApiSecurityScheme()
             {
-                AuthorizationCode = new OpenApiOAuthFlow
+                Type = SecuritySchemeType.OAuth2,
+                Flows = new OpenApiOAuthFlows
                 {
-                    AuthorizationUrl = new Uri(jwtOptions.AuthorizationUrl!),
-                    TokenUrl = new Uri(jwtOptions.TokenUrl!),
-                    Scopes = new Dictionary<string, string>
+                    AuthorizationCode = new OpenApiOAuthFlow
                     {
+                        AuthorizationUrl = new Uri(jwtOptions.AuthorizationUrl!),
+                        TokenUrl = new Uri(jwtOptions.TokenUrl!),
+                        Scopes = new Dictionary<string, string>
+                        {
                              { "openid", "OpenID Connect" }
+                        }
                     }
                 }
-            }
-        };
-        document.Components ??= new OpenApiComponents();
-        var securitySchemes = new Dictionary<string, IOpenApiSecurityScheme>
-        {
-            ["OAuth2"] = scheme
-        };
-        document.Components.SecuritySchemes = securitySchemes;
-        return Task.CompletedTask;
+            };
+            document.Components ??= new OpenApiComponents();
+            var securitySchemes = new Dictionary<string, IOpenApiSecurityScheme>
+            {
+                ["OAuth2"] = scheme
+            };
+            document.Components.SecuritySchemes = securitySchemes;
+            return Task.CompletedTask;
+        });
     });
-});
-builder.Services.AddProblemDetails();
-builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-builder.Services.Configure<RouteOptions>(options =>
- {
-     options.LowercaseUrls = true;
- });
-builder.Services.AddControllers()
-    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
-builder.Services.AddIdentityApplication();
-builder.Services.AddIdentityInfrastructure(builder.Configuration, builder.Environment.IsDevelopment());
+    builder.Services.AddProblemDetails();
+    builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+    builder.Services.Configure<RouteOptions>(options =>
+     {
+         options.LowercaseUrls = true;
+     });
+    builder.Services.AddControllers()
+        .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+    builder.Services.AddIdentityApplication();
+    builder.Services.AddIdentityInfrastructure(builder.Configuration, builder.Environment.IsDevelopment());
 
-var app = builder.Build();
+    var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.MapOpenApi();
 
-    using var scope = app.Services.CreateAsyncScope();
-    var db = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
-    await db.Database.MigrateAsync();
+        using var scope = app.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
+        await db.Database.MigrateAsync();
+    }
+
+    app.UseExceptionHandler();
+    app.UseStatusCodePages();
+    app.UseAuthentication();
+    app.UseAuthorization();
+    app.UseSerilogRequestLogging();
+    app.MapControllers();
+    app.MapHealthChecks("/health", new HealthCheckOptions
+    {
+        ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+    });
+
+    app.Run();
 }
-
-app.UseExceptionHandler();
-app.UseStatusCodePages();
-app.UseAuthentication();
-app.UseAuthorization();
-app.UseSerilogRequestLogging();
-app.MapControllers();
-app.MapHealthChecks("/health", new HealthCheckOptions
+catch (Exception ex)
 {
-    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-});
-
-app.Run();
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
