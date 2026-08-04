@@ -7,5 +7,7 @@ internal class JwtOptions
     public string? ValidIssuer { get; set; }
     public string? ValidAudience { get; set; }
     public string? MetadataAddress { get; set; }
+    public string? AuthorizationUrl { get; set; }
+    public string? TokenUrl { get; set; }
 }
 
