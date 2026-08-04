@@ -3,9 +3,11 @@ using HealthChecks.UI.Client;
 using LiveLearn.Catalog.API.ExceptionHandlers;
 using LiveLearn.Catalog.Application;
 using LiveLearn.Catalog.Infrastructure;
+using LiveLearn.Catalog.Infrastructure.Authentication;
 using LiveLearn.Catalog.Infrastructure.Contexts;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
 using Serilog;
 using Serilog.Formatting.Compact;
 
@@ -33,11 +35,46 @@ try
             config.WriteTo.Console(new CompactJsonFormatter());
         }
     });
-    // Add services to the container.
-    // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-    builder.Services.AddOpenApi();
+
+    var jwtOptions = builder.Configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()
+       ?? throw new InvalidOperationException("JWT options not defined");
+       
+    builder.Services.AddOpenApi(options =>
+    {
+        options.AddDocumentTransformer((document, context, ct) =>
+        {
+            document.Servers = [new OpenApiServer { Url = "/catalog" }];
+            var scheme = new OpenApiSecurityScheme()
+            {
+                Type = SecuritySchemeType.OAuth2,
+                Flows = new OpenApiOAuthFlows
+                {
+                    AuthorizationCode = new OpenApiOAuthFlow
+                    {
+                        AuthorizationUrl = new Uri(jwtOptions.AuthorizationUrl!),
+                        TokenUrl = new Uri(jwtOptions.TokenUrl!),
+                        Scopes = new Dictionary<string, string> 
+                        {
+                             { "openid", "OpenID Connect" }
+                        }
+                    }
+                }
+            };
+            document.Components ??= new OpenApiComponents();
+            var securitySchemes = new Dictionary<string, IOpenApiSecurityScheme>
+            {
+                ["OAuth2"] = scheme
+            };
+            document.Components.SecuritySchemes = securitySchemes;
+            return Task.CompletedTask;
+        });
+    });
     builder.Services.AddProblemDetails();
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+    builder.Services.Configure<RouteOptions>(options =>
+    {
+        options.LowercaseUrls = true;
+    });
     builder.Services.AddControllers()
         .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
