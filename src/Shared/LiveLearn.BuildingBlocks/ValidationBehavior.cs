@@ -18,12 +18,35 @@ public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TReq
             .Select(v => v.Validate(context))
             .SelectMany(r => r.Errors)
             .Where(f => f != null)
-            .Select(f => new Error(f.PropertyName, f.ErrorMessage, ErrorType.Validation))
+            .Select(f => Error.Validation(f.PropertyName, f.ErrorMessage))
             .ToArray();
 
         if (errors.Length > 0)
-            return (TResponse)(object)Result.Failure(errors);
+        {
+
+            return CreateValidationResult<TResponse>(errors);
+
+        }
+
 
         return await next(cancellationToken);
     }
+
+    private static TResult CreateValidationResult<TResult>(Error[] errors)
+        where TResult : Result
+    {
+        if (typeof(TResult) == typeof(Result))
+        {
+            return (Result.Failure(errors) as TResult)!;
+        }
+
+        object result = typeof(Result<>)
+            .GetGenericTypeDefinition()
+            .MakeGenericType(typeof(TResult).GenericTypeArguments[0])
+            .GetMethod(nameof(Result.Failure))!
+            .Invoke(null, [errors])!;
+
+        return (TResult)result;
+    }
+
 }
