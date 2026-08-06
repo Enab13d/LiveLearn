@@ -15,13 +15,15 @@ internal sealed class AddSectionCommandHandler(ICourseRepository courseRepositor
 
         if (course.TutorId != request.TutorId) return Result<Guid>.Failure(CourseErrors.Forbidden);
 
-        var result = course.AddSection(request.SectionId, request.Title, request.Order);
+        var sectionId = Guid.NewGuid();
+
+        var result = course.AddSection(sectionId, request.Title);
 
         if (!result.IsSuccess) return Result<Guid>.Failure(result.FirstError);
 
         await unitOfWork.CommitAsync(ct);
 
-        return Result<Guid>.Success(request.SectionId);
+        return Result<Guid>.Success(sectionId);
 
 
     }
