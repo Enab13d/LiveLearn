@@ -11,6 +11,7 @@ internal sealed class SectionConfiguration : IEntityTypeConfiguration<Section>
     public void Configure(EntityTypeBuilder<Section> builder)
     {
         builder.ToTable("sections");
+        builder.Property(e => e.Id).ValueGeneratedNever();
         builder.Property(e => e.Title).IsRequired().HasMaxLength(128);
         builder.HasMany(e => e.Lectures).WithOne().HasForeignKey(e => e.SectionId);
 
