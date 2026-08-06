@@ -35,7 +35,9 @@ internal sealed class GetCourseByIdQueryHandler(ReadDbContext dbContext) : IQuer
                 ))
             .ToList()
             )
-        ).FirstOrDefaultAsync(ct);
+        )
+        .AsSplitQuery()
+        .FirstOrDefaultAsync(ct);
 
         if (courseDetails is null) return Result<CourseDetailDto>.Failure(CourseErrors.NotFound);
         return courseDetails;
