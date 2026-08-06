@@ -71,8 +71,9 @@ public sealed class Course : AggregateRoot<Guid>
         return Result.Success();
     }
 
-    public Result AddSection(Guid sectionId, string title, int order)
+    public Result AddSection(Guid sectionId, string title)
     {
+        int order = _sections.Count + 1;
         Section section = new(sectionId, Id, title, order);
         _sections.Add(section);
         RaiseDomainEvent(new SectionAddedDomainEvent(sectionId, Id));
@@ -91,7 +92,45 @@ public sealed class Course : AggregateRoot<Guid>
 
     }
 
+    public Result UpdateSection(Guid sectionId, string title)
+    {
+        var section = _sections.FirstOrDefault(s => s.Id == sectionId);
+        if (section is null) return Result.Failure(CourseErrors.SectionNotFound);
 
+        section.Update(title);
+        RaiseDomainEvent(new SectionUpdatedDomainEvent(Id, sectionId));
+        return Result.Success();
+    }
 
+    public Result UpdateSectionOrder(Guid sectionId, int order)
+    {
+        var section = _sections.FirstOrDefault(s => s.Id == sectionId);
+        if (section is null) return Result.Failure(CourseErrors.SectionNotFound);
+
+        var sectionAtGivenOrder = _sections.FirstOrDefault(s => s.Order == order);
+        if (sectionAtGivenOrder is not null)
+        {
+            sectionAtGivenOrder.SetOrder(section.Order);
+        }
+        section.SetOrder(order);
+
+        return Result.Success();
+    }
+
+    public Result DeleteSection(Guid sectionId)
+    {
+        var section = _sections.FirstOrDefault(s => s.Id == sectionId);
+        if (section is null) return Result.Failure(CourseErrors.SectionNotFound);
+
+        _sections.Remove(section);
+
+        foreach (var laterSection in _sections.Where(s => s.Order > section.Order))
+        {
+            laterSection.SetOrder(laterSection.Order - 1);
+        }
+
+        RaiseDomainEvent(new SectionRemovedDomainEvent(Id, sectionId));
+        return Result.Success();
+    }
 
 }
