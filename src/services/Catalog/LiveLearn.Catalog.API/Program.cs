@@ -78,6 +78,8 @@ try
     builder.Services.AddControllers()
         .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
+    builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+
     builder.Services.AddCatalogApplication();
     builder.Services.AddCatalogInfrastructure(builder.Configuration, builder.Environment.IsDevelopment());
 
