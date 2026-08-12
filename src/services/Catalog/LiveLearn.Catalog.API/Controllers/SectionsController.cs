@@ -66,9 +66,9 @@ public sealed class SectionsController(ISender mediator) : ControllerBase
         if (User.GetUserId() is not Guid tutorId)
             return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
 
-        var result = await mediator.Send(new UpdateSectionOrderCommand(courseId, tutorId, sectionId, request.Order), ct);
+        var result = await mediator.Send(new UpdateSectionOrderCommand(courseId, tutorId, sectionId, request.PreviousSectionId, request.NextSectionId), ct);
 
-        return result.IsSuccess ? NoContent() : this.ToProblemResult(result.Errors);
+        return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
     }
 
     [Authorize(Policy = AuthorizationPolicies.TutorPolicy)]
