@@ -1,4 +1,4 @@
 ﻿namespace LiveLearn.Catalog.API.Dto.Requests;
 
 
-public sealed record RequestLectureUpdateOrder(int Order);
+public sealed record RequestLectureUpdateOrder(Guid? PreviousLectureId, Guid? NextLectureId);
