@@ -11,4 +11,6 @@ public static class CourseErrors
     public static readonly Error SectionNotFound = Error.NotFound("Course.SectionNotFound", "Section was not found");
 
     public static readonly Error Forbidden = Error.Forbidden("Course.Forbidden", "Access to course modification is restricted for this user");
+
+    public static readonly Error InvalidSectionNeighbors = Error.Validation("Course.InvalidSectionNeighbors", "PreviousSectionId and NextSectionId must be immediately adjacent siblings in the course");
 }
