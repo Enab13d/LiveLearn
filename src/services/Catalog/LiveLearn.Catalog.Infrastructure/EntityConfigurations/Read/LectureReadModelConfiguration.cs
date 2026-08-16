@@ -16,8 +16,8 @@ internal sealed class LectureReadModelConfiguration : IEntityTypeConfiguration<L
         builder.Property(e => e.DurationInSeconds)
             .HasColumnName("Duration")
             .HasConversion(
-                v => TimeSpan.FromSeconds(v),
-                v => (int)v.TotalSeconds
+                v => v.HasValue ? TimeSpan.FromSeconds(v.Value) : (TimeSpan?)null,
+                v => v.HasValue ? (int?)v.Value.TotalSeconds : null
             );
 
     }

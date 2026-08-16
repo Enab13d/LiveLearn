@@ -11,7 +11,7 @@ internal class LectureReadModel
 
     public int Order { get; set; }
 
-    public int DurationInSeconds { get; set; }
+    public int? DurationInSeconds { get; set; }
 
     public string Description { get; set; } = string.Empty;
 
