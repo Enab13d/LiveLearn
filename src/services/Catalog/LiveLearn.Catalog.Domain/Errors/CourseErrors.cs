@@ -13,4 +13,6 @@ public static class CourseErrors
     public static readonly Error Forbidden = Error.Forbidden("Course.Forbidden", "Access to course modification is restricted for this user");
 
     public static readonly Error InvalidSectionNeighbors = Error.Validation("Course.InvalidSectionNeighbors", "PreviousSectionId and NextSectionId must be immediately adjacent siblings in the course");
+
+    public static readonly Error TaskRemovalBlocked = Error.Conflict("Course.TaskRemovalBlocked", "Cannot unassign a task from a section on a published course");
 }

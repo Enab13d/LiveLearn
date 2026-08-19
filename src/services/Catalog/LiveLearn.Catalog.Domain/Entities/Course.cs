@@ -109,7 +109,7 @@ public sealed class Course : AggregateRoot<Guid>
         var currentSection = _sections.FirstOrDefault(s => s.Id == sectionId);
         if (currentSection is null) return Result<OrderUpdateResult>.Failure(CourseErrors.SectionNotFound);
 
-        if (currentSection.Id == previousSectionId || currentSection.Id == nextSectionId || previousSectionId == nextSectionId) 
+        if (currentSection.Id == previousSectionId || currentSection.Id == nextSectionId || previousSectionId == nextSectionId)
             return Result<OrderUpdateResult>.Failure(CourseErrors.InvalidSectionNeighbors);
 
         // Move to the very start: no previous sibling
@@ -210,6 +210,24 @@ public sealed class Course : AggregateRoot<Guid>
 
         RaiseDomainEvent(new SectionRemovedDomainEvent(Id, sectionId));
         return Result.Success();
+    }
+
+    public Result AssignTaskToSection(Guid sectionId, Guid taskId, string taskType)
+    {
+        var section = _sections.FirstOrDefault(s => s.Id == sectionId);
+        if (section is null) return Result.Failure(CourseErrors.SectionNotFound);
+        if (section.HasTask(taskId)) return Result.Failure(SectionErrors.TaskAlreadyAssigned);
+        var result = section.AddTask(taskId, Id, taskType);
+        return result;
+    }
+
+    public Result RemoveTaskFromSection(Guid sectionId, Guid taskId)
+    {
+        if (Status == CourseStatus.Published) return Result.Failure(CourseErrors.TaskRemovalBlocked);
+        var section = _sections.FirstOrDefault(s => s.Id == sectionId);
+        if (section is null) return Result.Failure(CourseErrors.SectionNotFound);
+        var result = section.RemoveTask(taskId);
+        return result;
     }
 
 }
