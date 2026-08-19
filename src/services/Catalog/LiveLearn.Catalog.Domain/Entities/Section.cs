@@ -25,8 +25,9 @@ public sealed class Section : Entity<Guid>
     public string Title { get; private set; } = string.Empty;
     public int Order { get; private set; }
     private readonly List<Lecture> _lectures = [];
-
     public IReadOnlyCollection<Lecture> Lectures => _lectures.AsReadOnly();
+    private readonly List<SectionTask> _sectionTasks = [];
+    public IReadOnlyCollection<SectionTask> SectionTasks => _sectionTasks.AsReadOnly();
 
     internal void Update(string title)
     {
@@ -140,6 +141,24 @@ public sealed class Section : Entity<Guid>
             lectures[i].SetOrder((i + 1) * gapSize);
         }
     }
+
+    internal Result AddTask(Guid taskId, Guid courseId, string taskType)
+    {
+        var task = _sectionTasks.FirstOrDefault(t => t.TaskId == taskId);
+        if (task is not null) return Result.Failure(SectionErrors.TaskAlreadyAssigned);
+        _sectionTasks.Add(new SectionTask(Id, courseId, taskId, taskType));
+        return Result.Success();
+    }
+
+    internal Result RemoveTask(Guid taskId)
+    {
+        var task = _sectionTasks.FirstOrDefault(t => t.TaskId == taskId);
+        if (task is null) return Result.Failure(SectionErrors.TaskNotFound);
+        _sectionTasks.Remove(task);
+        return Result.Success();
+    }
+
+    internal bool HasTask(Guid taskId) => _sectionTasks.Any(t => t.TaskId == taskId);
 
 
 }
