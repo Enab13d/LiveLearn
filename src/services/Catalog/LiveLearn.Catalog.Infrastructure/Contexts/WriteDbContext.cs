@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace LiveLearn.Catalog.Infrastructure.Contexts;
 
 
-internal sealed class WriteDbContext(DbContextOptions<WriteDbContext> options) : DbContext(options)
+public sealed class WriteDbContext(DbContextOptions<WriteDbContext> options) : DbContext(options)
 {
     public DbSet<Course> Courses { get; set; } = null!;
 

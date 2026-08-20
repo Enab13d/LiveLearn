@@ -1,7 +1,7 @@
 ﻿namespace LiveLearn.Catalog.Infrastructure.Models;
 
 
-internal sealed class TaskReplica
+public sealed class TaskReplica
 {
     public Guid TaskId { get; set; }
 
