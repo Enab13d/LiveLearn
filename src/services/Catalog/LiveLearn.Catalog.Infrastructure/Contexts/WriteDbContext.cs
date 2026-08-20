@@ -1,15 +1,18 @@
 ﻿using LiveLearn.Catalog.Domain.Entities;
+using LiveLearn.Catalog.Infrastructure.Models;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 namespace LiveLearn.Catalog.Infrastructure.Contexts;
 
 
-public sealed class WriteDbContext(DbContextOptions<WriteDbContext> options) : DbContext(options)
+internal sealed class WriteDbContext(DbContextOptions<WriteDbContext> options) : DbContext(options)
 {
     public DbSet<Course> Courses { get; set; } = null!;
 
     public DbSet<Category> Categories { get; set; } = null!;
+
+    public DbSet<TaskReplica> TaskReplicas { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
