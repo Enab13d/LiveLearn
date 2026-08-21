@@ -57,12 +57,13 @@ public sealed class Course : AggregateRoot<Guid>
         CategoryId = categoryId;
     }
 
-    public Result Publish()
+    public Result Publish(DateTimeOffset publishedAt)
     {
         if (Status != CourseStatus.Draft) return Result.Failure(CourseErrors.PublishFailed);
 
         Status = CourseStatus.Published;
-        RaiseDomainEvent(new CoursePublishedDomainEvent(Id));
+        var taskIds = Sections.SelectMany(s => s.SectionTasks.Select(t => t.TaskId)).ToList();
+        RaiseDomainEvent(new CoursePublishedDomainEvent(Id, TutorId, taskIds, publishedAt));
         return Result.Success();
     }
 

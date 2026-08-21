@@ -1,14 +1,12 @@
 ﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Catalog.Application.Repositories;
 using LiveLearn.Catalog.Domain.Errors;
-using LiveLearn.Contracts.Catalog;
 
 namespace LiveLearn.Catalog.Application.Commands;
 
 internal sealed class PublishCourseCommandHandler(
     ICourseRepository courseRepository, 
     IUnitOfWork unitOfWork, 
-    IEventBus eventBus, 
     TimeProvider timeProvider
     ) : ICommandHandler<PublishCourseCommand>
 {
@@ -20,12 +18,9 @@ internal sealed class PublishCourseCommandHandler(
 
         if (course.TutorId != request.TutorId) return Result.Failure(CourseErrors.Forbidden);
 
-        var result = course.Publish();
+        var result = course.Publish(timeProvider.GetUtcNow());
 
         if (!result.IsSuccess) return result;
-
-        await eventBus.PublishAsync<CoursePublishedEvent>(
-            new(course.Id, course.TutorId, course.CategoryId, course.Title, course.Price, timeProvider.GetUtcNow()), ct);
 
         await unitOfWork.CommitAsync(ct);
 
