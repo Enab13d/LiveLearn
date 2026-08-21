@@ -114,7 +114,6 @@ public static class DependencyInjectionExtensions
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(typeof(DependencyInjectionExtensions).Assembly);
-            cfg.AddOpenBehavior(typeof(DomainEventDispatchBehavior<,>));
             cfg.AddOpenBehavior(typeof(CacheInvalidationBehavior<,>));
         });
 
