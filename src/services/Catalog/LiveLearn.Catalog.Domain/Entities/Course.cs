@@ -204,12 +204,19 @@ public sealed class Course : AggregateRoot<Guid>
 
     public Result DeleteSection(Guid sectionId)
     {
+        if (Status == CourseStatus.Published) return Result.Failure(CourseErrors.PublishFailed);
         var section = _sections.FirstOrDefault(s => s.Id == sectionId);
         if (section is null) return Result.Failure(CourseErrors.SectionNotFound);
 
+        var tasksIds = section.SectionTasks
+                .Select(e => e.TaskId)
+                .ToList()
+                .AsReadOnly();
+
         _sections.Remove(section);
 
-        RaiseDomainEvent(new SectionRemovedDomainEvent(Id, sectionId));
+        RaiseDomainEvent(new SectionRemovedDomainEvent(Id, sectionId, tasksIds));
+
         return Result.Success();
     }
 
