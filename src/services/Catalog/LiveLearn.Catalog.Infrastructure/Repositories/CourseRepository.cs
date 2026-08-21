@@ -29,6 +29,8 @@ internal sealed class CourseRepository(WriteDbContext dbContext) : ICourseReposi
         return await dbContext.Courses
             .Include(e => e.Sections)
             .ThenInclude(e => e.Lectures)
+            .Include(e => e.Sections)
+            .ThenInclude(e => e.SectionTasks)
             .AsSplitQuery()
             .FirstOrDefaultAsync(e => e.Id == id, ct);
     }
