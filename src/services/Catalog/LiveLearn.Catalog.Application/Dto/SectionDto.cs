@@ -1,3 +1,5 @@
-﻿namespace LiveLearn.Catalog.Application.Dto;
+﻿using LiveLearn.Catalog.Domain.Entities;
 
-public sealed record SectionDto(Guid Id, string Title, int Order, IReadOnlyList<LectureDto> Lectures);
+namespace LiveLearn.Catalog.Application.Dto;
+
+public sealed record SectionDto(Guid Id, string Title, int Order, IReadOnlyList<LectureDto> Lectures, IReadOnlyList<SectionTaskDto> SectionTasks);

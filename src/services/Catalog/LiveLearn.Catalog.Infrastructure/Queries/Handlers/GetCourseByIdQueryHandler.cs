@@ -31,6 +31,10 @@ internal sealed class GetCourseByIdQueryHandler(ReadDbContext dbContext) : IQuer
                 e.Lectures
                 .Select(e => new LectureDto(
                     e.Id, e.Title, e.Type, e.Order, e.DurationInSeconds))
+                .ToList(),
+                e.SectionTasks
+                .Select(e => new SectionTaskDto(
+                    e.SectionId, e.CourseId, e.TaskId, e.TaskType))
                 .ToList()
                 ))
             .ToList()
