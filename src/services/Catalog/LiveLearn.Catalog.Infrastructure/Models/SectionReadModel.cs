@@ -9,4 +9,7 @@ internal class SectionReadModel
     public int Order { get; set; }
     public List<LectureReadModel> Lectures { get; set; } = [];
 
+    public List<SectionTaskReadModel> SectionTasks { get; set; } = [];
+
+
 }
