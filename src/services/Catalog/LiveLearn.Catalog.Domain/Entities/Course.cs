@@ -226,6 +226,7 @@ public sealed class Course : AggregateRoot<Guid>
         if (section is null) return Result.Failure(CourseErrors.SectionNotFound);
         if (section.HasTask(taskId)) return Result.Failure(SectionErrors.TaskAlreadyAssigned);
         var result = section.AddTask(taskId, Id, taskType);
+        if (result.IsSuccess) RaiseDomainEvent(new TaskAssignedToSectionDomainEvent(taskId, section.Id, CourseId: Id));
         return result;
     }
 
