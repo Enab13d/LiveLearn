@@ -14,6 +14,7 @@ internal sealed class SectionReadModelConfiguration : IEntityTypeConfiguration<S
         builder.ToTable("sections");
         builder.HasKey(e => e.Id);
         builder.HasMany(e => e.Lectures).WithOne().HasForeignKey(e => e.SectionId);
+        builder.HasMany(e => e.SectionTasks).WithOne().HasForeignKey(e => e.SectionId);
 
     }
 }
