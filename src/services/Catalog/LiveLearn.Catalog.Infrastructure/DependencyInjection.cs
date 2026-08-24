@@ -1,12 +1,14 @@
 ﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Catalog.Application.Authorization;
 using LiveLearn.Catalog.Application.Repositories;
+using LiveLearn.Catalog.Application.Services;
 using LiveLearn.Catalog.Infrastructure.Authentication;
 using LiveLearn.Catalog.Infrastructure.Caching;
 using LiveLearn.Catalog.Infrastructure.Configuration;
 using LiveLearn.Catalog.Infrastructure.Contexts;
 using LiveLearn.Catalog.Infrastructure.Messaging;
 using LiveLearn.Catalog.Infrastructure.Repositories;
+using LiveLearn.Catalog.Infrastructure.Services;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -91,6 +93,7 @@ public static class DependencyInjectionExtensions
 
         services.AddScoped<ICourseRepository, CourseRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<ITaskReferenceLookup, TaskReferenceLookup>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         services.AddScoped<ICacheService, CacheService>();
