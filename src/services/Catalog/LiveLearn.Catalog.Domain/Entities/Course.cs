@@ -236,6 +236,10 @@ public sealed class Course : AggregateRoot<Guid>
         var section = _sections.FirstOrDefault(s => s.Id == sectionId);
         if (section is null) return Result.Failure(CourseErrors.SectionNotFound);
         var result = section.RemoveTask(taskId);
+        
+        if (result.IsSuccess) 
+            RaiseDomainEvent(new TaskRemovedFromSectionDomainEvent(taskId, section.Id, CourseId: Id));
+
         return result;
     }
 
