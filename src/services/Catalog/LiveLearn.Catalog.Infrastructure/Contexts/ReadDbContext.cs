@@ -10,6 +10,7 @@ internal sealed class ReadDbContext(DbContextOptions<ReadDbContext> options) : D
     public DbSet<SectionReadModel> Sections { get; set; } = null!;
     public DbSet<LectureReadModel> Lectures { get; set; } = null!;
     public DbSet<CategoryReadModel> Categories { get; set; } = null!;
+    public DbSet<SectionTaskReadModel> SectionTasks { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
