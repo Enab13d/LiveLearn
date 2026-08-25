@@ -64,6 +64,7 @@ public static class DependencyInjectionExtensions
         services.AddMassTransit(x =>
         {
             x.AddConsumer<TaskCreatedConsumer>();
+            x.AddConsumer<TaskDeletedConsumer>();
             x.SetKebabCaseEndpointNameFormatter();
             x.UsingRabbitMq((context, cfg) =>
             {
