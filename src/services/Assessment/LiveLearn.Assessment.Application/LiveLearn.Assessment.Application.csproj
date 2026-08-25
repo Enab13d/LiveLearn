@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\LiveLearn.Assessment.Domain\LiveLearn.Assessment.Domain.csproj" />
+    <ProjectReference Include="..\..\..\Shared\LiveLearn.BuildingBlocks\LiveLearn.BuildingBlocks.csproj" />
+    <ProjectReference Include="..\..\..\Shared\LiveLearn.Contracts\LiveLearn.Contracts.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>
