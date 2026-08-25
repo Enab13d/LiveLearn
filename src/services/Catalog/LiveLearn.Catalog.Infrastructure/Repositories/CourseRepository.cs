@@ -35,6 +35,18 @@ internal sealed class CourseRepository(WriteDbContext dbContext) : ICourseReposi
             .FirstOrDefaultAsync(e => e.Id == id, ct);
     }
 
+    public async Task<Course?> GetByTaskIdAsync(Guid taskId, CancellationToken ct = default)
+    {
+        return await dbContext.Courses
+            .Include(e => e.Sections)
+            .ThenInclude(e => e.SectionTasks)
+            .Where(e => e.Sections
+                .Any(e => e.SectionTasks
+                    .Any(e => e.TaskId == taskId)))
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(ct);
+    }
+
     public void Update(Course entity)
     {
         dbContext.Courses.Update(entity);
