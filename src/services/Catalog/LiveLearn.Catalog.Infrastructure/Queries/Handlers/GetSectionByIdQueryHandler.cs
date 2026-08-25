@@ -1,4 +1,4 @@
-using LiveLearn.BuildingBlocks;
+﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Catalog.Application.Dto;
 using LiveLearn.Catalog.Application.Queries;
 using LiveLearn.Catalog.Domain.Errors;
@@ -19,8 +19,14 @@ internal sealed class GetSectionByIdQueryHandler(ReadDbContext dbContext) : IQue
                 e.Order,
                 e.Lectures
                     .Select(l => new LectureDto(l.Id, l.Title, l.Type, l.Order, l.DurationInSeconds))
+                    .ToList(),
+                e.SectionTasks
+                    .Select(e => new SectionTaskDto(
+                        e.SectionId, e.CourseId, e.TaskId, e.TaskType))
                     .ToList()
-                ))
+
+                )
+                )
             .AsSplitQuery()
             .FirstOrDefaultAsync(ct);
 
