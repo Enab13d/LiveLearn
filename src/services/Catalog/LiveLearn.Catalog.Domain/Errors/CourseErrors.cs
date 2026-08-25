@@ -8,6 +8,8 @@ public static class CourseErrors
 
     public static readonly Error PublishFailed = Error.Conflict("Course.PublishFailed", "Course must be in Draft status to be published");
 
+    public static readonly Error ArchiveFailed = Error.Conflict("Course.ArchiveFailed", "Course must be in Published status to be archived");
+
     public static readonly Error SectionNotFound = Error.NotFound("Course.SectionNotFound", "Section was not found");
 
     public static readonly Error Forbidden = Error.Forbidden("Course.Forbidden", "Access to course modification is restricted for this user");

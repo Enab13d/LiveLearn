@@ -67,6 +67,14 @@ public sealed class Course : AggregateRoot<Guid>
         return Result.Success();
     }
 
+    public Result Archive()
+    {
+        if (Status != CourseStatus.Published) return Result.Failure(CourseErrors.ArchiveFailed);
+        Status = CourseStatus.Archived;
+        RaiseDomainEvent(new CourseArchivedDomainEvent(Id));
+        return Result.Success();
+    }
+
     public Result AddLecture(Guid sectionId, Guid lectureId, string title, LectureType lectureType, string description)
     {
         var section = _sections.FirstOrDefault(s => s.Id == sectionId);
