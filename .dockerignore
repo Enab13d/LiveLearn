@@ -12,6 +12,7 @@
 
 *.user
 *.suo
+scaffold-service.sh
 
 **/*.md
 README.md
