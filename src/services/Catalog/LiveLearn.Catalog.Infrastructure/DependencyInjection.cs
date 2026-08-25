@@ -7,6 +7,7 @@ using LiveLearn.Catalog.Infrastructure.Caching;
 using LiveLearn.Catalog.Infrastructure.Configuration;
 using LiveLearn.Catalog.Infrastructure.Contexts;
 using LiveLearn.Catalog.Infrastructure.Messaging;
+using LiveLearn.Catalog.Infrastructure.Messaging.Consumers;
 using LiveLearn.Catalog.Infrastructure.Repositories;
 using LiveLearn.Catalog.Infrastructure.Services;
 using MassTransit;
@@ -62,6 +63,7 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IEventBus, MassTransitEventBus>();
         services.AddMassTransit(x =>
         {
+            x.AddConsumer<TaskCreatedConsumer>();
             x.SetKebabCaseEndpointNameFormatter();
             x.UsingRabbitMq((context, cfg) =>
             {
