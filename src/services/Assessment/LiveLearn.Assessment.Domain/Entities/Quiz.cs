@@ -19,13 +19,17 @@ public sealed class Quiz : AssessmentTask
 
     public static Quiz Create(Guid id, string title, Guid tutorId, int passingPercent)
     {
-        return new Quiz()
+
+        Quiz quiz = new()
         {
             Id = id,
             Title = title,
             TutorId = tutorId,
             PassingScore = passingPercent
         };
+
+        quiz.RaiseDomainEvent(new TaskCreatedDomainEvent(id, tutorId, nameof(Quiz)));
+        return quiz;
     }
 
     public Result AddQuestion(string text, List<string> answerContents, int correctAnswerIdx)
