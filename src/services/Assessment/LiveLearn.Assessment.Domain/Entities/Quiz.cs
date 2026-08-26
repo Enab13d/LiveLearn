@@ -1,0 +1,94 @@
+﻿using System.Collections.ObjectModel;
+using LiveLearn.Assessment.Domain.Common;
+using LiveLearn.Assessment.Domain.DomainEvents;
+using LiveLearn.Assessment.Domain.Errors;
+using LiveLearn.BuildingBlocks;
+
+namespace LiveLearn.Assessment.Domain.Entities;
+
+
+public sealed class Quiz : AssessmentTask
+{
+
+    private Quiz() { }
+    public int PassingScore { get; private set; }
+
+    private readonly List<Question> _questions = [];
+
+    public ReadOnlyCollection<Question> Questions => _questions.AsReadOnly();
+
+    public static Quiz Create(Guid id, string title, Guid tutorId, int passingPercent)
+    {
+        return new Quiz()
+        {
+            Id = id,
+            Title = title,
+            TutorId = tutorId,
+            PassingScore = passingPercent
+        };
+    }
+
+    public Result AddQuestion(string text, List<string> answerContents, int correctAnswerIdx)
+    {
+        if (answerContents.Count - 1 < correctAnswerIdx || correctAnswerIdx < 0)
+            return Result.Failure(QuizErrors.InvalidAnswerIndex);
+
+        Question question = new(text, answerContents, correctAnswerIdx);
+        _questions.Add(question);
+
+        return Result.Success();
+    }
+
+    public Result RemoveQuestion(Guid questionId)
+    {
+        var question = _questions.FirstOrDefault(e => e.Id == questionId);
+
+        if (question is null) return Result.Failure(QuizErrors.QuestionNotFound);
+
+        _questions.Remove(question);
+
+        return Result.Success();
+    }
+
+    public Result<QuizEvaluationResult> Evaluate(Dictionary<Guid, Guid> questionAnswerMap, Guid studentId)
+    {
+        int totalQuestions = _questions.Count;
+        if (totalQuestions <= 0) return Result<QuizEvaluationResult>.Failure(QuizErrors.EmptyQuizEvaluation);
+
+        List<Guid> correctAnswerIds = [];
+        List<Guid> wrongAnswerIds = [];
+
+        foreach (var record in questionAnswerMap)
+        {
+            var question = _questions.FirstOrDefault(e => e.Id == record.Key);
+            if (question is null) return Result<QuizEvaluationResult>.Failure(QuizErrors.QuestionNotFound);
+
+
+            if (question.CorrectAnswerId == record.Value)
+            {
+                correctAnswerIds.Add(record.Value);
+            }
+            else
+            {
+                wrongAnswerIds.Add(record.Value);
+            }
+
+        }
+
+        var score = (int)Math.Round(100.0 * correctAnswerIds.Count / totalQuestions);
+        bool passed = score >= PassingScore;
+
+        if (passed)
+        {
+            RaiseDomainEvent(new TaskCompletedDomainEvent(Id, studentId, SectionId, CourseId));
+        }
+        else
+        {
+            RaiseDomainEvent(new TaskFailedDomainEvent(Id, studentId, SectionId, CourseId));
+        }
+
+        return new QuizEvaluationResult(passed, score, correctAnswerIds, wrongAnswerIds);
+
+    }
+
+}
