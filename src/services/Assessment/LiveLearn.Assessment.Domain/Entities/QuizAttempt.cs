@@ -21,11 +21,10 @@ public sealed class QuizAttempt : AggregateRoot<Guid>
 
     public DateTimeOffset AttemptedAt { get; private init; }
 
-    public static QuizAttempt Create(Guid id, Guid quizId, Guid studentId, Guid sectionId, Guid courseId, int score, bool isPassed)
+    public static QuizAttempt Create(Guid quizId, Guid studentId, Guid sectionId, Guid courseId, int score, bool isPassed)
     {
         QuizAttempt quizAttempt = new()
         {
-            Id = id,
             QuizId = quizId,
             StudentId = studentId,
             SectionId = sectionId,
