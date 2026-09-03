@@ -2,9 +2,8 @@
 
 namespace LiveLearn.Assessment.Application.Commands;
 
-public sealed record UpdateHomeworkCommand(
+public sealed record UpdateHomeworkDescriptionCommand(
     Guid HomeworkId, 
     Guid TutorId, 
-    string Title, 
     string Description
 ) : ICommand;

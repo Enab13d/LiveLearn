@@ -24,5 +24,14 @@ public sealed class Homework : AssessmentTask
 
     }
 
+    public void UpdateTitle(string title)
+    {
+        Title = title;
+    }
+    public void UpdateDescription(string description)
+    {
+        Description = description;
+    }
+
 
 }
