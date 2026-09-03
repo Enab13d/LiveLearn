@@ -10,4 +10,7 @@ public static class HomeworkErrors
 
     public static Error SubmissionAlreadyPending =>
         Error.Conflict("HomeworkErrors.SubmissionAlreadyPending", "Unable to submit homework, while it's in Status 'PendingReview'");
+
+    public static Error SubmissionNotFound =>
+        Error.NotFound("HomeworkErrors.SubmissionNotFound", "Homework submission not found");
 }
