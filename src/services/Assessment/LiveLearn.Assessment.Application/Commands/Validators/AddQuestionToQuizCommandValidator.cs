@@ -12,6 +12,8 @@ public sealed class AddQuestionToQuizCommandValidator : AbstractValidator<AddQue
         RuleFor(x => x.Answers).NotEmpty().Must(l => l.Count >= 2 && l.Count <= 6);
         RuleFor(x => x.CorrectAnswerIdx)
             .Must((model, currentValue) => 
-                currentValue < model.Answers.Count && currentValue >= 0);
+                currentValue < model.Answers.Count && currentValue >= 0)
+            .WithMessage(
+                (x) => $"Index of the correct answer should be a non-negative value within answers list range. Total answers: {x.Answers.Count}, correct answer idx: {x.CorrectAnswerIdx} (out of bounds)");
     }
 }
