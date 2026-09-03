@@ -1,4 +1,5 @@
-﻿using LiveLearn.BuildingBlocks;
+﻿using LiveLearn.Assessment.Domain.DomainEvents;
+using LiveLearn.BuildingBlocks;
 
 namespace LiveLearn.Assessment.Domain.Entities;
 
@@ -11,4 +12,6 @@ public abstract class AssessmentTask : AggregateRoot<Guid>
     public Guid TutorId { get; protected set; }
     public Guid SectionId { get; protected set; }
     public Guid CourseId { get; protected set; }
+
+    public void MarkAsDeleted() => RaiseDomainEvent(new TaskDeletedDomainEvent(Id));
 }
