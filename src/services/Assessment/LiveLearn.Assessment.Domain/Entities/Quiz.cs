@@ -95,4 +95,9 @@ public sealed class Quiz : AssessmentTask
 
     }
 
+    public void UpdateTitle(string newTitle)
+    {
+        Title = newTitle;
+    }
+
 }
