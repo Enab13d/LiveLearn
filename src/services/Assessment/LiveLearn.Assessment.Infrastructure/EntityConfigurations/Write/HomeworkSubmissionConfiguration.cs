@@ -23,5 +23,9 @@ internal sealed class HomeworkSubmissionConfiguration : IEntityTypeConfiguration
         builder.Property(e => e.Status).IsRequired().HasConversion<string>();
         builder.Property(e => e.InstructorFeedback).HasMaxLength(2048);
         builder.Property(e => e.SubmittedAt).ValueGeneratedOnAdd().HasDefaultValueSql("now()");
+
+        builder.HasIndex(e => new {e.HomeworkId, e.StudentId, e.SubmittedAt})
+            .IsDescending()
+            .HasDatabaseName("IX_HomeworkSubmissions_Homework_Student_SubmittedAt");
     }
 }
