@@ -21,8 +21,6 @@ public sealed class WriteDbContext(DbContextOptions<WriteDbContext> options) : D
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<AssessmentTask>().UseTptMappingStrategy();
-
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(WriteDbContext).Assembly,
             a => a.AssemblyQualifiedName?.Contains("EntityConfigurations.Write") == true);
 
