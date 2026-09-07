@@ -20,4 +20,10 @@ public abstract class AssessmentTask : AggregateRoot<Guid>
         CourseId = courseId;
         SectionId = sectionId;
     }
+
+    public void Unassign()
+    {
+        CourseId = null;
+        SectionId = null;
+    }
 }
