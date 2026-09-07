@@ -1,23 +1,119 @@
-var builder = WebApplication.CreateBuilder(args);
+﻿using System.Text.Json.Serialization;
+using HealthChecks.UI.Client;
+using LiveLearn.Assessment.API.ExceptionHandlers;
+using LiveLearn.Assessment.Application;
+using LiveLearn.Assessment.Infrastructure;
+using LiveLearn.Assessment.Infrastructure.Configuration;
+using LiveLearn.Assessment.Infrastructure.Contexts;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
+using Serilog;
+using Serilog.Formatting.Compact;
 
-// Add services to the container.
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+try
 {
-    app.MapOpenApi();
+    var builder = WebApplication.CreateBuilder(args);
+
+    builder.Host.UseSerilog((context, services, config) =>
+    {
+        config
+            .ReadFrom.Configuration(context.Configuration)
+            .ReadFrom.Services(services)
+            .Enrich.FromLogContext()
+            .Enrich.WithProperty("Service", "assessment");
+        if (context.HostingEnvironment.IsDevelopment())
+        {
+            config.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{Service}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
+        }
+        else
+        {
+            config.WriteTo.Console(new CompactJsonFormatter());
+        }
+    });
+
+    var jwtOptions = builder.Configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()
+       ?? throw new InvalidOperationException("JWT options not defined");
+       
+    builder.Services.AddOpenApi(options =>
+    {
+        options.AddDocumentTransformer((document, context, ct) =>
+        {
+            document.Servers = [new OpenApiServer { Url = "/assessment" }];
+            var scheme = new OpenApiSecurityScheme()
+            {
+                Type = SecuritySchemeType.OAuth2,
+                Flows = new OpenApiOAuthFlows
+                {
+                    AuthorizationCode = new OpenApiOAuthFlow
+                    {
+                        AuthorizationUrl = new Uri(jwtOptions.AuthorizationUrl!),
+                        TokenUrl = new Uri(jwtOptions.TokenUrl!),
+                        Scopes = new Dictionary<string, string> 
+                        {
+                             { "openid", "OpenID Connect" }
+                        }
+                    }
+                }
+            };
+            document.Components ??= new OpenApiComponents();
+            var securitySchemes = new Dictionary<string, IOpenApiSecurityScheme>
+            {
+                ["OAuth2"] = scheme
+            };
+            document.Components.SecuritySchemes = securitySchemes;
+            return Task.CompletedTask;
+        });
+    });
+    builder.Services.AddProblemDetails();
+    builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+    builder.Services.Configure<RouteOptions>(options =>
+    {
+        options.LowercaseUrls = true;
+    });
+    builder.Services.AddControllers()
+        .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+
+    builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+
+    builder.Services.AddAssessmentApplication();
+    builder.Services.AddAssessmentInfrastructure(builder.Configuration, builder.Environment.IsDevelopment());
+
+
+    var app = builder.Build();
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.MapOpenApi();
+
+        using var scope = app.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<WriteDbContext>();
+        await db.Database.MigrateAsync();
+    }
+
+    app.UseExceptionHandler();
+    app.UseStatusCodePages();
+    app.UseAuthentication();
+    app.UseAuthorization();
+    app.UseSerilogRequestLogging();
+    app.MapControllers();
+    app.MapHealthChecks("/health", new HealthCheckOptions
+    {
+        ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+    });
+
+
+    app.Run();
 }
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
