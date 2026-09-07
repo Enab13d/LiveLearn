@@ -18,18 +18,20 @@ internal sealed class SubmitHomeworkCommandHandler(
 
         var homework = await assessmentTaskRepository.GetHomeworkAsync(request.HomeworkId, ct);
         if (homework is null) return Result.Failure(TaskErrors.NotFound);
+        if (homework.SectionId is null || homework.CourseId is null)
+            return Result.Failure(TaskErrors.UnassignedTaskEvaluation);
 
         var existingSubmissions = await homeworkSubmissionRepository
             .FindAsync(
                 e => e.HomeworkId == request.HomeworkId
                 && e.Status == HomeworkStatus.PendingReview
-                && e.StudentId == request.StudentId, 
+                && e.StudentId == request.StudentId,
                 ct);
 
         if (existingSubmissions.Any()) return Result.Failure(HomeworkErrors.SubmissionAlreadyPending);
 
         var submission = HomeworkSubmission.Create(
-            Guid.NewGuid(), request.HomeworkId, request.StudentId, homework.SectionId, homework.CourseId, request.Content);
+            Guid.NewGuid(), request.HomeworkId, request.StudentId, homework.SectionId.Value, homework.CourseId.Value, request.Content);
 
         await homeworkSubmissionRepository.AddAsync(submission, ct);
         await unitOfWork.CommitAsync(ct);

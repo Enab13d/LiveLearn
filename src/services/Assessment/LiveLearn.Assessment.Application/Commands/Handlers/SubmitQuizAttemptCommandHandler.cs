@@ -22,8 +22,9 @@ internal sealed class SubmitQuizAttemptCommandHandler(
         var result = quiz.Evaluate(request.Answers, request.StudentId);
         if (!result.IsSuccess) return result;
 
+        // null-forgiving operator used below, since quiz.Evaluate() already has guard against null 
         var quizAttempt = QuizAttempt.Create(
-            request.QuizId, request.StudentId, quiz.SectionId, quiz.CourseId, result.Value.Score, result.Value.IsPassed);
+            request.QuizId, request.StudentId, quiz.SectionId!.Value, quiz.CourseId!.Value, result.Value.Score, result.Value.IsPassed);
 
         await quizAttemptRepository.AddAsync(quizAttempt, ct);
         await unitOfWork.CommitAsync(ct);
