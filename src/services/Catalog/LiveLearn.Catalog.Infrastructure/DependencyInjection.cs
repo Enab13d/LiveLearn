@@ -24,6 +24,7 @@ public static class DependencyInjectionExtensions
 {
     public static IServiceCollection AddCatalogInfrastructure(this IServiceCollection services, IConfiguration configuration, bool isDevelopment)
     {
+        services.AddSingleton(TimeProvider.System);
         services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
         var jwtOptions = configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()
             ?? throw new InvalidOperationException("JWT options not defined");
@@ -64,7 +65,7 @@ public static class DependencyInjectionExtensions
         services.AddMassTransit(x =>
         {
             x.AddConsumer<TaskCreatedConsumer>();
-            x.AddConsumer<TaskDeletedConsumer>();
+            x.AddConsumer<TaskDeletedConsumer, TaskDeletedConsumerDefinition>();
             x.SetKebabCaseEndpointNameFormatter();
             x.UsingRabbitMq((context, cfg) =>
             {
