@@ -14,4 +14,10 @@ public abstract class AssessmentTask : AggregateRoot<Guid>
     public Guid? CourseId { get; protected set; }
 
     public void MarkAsDeleted() => RaiseDomainEvent(new TaskDeletedDomainEvent(Id));
+
+    public void AssignToCourseAndSection(Guid courseId, Guid sectionId)
+    {
+        CourseId = courseId;
+        SectionId = sectionId;
+    }
 }
