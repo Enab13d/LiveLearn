@@ -8,7 +8,7 @@ namespace LiveLearn.Assessment.Application.Commands.Handlers;
 
 internal sealed class AddQuestionToQuizCommandHandler(
     IAssessmentTaskRepository repository,
-    IPublishedCoursesLookup publishedCoursesLookup,
+    ILockedTaskLookup lockedTaskLookup,
     IUnitOfWork unitOfWork
 ) : ICommandHandler<AddQuestionToQuizCommand>
 {
@@ -17,7 +17,7 @@ internal sealed class AddQuestionToQuizCommandHandler(
         var quiz = await repository.GetQuizAsync(request.QuizId, ct);
         if (quiz is null) return Result.Failure(TaskErrors.NotFound);
         if (quiz.TutorId != request.TutorId) return Result.Failure(TaskErrors.Forbidden);
-        bool isLocked = await publishedCoursesLookup.IsPublishedAsync(quiz.CourseId, ct);
+        bool isLocked = await lockedTaskLookup.IsLockedAsync(quiz.Id, ct);
         if (isLocked) return Result.Failure(TaskErrors.Locked);
         var result = quiz.AddQuestion(request.Text, request.Answers, request.CorrectAnswerIdx);
         if (result.IsSuccess) await unitOfWork.CommitAsync(ct);
