@@ -1,4 +1,5 @@
 ﻿using LiveLearn.Assessment.Domain.Entities;
+using LiveLearn.Assessment.Infrastructure.Models;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +17,8 @@ public sealed class WriteDbContext(DbContextOptions<WriteDbContext> options) : D
     public DbSet<HomeworkSubmission> HomeworkSubmissions { get; set; } = null!;
 
     public DbSet<QuizAttempt> QuizAttempts { get; set; } = null!;
+
+    public DbSet<LockedTask> LockedTasks { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
