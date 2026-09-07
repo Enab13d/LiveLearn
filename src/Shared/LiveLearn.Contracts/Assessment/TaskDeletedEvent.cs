@@ -1,3 +1,3 @@
 ﻿namespace LiveLearn.Contracts.Assessment;
 
-public sealed record TaskDeletedEvent(Guid TaskId);
+public sealed record TaskDeletedEvent(Guid TaskId, DateTimeOffset OccurredOn);
