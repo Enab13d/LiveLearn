@@ -56,6 +56,9 @@ public sealed class Quiz : AssessmentTask
 
     public Result<QuizEvaluationResult> Evaluate(Dictionary<Guid, Guid> questionAnswerMap, Guid studentId)
     {
+        if (SectionId is null || CourseId is null)
+            return Result<QuizEvaluationResult>.Failure(TaskErrors.UnassignedTaskEvaluation);
+
         int totalQuestions = _questions.Count;
         if (totalQuestions <= 0) return Result<QuizEvaluationResult>.Failure(QuizErrors.EmptyQuizEvaluation);
 
@@ -84,11 +87,11 @@ public sealed class Quiz : AssessmentTask
 
         if (passed)
         {
-            RaiseDomainEvent(new TaskCompletedDomainEvent(Id, studentId, SectionId, CourseId));
+            RaiseDomainEvent(new TaskCompletedDomainEvent(Id, studentId, SectionId.Value, CourseId.Value));
         }
         else
         {
-            RaiseDomainEvent(new TaskFailedDomainEvent(Id, studentId, SectionId, CourseId));
+            RaiseDomainEvent(new TaskFailedDomainEvent(Id, studentId, SectionId.Value, CourseId.Value));
         }
 
         return new QuizEvaluationResult(passed, score, correctAnswerIds, wrongAnswerIds);
