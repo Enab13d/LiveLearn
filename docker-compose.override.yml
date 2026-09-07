@@ -18,6 +18,11 @@ services:
         - ASPNETCORE_ENVIRONMENT=Development
         - RabbitMQ__Username=${RABBITMQ_DEFAULT_USER}
         - RabbitMQ__Password=${RABBITMQ_DEFAULT_PASS}
+  assessment-service:
+      environment:
+        - ASPNETCORE_ENVIRONMENT=Development
+        - RabbitMQ__Username=${RABBITMQ_DEFAULT_USER}
+        - RabbitMQ__Password=${RABBITMQ_DEFAULT_PASS}
 networks:
   livelearn-private-network:
     internal: false

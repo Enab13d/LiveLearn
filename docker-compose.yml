@@ -42,6 +42,22 @@ services:
     networks:
       - livelearn-private-network
 
+  assessment-service:
+    image: ${DOCKER_REGISTRY-}assessment-service
+    build:
+      context: .
+      dockerfile: src/services/Assessment/LiveLearn.Assessment.API/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
+      - ConnectionStrings__AssessmentDb=Host=postgres;Port=5432;Database=livelearn_assessment;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};GSS Encryption Mode=Disable
+    networks:
+      - livelearn-private-network
+
   postgres:
     image: postgres
     restart: unless-stopped
