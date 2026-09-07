@@ -34,5 +34,25 @@ dotnet user-secrets set "RabbitMQ:Password" "YOUR_PASS" \
     -c WriteDbContext \
     -s src/services/Catalog/LiveLearn.Catalog.API
 
+# Assessment service
+*init and set user-secrets*
+dotnet user-secrets init --project src/services/Assessment/LiveLearn.Assessment.API
+
+dotnet user-secrets set "ConnectionStrings:AssessmentDb" \
+  "Host=localhost;Port=5432;Database=livelearn_assessment;Username=YOUR_USERNAME;Password=YOUR_PASS" \
+  --project src/services/Assessment/LiveLearn.Assessment.API
+
+dotnet user-secrets set "RabbitMQ:Username" "YOUR_USERNAME" \
+--project "src/services/Assessment/LiveLearn.Assessment.API"
+
+dotnet user-secrets set "RabbitMQ:Password" "YOUR_PASS" \
+--project "src/services/Assessment/LiveLearn.Assessment.API"
+
+*Create migrations*
+ dotnet ef migrations add InitialCreate \
+    -p src/services/Assessment/LiveLearn.Assessment.Infrastructure \
+    -c WriteDbContext \
+    -s src/services/Assessment/LiveLearn.Assessment.API
+
 **Start in dev mode**
 docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
