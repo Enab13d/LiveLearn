@@ -9,9 +9,7 @@ internal sealed class HomeworkConfiguration : IEntityTypeConfiguration<Homework>
 {
     public void Configure(EntityTypeBuilder<Homework> builder)
     {
-        builder.ToTable("homeworks");
 
-        builder.HasKey(e => e.Id);
         builder.Property(e => e.Description).IsRequired().HasMaxLength(4096);
     }
 }

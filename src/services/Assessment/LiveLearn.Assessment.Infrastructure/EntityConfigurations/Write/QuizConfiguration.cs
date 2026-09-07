@@ -8,9 +8,7 @@ internal sealed class QuizConfiguration : IEntityTypeConfiguration<Quiz>
 {
     public void Configure(EntityTypeBuilder<Quiz> builder)
     {
-        builder.ToTable("quizzes");
 
-        builder.HasKey(e => e.Id);
         builder.Property(e => e.PassingScore).IsRequired();
 
         builder.OwnsMany(e => e.Questions, quesion =>

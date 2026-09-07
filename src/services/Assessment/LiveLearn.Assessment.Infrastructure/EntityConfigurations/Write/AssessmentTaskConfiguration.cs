@@ -13,6 +13,9 @@ internal sealed class AssessmentTaskConfiguration : IEntityTypeConfiguration<Ass
         builder.ToTable("tasks");
         builder.HasKey(e => e.Id);
         builder.Property(e => e.Title).IsRequired().HasMaxLength(128);
-        builder.UseTptMappingStrategy();
+        
+        builder.HasDiscriminator<string>("TaskType")
+            .HasValue<Quiz>("Quiz")
+            .HasValue<Homework>("Homework");
     }
 }
