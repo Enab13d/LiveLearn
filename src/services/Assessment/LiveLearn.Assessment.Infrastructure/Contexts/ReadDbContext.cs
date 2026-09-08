@@ -7,6 +7,7 @@ namespace LiveLearn.Assessment.Infrastructure.Contexts;
 internal sealed class ReadDbContext(DbContextOptions<ReadDbContext> options) : DbContext(options)
 {
 
+    public DbSet<AssessmentTaskReadModel> AssessmentTasks { get; set; } = null!;
     public DbSet<QuizReadModel> Quizzes { get; set; } = null!;
 
     public DbSet<HomeworkReadModel> Homeworks { get; set; } = null!;
