@@ -53,7 +53,7 @@ public sealed class CoursesController(ISender mediator) : ControllerBase
             new CreateCourseCommand(request.CategoryId, tutorId, request.Title, request.Description, request.Price), ct);
 
         return result.IsSuccess
-            ? CreatedAtAction(nameof(CreateCourse), new { courseId = result.Value.Id }, result.Value)
+            ? CreatedAtAction(nameof(GetCourseDetails), new { courseId = result.Value.Id }, result.Value)
             : this.ToProblemResult(result.Errors);
     }
 
