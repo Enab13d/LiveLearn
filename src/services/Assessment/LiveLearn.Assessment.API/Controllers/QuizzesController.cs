@@ -1,4 +1,5 @@
-﻿using LiveLearn.Assessment.API.Dto.Requests;
+﻿using LiveLearn.Assessment.API.Dto.QueryParameters;
+using LiveLearn.Assessment.API.Dto.Requests;
 using LiveLearn.Assessment.API.Extensions;
 using LiveLearn.Assessment.Application.Authorization;
 using LiveLearn.Assessment.Application.Commands;
@@ -29,18 +30,6 @@ public sealed class QuizzesController(ISender mediator) : ControllerBase
             : this.ToProblemResult(result.Errors);
     }
 
-    [HttpDelete]
-    [Route("{taskId:guid}")]
-    [Authorize(Policy = AuthorizationPolicies.TutorPolicy)]
-    public async Task<IActionResult> DeleteQuiz(Guid taskId, CancellationToken ct)
-    {
-        if (User.GetUserId() is not Guid tutorId)
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
-
-        var result = await mediator.Send(new DeleteTaskCommand(tutorId, taskId), ct);
-
-        return result.IsSuccess ? NoContent() : this.ToProblemResult(result.Errors);
-    }
 
     [HttpPost]
     [Route("{taskId:guid}/questions")]
@@ -104,12 +93,12 @@ public sealed class QuizzesController(ISender mediator) : ControllerBase
     [HttpGet]
     [Route("{taskId:guid}/attempts")]
     [Authorize(Policy = AuthorizationPolicies.StudentPolicy)]
-    public async Task<IActionResult> GetAttempts(Guid taskId, int pageNumber, int pageSize, CancellationToken ct)
+    public async Task<IActionResult> GetAttempts(Guid taskId, [FromQuery] PageableQueryParams query, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid studentId)
             return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
 
-        var result = await mediator.Send(new GetQuizAttemptsQuery(studentId, taskId, pageNumber, pageSize), ct);
+        var result = await mediator.Send(new GetQuizAttemptsQuery(studentId, taskId, query.PageNumber, query.PageSize), ct);
 
         return result.IsSuccess
             ? Ok(result.Value)
