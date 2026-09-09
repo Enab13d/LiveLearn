@@ -20,7 +20,7 @@ public sealed class TasksController(ISender mediator) : ControllerBase
     public async Task<IActionResult> GetTasksByTutor(bool assigned, [FromQuery] PageableQueryParams query, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
+            return this.MisconfiguredTokenProblem();
 
         var result = await mediator.Send(new GetTasksByTutorQuery(tutorId, assigned, query.PageNumber, query.PageSize), ct);
 
@@ -33,7 +33,7 @@ public sealed class TasksController(ISender mediator) : ControllerBase
     public async Task<IActionResult> DeleteTask(Guid taskId, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
+            return this.MisconfiguredTokenProblem();
 
         var result = await mediator.Send(new DeleteTaskCommand(tutorId, taskId), ct);
 

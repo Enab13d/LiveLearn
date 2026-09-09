@@ -17,13 +17,16 @@ internal static class ResultExtensions
         var first = errors[0];
         var statusCode = first.Type switch
         {
-            ErrorType.NotFound     => StatusCodes.Status404NotFound,
-            ErrorType.Conflict     => StatusCodes.Status409Conflict,
+            ErrorType.NotFound => StatusCodes.Status404NotFound,
+            ErrorType.Conflict => StatusCodes.Status409Conflict,
             ErrorType.Unauthorized => StatusCodes.Status401Unauthorized,
-            ErrorType.Forbidden    => StatusCodes.Status403Forbidden,
-            _                      => StatusCodes.Status500InternalServerError
+            ErrorType.Forbidden => StatusCodes.Status403Forbidden,
+            _ => StatusCodes.Status500InternalServerError
         };
 
         return controller.Problem(statusCode: statusCode, detail: first.Message, title: first.Code);
     }
+
+    public static IActionResult MisconfiguredTokenProblem(this ControllerBase controller) =>
+        controller.Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
 }

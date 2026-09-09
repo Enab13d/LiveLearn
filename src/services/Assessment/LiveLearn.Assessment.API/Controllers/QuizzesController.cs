@@ -21,7 +21,7 @@ public sealed class QuizzesController(ISender mediator) : ControllerBase
     public async Task<IActionResult> CreateQuiz([FromBody] CreateQuizRequestDto request, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
+            return this.MisconfiguredTokenProblem();
 
         var result = await mediator.Send(new CreateQuizCommand(tutorId, request.Title, request.PassingScore), ct);
 
@@ -37,7 +37,7 @@ public sealed class QuizzesController(ISender mediator) : ControllerBase
     public async Task<IActionResult> AddQuestion(Guid taskId, [FromBody] AddQuestionToQuizRequest request, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
+            return this.MisconfiguredTokenProblem();
 
         var result = await mediator.Send(
             new AddQuestionToQuizCommand(tutorId, taskId, request.Text, request.Answers, request.CorrectAnswerIdx), ct);
@@ -53,7 +53,7 @@ public sealed class QuizzesController(ISender mediator) : ControllerBase
     public async Task<IActionResult> RemoveQuestion(Guid taskId, Guid questionId, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
+            return this.MisconfiguredTokenProblem();
 
         var result = await mediator.Send(new RemoveQuestionFromQuizCommand(taskId, tutorId, questionId), ct);
 
@@ -81,7 +81,7 @@ public sealed class QuizzesController(ISender mediator) : ControllerBase
     public async Task<IActionResult> SubmitAttempt(Guid taskId, [FromBody] SubmitQuizAttemptRequestDto request, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid studentId)
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
+            return this.MisconfiguredTokenProblem();
 
         var result = await mediator.Send(new SubmitQuizAttemptCommand(studentId, taskId, request.Answers), ct);
         return result.IsSuccess
@@ -96,7 +96,7 @@ public sealed class QuizzesController(ISender mediator) : ControllerBase
     public async Task<IActionResult> GetAttempts(Guid taskId, [FromQuery] PageableQueryParams query, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid studentId)
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
+            return this.MisconfiguredTokenProblem();
 
         var result = await mediator.Send(new GetQuizAttemptsQuery(studentId, taskId, query.PageNumber, query.PageSize), ct);
 
@@ -111,7 +111,7 @@ public sealed class QuizzesController(ISender mediator) : ControllerBase
     public async Task<IActionResult> UpdateTitle(Guid taskId, [FromBody] UpdateQuizTitleRequestDto request, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
+            return this.MisconfiguredTokenProblem();
 
         var result = await mediator.Send(new UpdateQuizTitleCommand(tutorId, taskId, request.Title), ct);
         

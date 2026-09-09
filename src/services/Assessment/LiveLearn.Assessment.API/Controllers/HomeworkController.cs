@@ -21,7 +21,7 @@ public sealed class HomeworkController(ISender mediator) : ControllerBase
     public async Task<IActionResult> CreateHomework([FromBody] CreateHomeworkRequestDto request, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
+            return this.MisconfiguredTokenProblem();
 
         var result = await mediator.Send(
             new CreateHomeworkCommand(tutorId, request.Title, request.Description), ct);
@@ -44,7 +44,7 @@ public sealed class HomeworkController(ISender mediator) : ControllerBase
     public async Task<IActionResult> UpdateTitle(Guid taskId, [FromBody] UpdateHomeworkTitleRequestDto request, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
+            return this.MisconfiguredTokenProblem();
 
         var result = await mediator.Send(new UpdateHomeworkTitleCommand(taskId, tutorId, request.Title), ct);
 
@@ -57,7 +57,7 @@ public sealed class HomeworkController(ISender mediator) : ControllerBase
     public async Task<IActionResult> UpdateDescription(Guid taskId, [FromBody] UpdateHomeworkDescriptionRequestDto request, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
+            return this.MisconfiguredTokenProblem();
 
         var result = await mediator.Send(new UpdateHomeworkDescriptionCommand(taskId, tutorId, request.Description), ct);
 
@@ -70,7 +70,7 @@ public sealed class HomeworkController(ISender mediator) : ControllerBase
     public async Task<IActionResult> SubmitHomework(Guid taskId, [FromBody] SubmitHomeworkRequestDto request, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid studentId)
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
+            return this.MisconfiguredTokenProblem();
 
         var result = await mediator.Send(new SubmitHomeworkCommand(studentId, taskId, request.Content), ct);
 
@@ -86,7 +86,7 @@ public sealed class HomeworkController(ISender mediator) : ControllerBase
         CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
+            return this.MisconfiguredTokenProblem();
 
         var result = await mediator.Send(
             new GetHomeworkSubmissionsQuery(
@@ -111,7 +111,7 @@ public sealed class HomeworkController(ISender mediator) : ControllerBase
     public async Task<IActionResult> ReviewHomework(Guid submissionId, ReviewHomeworkSubmissionRequestDto request, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
+            return this.MisconfiguredTokenProblem();
 
         var result = await mediator.Send(
             new ReviewHomeworkSubmissionCommand(tutorId, submissionId, request.Feedback, request.IsAccepted), ct);
