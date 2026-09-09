@@ -1,7 +1,7 @@
 ﻿namespace LiveLearn.Assessment.Infrastructure.Models;
 
 
-internal sealed class AssessmentTaskReadModel
+internal class AssessmentTaskReadModel
 {
 
     public Guid Id { get; set; }

@@ -9,9 +9,6 @@ internal sealed class QuizReadModelConfiguration : IEntityTypeConfiguration<Quiz
 {
     public void Configure(EntityTypeBuilder<QuizReadModel> builder)
     {
-        builder.ToTable("tasks");
-        builder.Property<string>("TaskType");
-        builder.HasQueryFilter(e => EF.Property<string>(e, "TaskType") == "Quiz");
         builder.OwnsMany(e => e.Questions, quesion =>
         {
             quesion.ToJson();

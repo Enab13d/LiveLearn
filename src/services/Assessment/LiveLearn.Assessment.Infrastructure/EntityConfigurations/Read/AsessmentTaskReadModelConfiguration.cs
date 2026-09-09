@@ -14,5 +14,8 @@ internal sealed class AssessmentTaskReadModelConfiguration : IEntityTypeConfigur
 
         builder.HasKey(e => e.Id);
 
+        builder.HasDiscriminator<string>("TaskType")
+            .HasValue<QuizReadModel>("Quiz")
+            .HasValue<HomeworkReadModel>("Homework");
     }
 }
