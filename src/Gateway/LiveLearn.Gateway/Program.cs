@@ -81,6 +81,7 @@ if (app.Environment.IsDevelopment())
     {
         options.AddDocument("catalog", "Catalog", "/catalog/openapi/v1.json");
         options.AddDocument("identity", "Identity", "/identity/openapi/v1.json");
+        options.AddDocument("assessment", "Assessment", "/assessment/openapi/v1.json");
         options
         .AddPreferredSecuritySchemes("OAuth2")
         .AddAuthorizationCodeFlow("OAuth2", flow =>
