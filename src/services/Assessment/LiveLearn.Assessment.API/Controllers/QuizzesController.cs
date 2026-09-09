@@ -105,5 +105,20 @@ public sealed class QuizzesController(ISender mediator) : ControllerBase
             : this.ToProblemResult(result.Errors);
     }
 
+    [HttpPatch]
+    [Route("{taskId:guid}")]
+    [Authorize(Policy = AuthorizationPolicies.TutorPolicy)]
+    public async Task<IActionResult> UpdateTitle(Guid taskId, [FromBody] UpdateQuizTitleRequestDto request, CancellationToken ct)
+    {
+        if (User.GetUserId() is not Guid tutorId)
+            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
+
+        var result = await mediator.Send(new UpdateQuizTitleCommand(tutorId, taskId, request.Title), ct);
+        
+        return result.IsSuccess
+            ? Ok()
+            : this.ToProblemResult(result.Errors);
+    }
+
 
 }
