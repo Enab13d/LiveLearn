@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using LiveLearn.Assessment.Domain.Common;
+﻿using LiveLearn.Assessment.Domain.Common;
 using LiveLearn.Assessment.Domain.DomainEvents;
 using LiveLearn.Assessment.Domain.Errors;
 using LiveLearn.BuildingBlocks;
@@ -15,7 +14,7 @@ public sealed class Quiz : AssessmentTask
 
     private readonly List<Question> _questions = [];
 
-    public ReadOnlyCollection<Question> Questions => _questions.AsReadOnly();
+    public IReadOnlyCollection<Question> Questions => _questions;
 
     public static Quiz Create(Guid id, string title, Guid tutorId, int passingPercent)
     {
