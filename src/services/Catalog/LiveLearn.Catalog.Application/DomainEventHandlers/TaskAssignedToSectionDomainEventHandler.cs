@@ -5,7 +5,7 @@ using LiveLearn.Contracts.Catalog;
 namespace LiveLearn.Catalog.Application.DomainEventHandlers;
 
 
-internal sealed class AssignTaskToSectionDomainEventHandler(IEventBus eventBus, TimeProvider timeProvider) 
+internal sealed class TaskAssignedToSectionDomainEventHandler(IEventBus eventBus, TimeProvider timeProvider) 
     : IDomainEventHandler<TaskAssignedToSectionDomainEvent>
 {
     public async Task Handle(TaskAssignedToSectionDomainEvent notification, CancellationToken ct)
