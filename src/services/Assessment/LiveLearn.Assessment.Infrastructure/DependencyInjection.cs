@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using LiveLearn.Assessment.Infrastructure.Messaging.Consumers;
 
 namespace LiveLearn.Assessment.Infrastructure;
 
@@ -61,7 +62,10 @@ public static class DependencyInjectionExtensions
         services.AddMassTransit(x =>
         {
 
-            x.AddConsumers([typeof(DependencyInjectionExtensions).Assembly]);
+            x.AddConsumer<CourseArchivedConsumer, CourseArchivedConsumerDefinition>();
+            x.AddConsumer<CoursePublishedConsumer, CoursePublishedConsumerDefinition>();
+            x.AddConsumer<TaskAssignedConsumer>();
+            x.AddConsumer<TaskRemovedFromSectionConsumer>();
             x.SetKebabCaseEndpointNameFormatter();
             x.UsingRabbitMq((context, cfg) =>
             {
