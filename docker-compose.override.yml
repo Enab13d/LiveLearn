@@ -10,6 +10,7 @@ services:
   gateway:
       environment:
         - ASPNETCORE_ENVIRONMENT=Development
+        - OTEL_EXPORTER_OTLP_ENDPOINT=http://aspire-dashboard:18889
   identity-service:
       environment:
         - ASPNETCORE_ENVIRONMENT=Development
@@ -23,6 +24,16 @@ services:
         - ASPNETCORE_ENVIRONMENT=Development
         - RabbitMQ__Username=${RABBITMQ_DEFAULT_USER}
         - RabbitMQ__Password=${RABBITMQ_DEFAULT_PASS}
+  aspire-dashboard:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:13
+    container_name: aspire-dashboard
+    ports:
+      - "18888:18888"
+    environment:
+      - DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS=true
+    networks:
+      - livelearn-private-network
+
 networks:
   livelearn-private-network:
     internal: false
