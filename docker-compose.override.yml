@@ -25,6 +25,7 @@ services:
         - ASPNETCORE_ENVIRONMENT=Development
         - RabbitMQ__Username=${RABBITMQ_DEFAULT_USER}
         - RabbitMQ__Password=${RABBITMQ_DEFAULT_PASS}
+        - OTEL_EXPORTER_OTLP_ENDPOINT=http://aspire-dashboard:18889
   aspire-dashboard:
     image: mcr.microsoft.com/dotnet/aspire-dashboard:13
     container_name: aspire-dashboard
