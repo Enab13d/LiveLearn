@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Reflection;
+using System.Text.Json.Serialization;
 using HealthChecks.UI.Client;
 using LiveLearn.Catalog.API.ExceptionHandlers;
 using LiveLearn.Catalog.Application;
@@ -8,6 +9,10 @@ using LiveLearn.Catalog.Infrastructure.Contexts;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
+using OpenTelemetry;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Serilog;
 using Serilog.Formatting.Compact;
 
@@ -19,13 +24,28 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
+    var serviceName = builder.Environment.ApplicationName;
+    var serviceVersion = typeof(Program).Assembly
+        .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "unknown";
+
+    var serviceInstanceId = Environment.MachineName;
+
     builder.Host.UseSerilog((context, services, config) =>
     {
         config
             .ReadFrom.Configuration(context.Configuration)
             .ReadFrom.Services(services)
             .Enrich.FromLogContext()
-            .Enrich.WithProperty("Service", "catalog");
+            .Enrich.WithProperty("Service", builder.Environment.ApplicationName)
+            .WriteTo.OpenTelemetry(options =>
+            {
+                options.ResourceAttributes = new Dictionary<string, object>
+                {
+                    ["service.name"] = serviceName,
+                    ["service.version"] = serviceVersion,
+                    ["service.instance.id"] = serviceInstanceId
+                };
+            });
         if (context.HostingEnvironment.IsDevelopment())
         {
             config.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{Service}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
@@ -36,9 +56,24 @@ try
         }
     });
 
+    builder.Services.AddOpenTelemetry()
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddSource("Yarp.ReverseProxy"))
+    .WithMetrics(metrics => metrics
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddMeter("System.Runtime"))
+    .ConfigureResource(cfg =>
+    {
+        cfg.AddService(serviceName, serviceVersion: serviceVersion, serviceInstanceId: serviceInstanceId);
+    })
+    .UseOtlpExporter();
+
     var jwtOptions = builder.Configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()
        ?? throw new InvalidOperationException("JWT options not defined");
-       
+
     builder.Services.AddOpenApi(options =>
     {
         options.AddDocumentTransformer((document, context, ct) =>
@@ -53,7 +88,7 @@ try
                     {
                         AuthorizationUrl = new Uri(jwtOptions.AuthorizationUrl!),
                         TokenUrl = new Uri(jwtOptions.TokenUrl!),
-                        Scopes = new Dictionary<string, string> 
+                        Scopes = new Dictionary<string, string>
                         {
                              { "openid", "OpenID Connect" }
                         }

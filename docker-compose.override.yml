@@ -19,6 +19,7 @@ services:
         - ASPNETCORE_ENVIRONMENT=Development
         - RabbitMQ__Username=${RABBITMQ_DEFAULT_USER}
         - RabbitMQ__Password=${RABBITMQ_DEFAULT_PASS}
+        - OTEL_EXPORTER_OTLP_ENDPOINT=http://aspire-dashboard:18889
   assessment-service:
       environment:
         - ASPNETCORE_ENVIRONMENT=Development
