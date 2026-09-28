@@ -11,17 +11,17 @@ internal sealed class ProvisionUserCommandHandler(IUserRepository userRepository
     {
         var user = await userRepository.GetByIdAsync(request.Id, ct);
 
-        if (user is not null && user.Email == request.Email && user.Role == request.UserRole)
+        if (user is not null && user.Email == request.Email)
             return Result.Success(); // already in sync, nothing to do
 
         if (user is null)
         {
-            user = User.Create(request.Id, request.FirstName, request.LastName, request.Email, request.UserRole);
+            user = User.Create(request.Id, request.FirstName, request.LastName, request.Email);
             await userRepository.AddAsync(user, ct);
         }
         else
         {
-            user.UpdateAuthData(request.Email, request.UserRole);
+            user.UpdateAuthData(request.Email);
         }
 
         await unitOfWork.CommitAsync(ct);

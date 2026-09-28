@@ -1,7 +1,6 @@
 ﻿using LiveLearn.BuildingBlocks;
-using LiveLearn.Identity.Domain.Entities;
 
 namespace LiveLearn.Identity.Domain.DomainEvents;
 
 
-public sealed record AuthDataUpdatedDomainEvent(string Email, Role role): IDomainEvent;
+public sealed record AuthDataUpdatedDomainEvent(Guid UserId, string Email): IDomainEvent;

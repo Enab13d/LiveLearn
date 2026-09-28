@@ -3,7 +3,6 @@ using LiveLearn.Identity.API.Extensions;
 using LiveLearn.Identity.Application.Authorization;
 using LiveLearn.Identity.Application.Commands;
 using LiveLearn.Identity.Application.Queries;
-using LiveLearn.Identity.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -40,22 +39,18 @@ public sealed class UsersController(ISender mediator) : ControllerBase
     public async Task<IActionResult> SyncAuthData(CancellationToken ct)
     {
         var claims = HttpContext.User;
-        var role = User.FindAll("role")
-            .Select(c => Enum.TryParse<Role>(c.Value, out var r) ? (Role?)r : null)
-            .FirstOrDefault(r => r.HasValue);
-
-        if (role is null)
-            return Problem("Token contains no valid application role. Identity provider misconfigured.");
 
         string sub = claims.FindFirstValue("sub") ?? "";
         string firstName = claims.FindFirstValue("given_name") ?? "";
         string lastName = claims.FindFirstValue("family_name") ?? "";
         string email = claims.FindFirstValue("email") ?? "";
+
         if (!Guid.TryParse(sub, out var id))
         {
             return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
         }
-        var result = await mediator.Send(new ProvisionUserCommand(id, email, firstName, lastName, role.Value), ct);
+        
+        var result = await mediator.Send(new ProvisionUserCommand(id, email, firstName, lastName), ct);
         return result.IsSuccess ? NoContent() : this.ToProblemResult(result.Errors);
     }
 }

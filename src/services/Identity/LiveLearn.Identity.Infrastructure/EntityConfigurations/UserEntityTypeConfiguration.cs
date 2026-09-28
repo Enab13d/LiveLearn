@@ -14,7 +14,6 @@ internal sealed class UserEntityTypeConfiguration : IEntityTypeConfiguration<Use
         builder.Property(u => u.Email).IsRequired().HasMaxLength(254);
         builder.Property(u => u.AvatarUrl).IsRequired(false).HasMaxLength(2048);
         builder.Property(u => u.Bio).IsRequired(false).HasMaxLength(1000);
-        builder.Property(u => u.Role).HasConversion<string>();
 
         builder.HasIndex(u => u.Email).IsUnique();
     }

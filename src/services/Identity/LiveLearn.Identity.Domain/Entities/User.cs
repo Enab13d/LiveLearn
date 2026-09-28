@@ -19,9 +19,7 @@ public sealed class User : AggregateRoot<Guid>
 
     public string Bio { get; private set; } = string.Empty;
 
-    public Role Role { get; private set; }
-
-    public static User Create(Guid id, string firstName, string lastName, string email, Role role = Role.Student)
+    public static User Create(Guid id, string firstName, string lastName, string email)
     {
         var user = new User()
         {
@@ -30,7 +28,6 @@ public sealed class User : AggregateRoot<Guid>
             LastName = lastName,
             Email = email,
             DisplayName = $"{firstName} {lastName}",
-            Role = role
         };
         user.RaiseDomainEvent(new UserCreatedDomainEvent(id, email, user.DisplayName));
         return user;
@@ -44,11 +41,10 @@ public sealed class User : AggregateRoot<Guid>
         RaiseDomainEvent(new UserProfileUpdatedDomainEvent(Id, DisplayName, AvatarUrl, Bio));
     }
 
-    public void UpdateAuthData(string email, Role role)
+    public void UpdateAuthData(string email)
     {
         Email = email;
-        Role = role;
-        RaiseDomainEvent(new AuthDataUpdatedDomainEvent(Email, Role));
+        RaiseDomainEvent(new AuthDataUpdatedDomainEvent(Id, Email));
     }
 }
 

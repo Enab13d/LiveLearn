@@ -1,6 +1,5 @@
 ﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Identity.Application.Repositories;
-using LiveLearn.Identity.Domain.Entities;
 using LiveLearn.Identity.Infrastructure.Authentication;
 using LiveLearn.Identity.Application.Authorization;
 using LiveLearn.Identity.Infrastructure.Context;
@@ -43,11 +42,7 @@ public static class DependencyInjectionExtensions
         });
         services.AddAuthorizationBuilder()
             .AddPolicy(AuthorizationPolicies.AdminPolicy, policy =>
-                policy.RequireRole(nameof(Role.Admin)))
-            .AddPolicy(AuthorizationPolicies.TutorPolicy, policy =>
-                policy.RequireRole(nameof(Role.Tutor)))
-            .AddPolicy(AuthorizationPolicies.StudentPolicy, policy =>
-                policy.RequireRole(nameof(Role.Student)));
+                policy.RequireRole("Admin"));
 
         var connectionString = configuration.GetConnectionString("UsersDb")
             ?? throw new InvalidOperationException("Connection string 'UsersDb' is not configured.");

@@ -1,6 +1,4 @@
-﻿using LiveLearn.Identity.Domain.Entities;
-
-namespace LiveLearn.Identity.Application.Dto;
+﻿namespace LiveLearn.Identity.Application.Dto;
 
 public record struct UserProfileDto
 (
@@ -8,6 +6,5 @@ public record struct UserProfileDto
     string Email,
     string DisplayName,
     string AvatarUrl,
-    string Bio,
-    Role Role
+    string Bio
 );

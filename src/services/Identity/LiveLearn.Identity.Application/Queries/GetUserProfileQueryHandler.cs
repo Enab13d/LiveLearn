@@ -1,4 +1,4 @@
-using LiveLearn.BuildingBlocks;
+﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Identity.Application.Dto;
 using LiveLearn.Identity.Application.Repositories;
 using LiveLearn.Identity.Domain.Errors;
@@ -20,8 +20,7 @@ internal sealed class GetUserProfileQueryHandler(IUserRepository userRepository)
             user.Email,
             user.DisplayName,
             user.AvatarUrl,
-            user.Bio,
-            user.Role);
+            user.Bio);
 
         return Result<UserProfileDto>.Success(dto);
     }

@@ -45,6 +45,7 @@
   "quickLoginCheckMilliSeconds": 1000,
   "maxDeltaTimeSeconds": 43200,
   "failureFactor": 30,
+  "maxSecondaryAuthFailures": 0,
   "roles": {
     "realm": [
       {
@@ -55,8 +56,7 @@
         "composites": {
           "realm": [
             "offline_access",
-            "uma_authorization",
-            "Student"
+            "uma_authorization"
           ],
           "client": {
             "account": [
@@ -70,27 +70,9 @@
         "attributes": {}
       },
       {
-        "id": "a8f76928-9364-45e8-bb83-b224d72a0814",
-        "name": "Tutor",
-        "description": "Tutor role",
-        "composite": false,
-        "clientRole": false,
-        "containerId": "3d0e642b-efc5-4473-bdca-f4ba6b29e164",
-        "attributes": {}
-      },
-      {
         "id": "ce8a8a30-077f-40b6-a7d3-c7b45c5405e8",
         "name": "offline_access",
         "description": "${role_offline-access}",
-        "composite": false,
-        "clientRole": false,
-        "containerId": "3d0e642b-efc5-4473-bdca-f4ba6b29e164",
-        "attributes": {}
-      },
-      {
-        "id": "4322e14e-0eb7-4570-a949-3f2b89d4a2a3",
-        "name": "Student",
-        "description": "Student role",
         "composite": false,
         "clientRole": false,
         "containerId": "3d0e642b-efc5-4473-bdca-f4ba6b29e164",
@@ -703,19 +685,20 @@
       "clientId": "livelearn-spa",
       "name": "livelearn-spa",
       "description": "Live learn public client for single-page application",
-      "rootUrl": "http://localhost:4200",
-      "adminUrl": "http://localhost:4200",
-      "baseUrl": "http://localhost:4200",
+      "rootUrl": "http://localhost",
+      "adminUrl": "http://localhost",
+      "baseUrl": "http://localhost",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "http://localhost:4200/*",
+        "",
+        "http://localhost/*",
         "https://oauth.pstmn.io/v1/callback"
       ],
       "webOrigins": [
-        "http://localhost:4200"
+        "http://localhost"
       ],
       "notBefore": 0,
       "bearerOnly": false,
@@ -728,16 +711,18 @@
       "frontchannelLogout": true,
       "protocol": "openid-connect",
       "attributes": {
+        "logout.confirmation.enabled": "false",
+        "standard.token.exchange.enabled": "false",
+        "oauth2.jwt.authorization.grant.enabled": "false",
+        "frontchannel.logout.session.required": "true",
+        "post.logout.redirect.uris": "+##http://localhost/*",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "backchannel.logout.revoke.offline.tokens": "false",
         "realm_client": "false",
         "oidc.ciba.grant.enabled": "false",
         "backchannel.logout.session.required": "true",
-        "standard.token.exchange.enabled": "false",
-        "frontchannel.logout.session.required": "true",
-        "post.logout.redirect.uris": "+",
         "display.on.consent.screen": "false",
-        "oauth2.device.authorization.grant.enabled": "false",
         "pkce.code.challenge.method": "S256",
-        "backchannel.logout.revoke.offline.tokens": "false",
         "dpop.bound.access.tokens": "false"
       },
       "authenticationFlowBindingOverrides": {},
@@ -772,8 +757,9 @@
             "included.client.audience": "livelearn-spa",
             "id.token.claim": "false",
             "lightweight.claim": "false",
+            "introspection.token.claim": "true",
             "access.token.claim": "true",
-            "introspection.token.claim": "true"
+            "userinfo.token.claim": "false"
           }
         }
       ],
@@ -1687,13 +1673,13 @@
         "config": {
           "allowed-protocol-mapper-types": [
             "oidc-usermodel-property-mapper",
-            "saml-user-attribute-mapper",
+            "oidc-usermodel-attribute-mapper",
             "oidc-address-mapper",
             "saml-role-list-mapper",
-            "saml-user-property-mapper",
             "oidc-full-name-mapper",
-            "oidc-sha256-pairwise-sub-mapper",
-            "oidc-usermodel-attribute-mapper"
+            "saml-user-property-mapper",
+            "saml-user-attribute-mapper",
+            "oidc-sha256-pairwise-sub-mapper"
           ]
         }
       },
@@ -1725,14 +1711,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "oidc-sha256-pairwise-sub-mapper",
-            "oidc-usermodel-attribute-mapper",
-            "saml-user-attribute-mapper",
-            "oidc-full-name-mapper",
-            "oidc-address-mapper",
             "saml-user-property-mapper",
+            "saml-role-list-mapper",
+            "oidc-usermodel-attribute-mapper",
+            "oidc-full-name-mapper",
+            "oidc-sha256-pairwise-sub-mapper",
+            "oidc-address-mapper",
             "oidc-usermodel-property-mapper",
-            "saml-role-list-mapper"
+            "saml-user-attribute-mapper"
           ]
         }
       }
@@ -2626,11 +2612,12 @@
     "cibaInterval": "5",
     "realmReusableOtpCode": "false"
   },
-  "keycloakVersion": "26.4.5",
+  "keycloakVersion": "26.6.3",
   "userManagedAccessAllowed": false,
   "organizationsEnabled": false,
   "verifiableCredentialsEnabled": false,
   "adminPermissionsEnabled": false,
+  "scimApiEnabled": false,
   "clientProfiles": {
     "profiles": []
   },

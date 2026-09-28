@@ -25,8 +25,7 @@ internal sealed class UpdateUserProfileCommandHandler(IUserRepository userReposi
             user.Email,
             user.DisplayName,
             user.AvatarUrl,
-            user.Bio,
-            user.Role);
+            user.Bio);
 
         return Result<UserProfileDto>.Success(dto);
 
