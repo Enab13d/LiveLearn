@@ -63,7 +63,7 @@ public sealed class Course : AggregateRoot<Guid>
 
         Status = CourseStatus.Published;
         var taskIds = Sections.SelectMany(s => s.SectionTasks.Select(t => t.TaskId)).ToList();
-        RaiseDomainEvent(new CoursePublishedDomainEvent(Id, TutorId, taskIds, publishedAt));
+        RaiseDomainEvent(new CoursePublishedDomainEvent(Id, TutorId, Price, taskIds, publishedAt));
         return Result.Success();
     }
 
