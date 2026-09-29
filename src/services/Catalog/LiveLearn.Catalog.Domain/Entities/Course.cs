@@ -51,10 +51,14 @@ public sealed class Course : AggregateRoot<Guid>
 
     public void Update(string title, string description, decimal price, Guid categoryId)
     {
+        if (Status == CourseStatus.Published && price != Price)
+            RaiseDomainEvent(new CoursePriceChangedDomainEvent(Id, price));
+            
         Title = title;
         Description = description;
         Price = price;
         CategoryId = categoryId;
+
     }
 
     public Result Publish(DateTimeOffset publishedAt)
