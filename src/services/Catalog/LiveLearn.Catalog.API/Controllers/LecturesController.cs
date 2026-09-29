@@ -1,7 +1,6 @@
 ﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Catalog.API.Dto.Requests;
 using LiveLearn.Catalog.API.Extensions;
-using LiveLearn.Catalog.Application.Authorization;
 using LiveLearn.Catalog.Application.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -15,7 +14,6 @@ namespace LiveLearn.Catalog.API.Controllers;
 public sealed class LecturesController(ISender mediator) : ControllerBase
 {
 
-    [Authorize(Policy = AuthorizationPolicies.TutorPolicy)]
     [HttpPost]
     public async Task<IActionResult> AddLecture([FromBody] RequestLectureDto request, Guid courseId, Guid sectionId, CancellationToken ct)
     {
@@ -29,7 +27,6 @@ public sealed class LecturesController(ISender mediator) : ControllerBase
         return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
     }
 
-    [Authorize(Policy = AuthorizationPolicies.TutorPolicy)]
     [HttpPatch("{lectureId:guid}/order")]
     public async Task<IActionResult> UpdateLectureOrder([FromBody] RequestLectureUpdateOrder request, Guid courseId, Guid sectionId, Guid lectureId, CancellationToken ct)
     {

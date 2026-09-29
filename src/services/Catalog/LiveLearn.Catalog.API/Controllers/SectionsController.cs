@@ -1,7 +1,6 @@
 ﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Catalog.API.Dto.Requests;
 using LiveLearn.Catalog.API.Extensions;
-using LiveLearn.Catalog.Application.Authorization;
 using LiveLearn.Catalog.Application.Commands;
 using LiveLearn.Catalog.Application.Queries;
 using MediatR;
@@ -33,7 +32,6 @@ public sealed class SectionsController(ISender mediator) : ControllerBase
         return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
     }
 
-    [Authorize(Policy = AuthorizationPolicies.TutorPolicy)]
     [HttpPost]
     public async Task<IActionResult> AddSection([FromBody] RequestSectionDto request, Guid courseId, CancellationToken ct)
     {
@@ -47,7 +45,6 @@ public sealed class SectionsController(ISender mediator) : ControllerBase
             : this.ToProblemResult(result.Errors);
     }
 
-    [Authorize(Policy = AuthorizationPolicies.TutorPolicy)]
     [HttpPut("{sectionId:guid}")]
     public async Task<IActionResult> UpdateSection([FromBody] RequestSectionDto request, Guid courseId, Guid sectionId, CancellationToken ct)
     {
@@ -59,7 +56,6 @@ public sealed class SectionsController(ISender mediator) : ControllerBase
         return result.IsSuccess ? NoContent() : this.ToProblemResult(result.Errors);
     }
 
-    [Authorize(Policy = AuthorizationPolicies.TutorPolicy)]
     [HttpPatch("{sectionId:guid}/order")]
     public async Task<IActionResult> UpdateSectionOrder([FromBody] RequestSectionUpdateOrder request, Guid courseId, Guid sectionId, CancellationToken ct)
     {
@@ -71,7 +67,6 @@ public sealed class SectionsController(ISender mediator) : ControllerBase
         return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
     }
 
-    [Authorize(Policy = AuthorizationPolicies.TutorPolicy)]
     [HttpDelete("{sectionId:guid}")]
     public async Task<IActionResult> DeleteSection(Guid courseId, Guid sectionId, CancellationToken ct)
     {

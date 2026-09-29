@@ -1,7 +1,6 @@
 ﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Catalog.API.Dto.Requests;
 using LiveLearn.Catalog.API.Extensions;
-using LiveLearn.Catalog.Application.Authorization;
 using LiveLearn.Catalog.Application.Commands;
 using LiveLearn.Catalog.Application.Queries;
 using MediatR;
@@ -42,7 +41,6 @@ public sealed class CoursesController(ISender mediator) : ControllerBase
     }
 
 
-    [Authorize(Policy = AuthorizationPolicies.TutorPolicy)]
     [HttpPost]
     public async Task<IActionResult> CreateCourse([FromBody] RequestCourseDto request, CancellationToken ct)
     {
@@ -57,7 +55,6 @@ public sealed class CoursesController(ISender mediator) : ControllerBase
             : this.ToProblemResult(result.Errors);
     }
 
-    [Authorize(Policy = AuthorizationPolicies.TutorPolicy)]
     [HttpPut("{courseId:guid}")]
     public async Task<IActionResult> UpdateCourse(Guid courseId, [FromBody] RequestCourseDto request, CancellationToken ct)
     {
@@ -70,7 +67,6 @@ public sealed class CoursesController(ISender mediator) : ControllerBase
         return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
     }
 
-    [Authorize(Policy = AuthorizationPolicies.TutorPolicy)]
     [HttpPost("{courseId:guid}/publish")]
     public async Task<IActionResult> PublishCourse(Guid courseId, CancellationToken ct)
     {

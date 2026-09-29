@@ -51,11 +51,8 @@ public static class DependencyInjectionExtensions
         });
         services.AddAuthorizationBuilder()
             .AddPolicy(AuthorizationPolicies.AdminPolicy, policy =>
-                policy.RequireRole(nameof(Role.Admin)))
-            .AddPolicy(AuthorizationPolicies.TutorPolicy, policy =>
-                policy.RequireRole(nameof(Role.Tutor)))
-            .AddPolicy(AuthorizationPolicies.StudentPolicy, policy =>
-                policy.RequireRole(nameof(Role.Student)));
+                policy.RequireRole("Admin"));
+
         services.Configure<RabbitMQOptions>(configuration.GetSection(RabbitMQOptions.SectionName));
 
         var rabbitMQOptions = configuration.GetRequiredSection(RabbitMQOptions.SectionName).Get<RabbitMQOptions>()

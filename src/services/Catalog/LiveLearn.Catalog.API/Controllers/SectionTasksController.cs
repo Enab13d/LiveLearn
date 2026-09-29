@@ -1,7 +1,6 @@
 ﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Catalog.API.Dto.Requests;
 using LiveLearn.Catalog.API.Extensions;
-using LiveLearn.Catalog.Application.Authorization;
 using LiveLearn.Catalog.Application.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -10,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LiveLearn.Catalog.API.Controllers;
 
 [ApiController]
-[Authorize(Policy = AuthorizationPolicies.TutorPolicy)]
+[Authorize]
 [Route("api/courses/{courseId:guid}/sections/{sectionId:guid}/[controller]")]
 public sealed class SectionTasksController(ISender mediator) : ControllerBase
 {
