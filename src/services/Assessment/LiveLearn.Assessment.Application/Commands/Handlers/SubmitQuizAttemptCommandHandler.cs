@@ -1,4 +1,5 @@
 ﻿using LiveLearn.Assessment.Application.Repositories;
+using LiveLearn.Assessment.Application.Services;
 using LiveLearn.Assessment.Domain.Common;
 using LiveLearn.Assessment.Domain.Entities;
 using LiveLearn.Assessment.Domain.Errors;
@@ -10,6 +11,7 @@ namespace LiveLearn.Assessment.Application.Commands.Handlers;
 internal sealed class SubmitQuizAttemptCommandHandler(
     IAssessmentTaskRepository assessmentTaskRepository,
     IQuizAttemptRepository quizAttemptRepository,
+    IEnrollmentLookup enrollmentLookup,
     IUnitOfWork unitOfWork
 ) : ICommandHandler<SubmitQuizAttemptCommand, QuizEvaluationResult>
 {
@@ -18,6 +20,9 @@ internal sealed class SubmitQuizAttemptCommandHandler(
 
         var quiz = await assessmentTaskRepository.GetQuizAsync(request.QuizId, ct);
         if (quiz is null) return Result<QuizEvaluationResult>.Failure(TaskErrors.NotFound);
+ 
+        if (quiz.CourseId is not Guid courseId || !await enrollmentLookup.IsEnrolledAsync(request.StudentId, courseId, ct))
+            return Result<QuizEvaluationResult>.Failure(TaskErrors.Forbidden);
 
         var result = quiz.Evaluate(request.Answers, request.StudentId);
         if (!result.IsSuccess) return result;
