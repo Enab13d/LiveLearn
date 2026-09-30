@@ -20,6 +20,8 @@ public sealed class WriteDbContext(DbContextOptions<WriteDbContext> options) : D
 
     public DbSet<LockedTask> LockedTasks { get; set; } = null!;
 
+    public DbSet<Enrollment> Enrollments { get; set; } = null!;
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

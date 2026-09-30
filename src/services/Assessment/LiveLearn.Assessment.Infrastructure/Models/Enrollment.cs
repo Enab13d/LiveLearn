@@ -3,9 +3,20 @@
 
 public sealed class Enrollment
 {
-    public Guid Id { get; set; }
-    
+
     public Guid StudentId { get; set; }
 
     public Guid CourseId { get; set; }
+
+    public EnrollmentStatus Status { get; set; }
+
+    public long Version { get; set; }
+
+    public DateTimeOffset UpdatedAt { get; set; }
+}
+
+public enum EnrollmentStatus
+{
+    Active,
+    Revoked
 }

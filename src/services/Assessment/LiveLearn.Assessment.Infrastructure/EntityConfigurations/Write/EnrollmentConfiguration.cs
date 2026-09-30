@@ -11,8 +11,11 @@ internal sealed class EnrollmentConfiguration : IEntityTypeConfiguration<Enrollm
     {
         builder.ToTable("enrollments");
 
-        builder.HasKey(e => e.Id);
+        builder.HasKey(e => new { e.StudentId, e.CourseId });
 
-        builder.HasIndex(e => new { e.StudentId, e.CourseId}).IsUnique();
+        builder.Property(e => e.Status).IsRequired().HasConversion<string>();
+
+        builder.Property(e => e.UpdatedAt);
+
     }
 }

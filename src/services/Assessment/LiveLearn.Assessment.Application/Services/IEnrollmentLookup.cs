@@ -3,6 +3,6 @@
 
 public interface IEnrollmentLookup
 {
-    public Task<bool> IsEnrolledAsync(Guid userId, Guid courseId);
+    public Task<bool> IsEnrolledAsync(Guid userId, Guid courseId, CancellationToken ct = default);
 
 }
