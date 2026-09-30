@@ -56,6 +56,7 @@ public static class DependencyInjectionExtensions
             ?? throw new InvalidOperationException("RabbitMQOptions options not defined");
 
         services.AddScoped<IEventBus, MassTransitEventBus>();
+        services.AddScoped<IEnrollmentLookup, EnrollmentLookup>();
         services.AddMassTransit(x =>
         {
 
