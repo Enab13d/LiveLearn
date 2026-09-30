@@ -24,7 +24,7 @@ internal sealed class GetQuizByIdQueryHandler(ReadDbContext dbContext) : IQueryH
                     q.Text,
                     q.Answers
                         .Select(a => new AnswerDto(a.Id, a.Content)).ToList(),
-                    request.IncludeCorrectAnswer ? q.CorrectAnswerId : null
+                    request.RequesterId == quiz.TutorId ? q.CorrectAnswerId : null
                     ))
                 .ToList());
 

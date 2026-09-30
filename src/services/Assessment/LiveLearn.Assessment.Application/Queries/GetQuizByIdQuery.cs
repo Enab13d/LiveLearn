@@ -4,4 +4,4 @@ using LiveLearn.BuildingBlocks;
 namespace LiveLearn.Assessment.Application.Queries;
 
 
-public sealed record GetQuizByIdQuery(Guid Id, bool IncludeCorrectAnswer) : IQuery<QuizDto>;
+public sealed record GetQuizByIdQuery(Guid Id, Guid RequesterId) : IQuery<QuizDto>;

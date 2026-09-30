@@ -17,7 +17,6 @@ namespace LiveLearn.Assessment.API.Controllers;
 public sealed class QuizzesController(ISender mediator) : ControllerBase
 {
     [HttpPost]
-    [Authorize(Policy = AuthorizationPolicies.TutorPolicy)]
     public async Task<IActionResult> CreateQuiz([FromBody] CreateQuizRequestDto request, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
@@ -33,7 +32,6 @@ public sealed class QuizzesController(ISender mediator) : ControllerBase
 
     [HttpPost]
     [Route("{taskId:guid}/questions")]
-    [Authorize(Policy = AuthorizationPolicies.TutorPolicy)]
     public async Task<IActionResult> AddQuestion(Guid taskId, [FromBody] AddQuestionToQuizRequest request, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
@@ -49,7 +47,6 @@ public sealed class QuizzesController(ISender mediator) : ControllerBase
 
     [HttpDelete]
     [Route("{taskId:guid}/questions/{questionId:guid}")]
-    [Authorize(Policy = AuthorizationPolicies.TutorPolicy)]
     public async Task<IActionResult> RemoveQuestion(Guid taskId, Guid questionId, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
@@ -66,9 +63,10 @@ public sealed class QuizzesController(ISender mediator) : ControllerBase
     [Route("{taskId:guid}")]
     public async Task<IActionResult> GetQuiz(Guid taskId, CancellationToken ct)
     {
-        var isTutor = User.IsInRole(Role.Tutor.ToString());
+        if (User.GetUserId() is not Guid requesterId)
+            return this.MisconfiguredTokenProblem();
 
-        var result = await mediator.Send(new GetQuizByIdQuery(taskId, IncludeCorrectAnswer: isTutor), ct);
+        var result = await mediator.Send(new GetQuizByIdQuery(taskId, requesterId), ct);
 
         return result.IsSuccess
             ? Ok(result.Value)
@@ -77,7 +75,6 @@ public sealed class QuizzesController(ISender mediator) : ControllerBase
 
     [HttpPost]
     [Route("{taskId:guid}/attempts")]
-    [Authorize(Policy = AuthorizationPolicies.StudentPolicy)]
     public async Task<IActionResult> SubmitAttempt(Guid taskId, [FromBody] SubmitQuizAttemptRequestDto request, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid studentId)
@@ -92,7 +89,6 @@ public sealed class QuizzesController(ISender mediator) : ControllerBase
 
     [HttpGet]
     [Route("{taskId:guid}/attempts")]
-    [Authorize(Policy = AuthorizationPolicies.StudentPolicy)]
     public async Task<IActionResult> GetAttempts(Guid taskId, [FromQuery] PageableQueryParams query, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid studentId)
@@ -107,14 +103,13 @@ public sealed class QuizzesController(ISender mediator) : ControllerBase
 
     [HttpPatch]
     [Route("{taskId:guid}")]
-    [Authorize(Policy = AuthorizationPolicies.TutorPolicy)]
     public async Task<IActionResult> UpdateTitle(Guid taskId, [FromBody] UpdateQuizTitleRequestDto request, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
             return this.MisconfiguredTokenProblem();
 
         var result = await mediator.Send(new UpdateQuizTitleCommand(tutorId, taskId, request.Title), ct);
-        
+
         return result.IsSuccess
             ? Ok()
             : this.ToProblemResult(result.Errors);

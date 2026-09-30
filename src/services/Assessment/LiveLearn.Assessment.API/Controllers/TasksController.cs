@@ -1,6 +1,5 @@
 ﻿using LiveLearn.Assessment.API.Dto.QueryParameters;
 using LiveLearn.Assessment.API.Extensions;
-using LiveLearn.Assessment.Application.Authorization;
 using LiveLearn.Assessment.Application.Commands;
 using LiveLearn.Assessment.Application.Queries;
 using LiveLearn.BuildingBlocks;
@@ -15,7 +14,6 @@ namespace LiveLearn.Assessment.API.Controllers;
 [Route("api/[controller]")]
 public sealed class TasksController(ISender mediator) : ControllerBase
 {
-    [Authorize(Policy = AuthorizationPolicies.TutorPolicy)]
     [HttpGet]
     public async Task<IActionResult> GetTasksByTutor(bool assigned, [FromQuery] PageableQueryParams query, CancellationToken ct)
     {
@@ -29,7 +27,6 @@ public sealed class TasksController(ISender mediator) : ControllerBase
 
     [HttpDelete]
     [Route("{taskId:guid}")]
-    [Authorize(Policy = AuthorizationPolicies.TutorPolicy)]
     public async Task<IActionResult> DeleteTask(Guid taskId, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)

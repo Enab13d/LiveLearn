@@ -17,7 +17,6 @@ namespace LiveLearn.Assessment.API.Controllers;
 public sealed class HomeworkController(ISender mediator) : ControllerBase
 {
     [HttpPost]
-    [Authorize(Policy = AuthorizationPolicies.TutorPolicy)]
     public async Task<IActionResult> CreateHomework([FromBody] CreateHomeworkRequestDto request, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
@@ -40,7 +39,6 @@ public sealed class HomeworkController(ISender mediator) : ControllerBase
 
     [HttpPatch]
     [Route("{taskId:guid}/title")]
-    [Authorize(Policy = AuthorizationPolicies.TutorPolicy)]
     public async Task<IActionResult> UpdateTitle(Guid taskId, [FromBody] UpdateHomeworkTitleRequestDto request, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
@@ -53,7 +51,6 @@ public sealed class HomeworkController(ISender mediator) : ControllerBase
 
     [HttpPatch]
     [Route("{taskId:guid}/description")]
-    [Authorize(Policy = AuthorizationPolicies.TutorPolicy)]
     public async Task<IActionResult> UpdateDescription(Guid taskId, [FromBody] UpdateHomeworkDescriptionRequestDto request, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
@@ -66,7 +63,6 @@ public sealed class HomeworkController(ISender mediator) : ControllerBase
 
     [HttpPost]
     [Route("{taskId:guid}/submissions")]
-    [Authorize(Policy = AuthorizationPolicies.StudentPolicy)]
     public async Task<IActionResult> SubmitHomework(Guid taskId, [FromBody] SubmitHomeworkRequestDto request, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid studentId)
@@ -79,7 +75,6 @@ public sealed class HomeworkController(ISender mediator) : ControllerBase
 
     [HttpGet]
     [Route("{taskId:guid}/submissions")]
-    [Authorize(Policy = AuthorizationPolicies.TutorPolicy)]
     public async Task<IActionResult> GetSubmissions(
         Guid taskId,
         [FromQuery] HomeworkQueryParameters query,
@@ -107,7 +102,6 @@ public sealed class HomeworkController(ISender mediator) : ControllerBase
 
     [HttpPatch]
     [Route("submissions/{submissionId:guid}")]
-    [Authorize(Policy = AuthorizationPolicies.TutorPolicy)]
     public async Task<IActionResult> ReviewHomework(Guid submissionId, ReviewHomeworkSubmissionRequestDto request, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
