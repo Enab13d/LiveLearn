@@ -65,6 +65,7 @@ public static class DependencyInjectionExtensions
             x.AddConsumer<TaskAssignedConsumer>();
             x.AddConsumer<TaskRemovedFromSectionConsumer>();
             x.AddConsumer<EnrollmentActivatedConsumer, EnrollmentActivatedConsumerDefinition>();
+            x.AddConsumer<EnrollmentRevokedConsumer, EnrollmentRevokedConsumerDefinition>();
             x.SetKebabCaseEndpointNameFormatter();
             x.UsingRabbitMq((context, cfg) =>
             {
