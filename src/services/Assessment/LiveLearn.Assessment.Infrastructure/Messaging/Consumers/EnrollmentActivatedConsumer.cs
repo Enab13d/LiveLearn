@@ -4,18 +4,25 @@ using LiveLearn.BuildingBlocks;
 using LiveLearn.Contracts.Enrollment;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace LiveLearn.Assessment.Infrastructure.Messaging.Consumers;
 
 
 internal sealed class EnrollmentActivatedConsumer(
     WriteDbContext writeDbContext,
-    IUnitOfWork unitOfWork) : IConsumer<EnrollmentActivatedEvent>
+    IUnitOfWork unitOfWork,
+    ILogger<EnrollmentActivatedConsumer> logger
+) : IConsumer<EnrollmentActivatedEvent>
 {
     public async Task Consume(ConsumeContext<EnrollmentActivatedEvent> context)
     {
         var msg = context.Message;
         var ct = context.CancellationToken;
+
+        logger.LogInformation(
+            "Processing message {messageName} with correlationId {correlationId}, data: {@message}",
+            nameof(EnrollmentActivatedEvent), context.CorrelationId, msg);
 
         var existing = await writeDbContext.Enrollments
             .FirstOrDefaultAsync(e =>
@@ -33,10 +40,10 @@ internal sealed class EnrollmentActivatedConsumer(
                 Status = EnrollmentStatus.Active
 
             };
-            
+
             writeDbContext.Enrollments.Add(enrollment);
         }
-        //if exist compare versions and insert fresher
+
         else if (existing.Version < msg.Version)
         {
             existing.UpdatedAt = msg.OccurredOn;
@@ -51,6 +58,9 @@ internal sealed class EnrollmentActivatedConsumer(
 
         await unitOfWork.CommitAsync(ct);
 
+        logger.LogInformation(
+            "Successfully processed message {messageName} with correlation id {correlationId}",
+            nameof(EnrollmentActivatedEvent), context.CorrelationId);
     }
 }
 
