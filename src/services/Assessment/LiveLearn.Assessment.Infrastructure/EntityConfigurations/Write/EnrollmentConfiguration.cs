@@ -15,6 +15,8 @@ internal sealed class EnrollmentConfiguration : IEntityTypeConfiguration<Enrollm
 
         builder.Property(e => e.Status).IsRequired().HasConversion<string>();
 
+        builder.Property(e => e.Version).IsRequired().IsConcurrencyToken();
+
         builder.Property(e => e.UpdatedAt);
 
     }
