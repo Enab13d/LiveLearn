@@ -5,5 +5,6 @@ public sealed record EnrollmentRevokedEvent(
     Guid StudentId,
     Guid CourseId,
     long Version,
-    DateTimeOffset OccurredOn
+    DateTimeOffset OccurredOn,
+    string Reason
 );
