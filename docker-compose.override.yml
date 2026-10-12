@@ -20,6 +20,8 @@ services:
         - RabbitMQ__Username=${RABBITMQ_DEFAULT_USER}
         - RabbitMQ__Password=${RABBITMQ_DEFAULT_PASS}
         - OTEL_EXPORTER_OTLP_ENDPOINT=http://aspire-dashboard:18889
+        - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER}
+        - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD}
   assessment-service:
       environment:
         - ASPNETCORE_ENVIRONMENT=Development

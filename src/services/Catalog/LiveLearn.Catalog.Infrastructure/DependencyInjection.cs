@@ -1,4 +1,6 @@
-﻿using LiveLearn.BuildingBlocks;
+﻿using Amazon.Runtime;
+using Amazon.S3;
+using LiveLearn.BuildingBlocks;
 using LiveLearn.Catalog.Application.Authorization;
 using LiveLearn.Catalog.Application.Repositories;
 using LiveLearn.Catalog.Application.Services;
@@ -92,6 +94,19 @@ public static class DependencyInjectionExtensions
         services.AddDbContext<ReadDbContext>(options =>
             options.UseNpgsql(connectionString).UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
 
+        services.Configure<StorageOptions>(configuration.GetSection(StorageOptions.SectionName));
+        var storageOptions = configuration.GetRequiredSection(StorageOptions.SectionName).Get<StorageOptions>()
+            ?? throw new InvalidOperationException("StorageOptions options not defined");
+
+        services.AddSingleton<IAmazonS3>(_ => new AmazonS3Client(new AmazonS3Config
+        {
+            ServiceURL = storageOptions.ServiceUrl,
+            ForcePathStyle = true,
+            AuthenticationRegion = "us-east-1",
+            RequestChecksumCalculation = RequestChecksumCalculation.WHEN_REQUIRED,
+            ResponseChecksumValidation = ResponseChecksumValidation.WHEN_REQUIRED,
+        }));
+
         services.AddScoped<ICourseRepository, CourseRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<ITaskReferenceLookup, TaskReferenceLookup>();
@@ -99,6 +114,7 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         services.AddScoped<ICacheService, CacheService>();
+        services.AddScoped<IStorageService, MinioStorageService>();
 
         services.AddHybridCache(options =>
         {
