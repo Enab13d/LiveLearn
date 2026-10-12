@@ -14,6 +14,8 @@ public sealed class WriteDbContext(DbContextOptions<WriteDbContext> options) : D
 
     public DbSet<TaskReplica> TaskReplicas { get; set; } = null!;
 
+    public DbSet<CourseEnrollment> CourseEnrollments { get; set; } = null!;
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

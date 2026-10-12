@@ -95,6 +95,7 @@ public static class DependencyInjectionExtensions
         services.AddScoped<ICourseRepository, CourseRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<ITaskReferenceLookup, TaskReferenceLookup>();
+        services.AddScoped<IEnrollmentLookup, EnrollmentLookup>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         services.AddScoped<ICacheService, CacheService>();
