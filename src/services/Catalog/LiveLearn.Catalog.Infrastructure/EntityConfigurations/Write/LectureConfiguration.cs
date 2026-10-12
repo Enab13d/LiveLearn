@@ -15,6 +15,6 @@ internal sealed class LectureConfiguration : IEntityTypeConfiguration<Lecture>
         builder.Property(e => e.Type).IsRequired().HasConversion<string>();
         builder.HasIndex(e => new { e.SectionId, e.Order }).IsUnique();
         builder.Property(e => e.Description).IsRequired();
-        builder.Property(e => e.VideoUrl).HasMaxLength(2048);
+        builder.Property(e => e.VideoStatus).IsRequired().HasConversion<string>().HasMaxLength(16);
     }
 }

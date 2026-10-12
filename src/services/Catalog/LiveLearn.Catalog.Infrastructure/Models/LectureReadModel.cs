@@ -15,6 +15,8 @@ internal class LectureReadModel
 
     public string Description { get; set; } = string.Empty;
 
-    public string VideoUrl { get; set; } = string.Empty;
+    public Guid? VideoId { get; set; }
+
+    public string VideoStatus { get; set; } = string.Empty;
 
 }
