@@ -53,7 +53,7 @@ public sealed class Course : AggregateRoot<Guid>
     {
         if (Status == CourseStatus.Published && price != Price)
             RaiseDomainEvent(new CoursePriceChangedDomainEvent(Id, price));
-            
+
         Title = title;
         Description = description;
         Price = price;
@@ -260,4 +260,42 @@ public sealed class Course : AggregateRoot<Guid>
         return Sections.FirstOrDefault(e => e.HasTask(taskId))?.Id;
     }
 
+    public Result RequestLectureVideoUpload(Guid lectureId, Guid videoId)
+    {
+        var lecture = FindLecture(lectureId);
+        if (lecture is null) return Result.Failure(LectureErrors.NotFound);
+
+        return lecture.RequestVideoUpload(videoId);
+    }
+
+    public Result MarkLectureVideoUploaded(Guid lectureId, Guid videoId)
+    {
+        var lecture = FindLecture(lectureId);
+        if (lecture is null) return Result.Failure(LectureErrors.NotFound);
+
+        var result = lecture.MarkVideoUploaded(videoId);
+        if (result.IsSuccess) RaiseDomainEvent(new LectureVideoUploadedDomainEvent(Id, lecture.Id, videoId));
+        return result;
+    }
+
+    public Result MarkLectureVideoReady(Guid lectureId, Guid videoId)
+    {
+        var lecture = FindLecture(lectureId);
+        if (lecture is null) return Result.Failure(LectureErrors.NotFound);
+
+        lecture.MarkVideoReady(videoId);
+        return Result.Success();
+    }
+
+    public Result MarkLectureVideoFailed(Guid lectureId, Guid videoId)
+    {
+        var lecture = FindLecture(lectureId);
+        if (lecture is null) return Result.Failure(LectureErrors.NotFound);
+
+        lecture.MarkVideoFailed(videoId);
+        return Result.Success();
+    }
+
+    private Lecture? FindLecture(Guid lectureId) =>
+        _sections.SelectMany(s => s.Lectures).FirstOrDefault(l => l.Id == lectureId);
 }

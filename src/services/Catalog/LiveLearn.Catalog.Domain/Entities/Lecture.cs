@@ -1,5 +1,6 @@
 ﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Catalog.Domain.Enums;
+using LiveLearn.Catalog.Domain.Errors;
 
 namespace LiveLearn.Catalog.Domain.Entities;
 
@@ -28,17 +29,44 @@ public sealed class Lecture : Entity<Guid>
 
     public string Description { get; private set; } = string.Empty;
 
-    public string VideoUrl { get; private set; } = string.Empty;
+    public Guid? VideoId { get; private set; }
+
+    public VideoStatus VideoStatus { get; private set; } = VideoStatus.None;
 
     internal void SetOrder(int order)
     {
         Order = order;
     }
 
+    internal Result RequestVideoUpload(Guid videoId)
+    {
+        if (Type != LectureType.Video) return Result.Failure(LectureErrors.NotVideo);
+        if (VideoStatus is VideoStatus.Processing or VideoStatus.Ready)
+            return Result.Failure(LectureErrors.VideoUploadNotAllowed);
 
+        VideoId = videoId;
+        VideoStatus = VideoStatus.Uploading;
+        return Result.Success();
+    }
+
+    internal Result MarkVideoUploaded(Guid videoId)
+    {
+        if (VideoStatus != VideoStatus.Uploading || VideoId != videoId)
+            return Result.Failure(LectureErrors.VideoNotUploading);
+
+        VideoStatus = VideoStatus.Processing;
+        return Result.Success();
+    }
+
+    internal void MarkVideoReady(Guid videoId)
+    {
+        if (VideoId != videoId || VideoStatus != VideoStatus.Processing) return;
+        VideoStatus = VideoStatus.Ready;
+    }
+
+    internal void MarkVideoFailed(Guid videoId)
+    {
+        if (VideoId != videoId || VideoStatus != VideoStatus.Processing) return;
+        VideoStatus = VideoStatus.Failed;
+    }
 }
-
-
-
-
-
