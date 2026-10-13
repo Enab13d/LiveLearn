@@ -18,7 +18,7 @@ public sealed class LecturesController(ISender mediator) : ControllerBase
     public async Task<IActionResult> AddLecture([FromBody] RequestLectureDto request, Guid courseId, Guid sectionId, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
+            return this.MisconfiguredTokenProblem();
 
         AddLectureCommand command = new(courseId, sectionId, tutorId, request.Title, request.LectureType, request.Description);
 
@@ -31,7 +31,7 @@ public sealed class LecturesController(ISender mediator) : ControllerBase
     public async Task<IActionResult> UpdateLectureOrder([FromBody] RequestLectureUpdateOrder request, Guid courseId, Guid sectionId, Guid lectureId, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
+            return this.MisconfiguredTokenProblem();
 
         var result = await mediator.Send(
             new UpdateLectureOrderCommand(courseId, tutorId, sectionId, lectureId, request.PreviousLectureId, request.NextLectureId), ct);
