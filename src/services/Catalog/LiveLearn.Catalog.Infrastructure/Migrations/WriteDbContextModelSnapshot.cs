@@ -125,10 +125,13 @@ namespace LiveLearn.Catalog.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("VideoUrl")
+                    b.Property<Guid?>("VideoId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("VideoStatus")
                         .IsRequired()
-                        .HasMaxLength(2048)
-                        .HasColumnType("character varying(2048)");
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
 
                     b.HasKey("Id");
 
@@ -196,6 +199,34 @@ namespace LiveLearn.Catalog.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("section_tasks", (string)null);
+                });
+
+            modelBuilder.Entity("LiveLearn.Catalog.Infrastructure.Models.CourseEnrollment", b =>
+                {
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<long>("CourseRevision")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint");
+
+                    b.HasKey("StudentId", "CourseId");
+
+                    b.ToTable("course_enrollments", (string)null);
                 });
 
             modelBuilder.Entity("LiveLearn.Catalog.Infrastructure.Models.TaskReplica", b =>
