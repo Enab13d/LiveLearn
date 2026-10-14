@@ -2,6 +2,7 @@
 using LiveLearn.Catalog.API.Dto.Requests;
 using LiveLearn.Catalog.API.Extensions;
 using LiveLearn.Catalog.Application.Commands;
+using LiveLearn.Catalog.Application.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,6 +24,18 @@ public sealed class LecturesController(ISender mediator) : ControllerBase
         AddLectureCommand command = new(courseId, sectionId, tutorId, request.Title, request.LectureType, request.Description);
 
         var result = await mediator.Send(command, ct);
+
+        return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
+    }
+
+    [HttpGet("{lectureId:guid}/content")]
+    public async Task<IActionResult> GetLectureContent(Guid courseId, Guid sectionId, Guid lectureId, CancellationToken ct)
+    {
+        if (User.GetUserId() is not Guid userId)
+            return this.MisconfiguredTokenProblem();
+
+        var result = await mediator.Send(
+            new GetLectureContentQuery(courseId, sectionId, lectureId, userId, User.IsInRole("Admin")), ct);
 
         return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
     }

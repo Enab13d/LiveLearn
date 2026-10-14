@@ -12,5 +12,7 @@ public static class LectureErrors
 
     public static readonly Error VideoUploadNotAllowed = Error.Conflict("Lecture.VideoUploadNotAllowed", "Lecture video is already processing or ready");
 
+    public static readonly Error Forbidden = Error.Forbidden("Lecture.Forbidden", "Lecture content is available only to the course owner and its students");
+
     public static readonly Error VideoNotUploading = Error.Conflict("Lecture.VideoNotUploading", "No pending upload matches this video");
 }
