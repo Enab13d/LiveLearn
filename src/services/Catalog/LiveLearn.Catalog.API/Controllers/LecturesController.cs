@@ -40,6 +40,18 @@ public sealed class LecturesController(ISender mediator) : ControllerBase
         return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
     }
 
+    [HttpPost("{lectureId:guid}/watch-ticket")]
+    public async Task<IActionResult> IssueWatchTicket(Guid courseId, Guid lectureId, CancellationToken ct)
+    {
+        if (User.GetUserId() is not Guid userId)
+            return this.MisconfiguredTokenProblem();
+
+        var result = await mediator.Send(
+            new IssueWatchTicketCommand(userId, courseId, lectureId, User.IsInRole("Admin")), ct);
+
+        return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
+    }
+
     [HttpPatch("{lectureId:guid}/order")]
     public async Task<IActionResult> UpdateLectureOrder([FromBody] RequestLectureUpdateOrder request, Guid courseId, Guid sectionId, Guid lectureId, CancellationToken ct)
     {
