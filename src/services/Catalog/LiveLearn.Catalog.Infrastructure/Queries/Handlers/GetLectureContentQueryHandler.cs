@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace LiveLearn.Catalog.Infrastructure.Queries.Handlers;
 
 
-internal sealed class GetLectureContentQueryHandler(ReadDbContext dbContext, IEnrollmentLookup enrollmentLookup) : IQueryHandler<GetLectureContentQuery, LectureContentDto>
+internal sealed class GetLectureContentQueryHandler(ReadDbContext dbContext, ICourseContentAccess contentAccess) : IQueryHandler<GetLectureContentQuery, LectureContentDto>
 {
     public async Task<Result<LectureContentDto>> Handle(GetLectureContentQuery request, CancellationToken ct)
     {
@@ -29,14 +29,8 @@ internal sealed class GetLectureContentQueryHandler(ReadDbContext dbContext, IEn
         if (lecture is null)
             return Result<LectureContentDto>.Failure(LectureErrors.NotFound);
 
-        if (request.IsAdmin || lecture.TutorId == request.UserId)
-            return Result<LectureContentDto>.Success(lecture.Content);
-
-        // TODO(US-CA05): also require the lecture to be visible at enrollment.CourseRevision
-        var enrollment = await enrollmentLookup.GetActiveAsync(request.UserId, request.CourseId, ct);
-
-        return enrollment is null
-            ? Result<LectureContentDto>.Failure(LectureErrors.Forbidden)
-            : Result<LectureContentDto>.Success(lecture.Content);
+        return await contentAccess.CanAccessAsync(request.UserId, request.IsAdmin, lecture.TutorId, request.CourseId, ct)
+            ? Result<LectureContentDto>.Success(lecture.Content)
+            : Result<LectureContentDto>.Failure(LectureErrors.Forbidden);
     }
 }
