@@ -16,5 +16,7 @@ public static class LectureErrors
 
     public static readonly Error VideoNotReady = Error.Conflict("Lecture.VideoNotReady", "Lecture video is not ready for playback");
 
+    public static readonly Error Archived = Error.Conflict("Lecture.Archived", "Lecture is archived");
+
     public static readonly Error VideoNotUploading = Error.Conflict("Lecture.VideoNotUploading", "No pending upload matches this video");
 }

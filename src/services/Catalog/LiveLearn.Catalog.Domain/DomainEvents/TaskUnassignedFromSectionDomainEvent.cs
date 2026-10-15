@@ -3,8 +3,9 @@
 namespace LiveLearn.Catalog.Domain.DomainEvents;
 
 
-public sealed record TaskRemovedFromSectionDomainEvent(
+public sealed record TaskUnassignedFromSectionDomainEvent(
     Guid TaskId,
     Guid SectionId,
-    Guid CourseId
+    Guid CourseId,
+    long Revision
 ) : IDomainEvent;

@@ -3,4 +3,4 @@
 namespace LiveLearn.Catalog.Domain.DomainEvents;
 
 
-public sealed record LectureAddedDomainEvent(Guid CourseId, Guid SectionId, Guid LectureId) : IDomainEvent;
+public sealed record LectureAddedDomainEvent(Guid CourseId, Guid SectionId, Guid LectureId, long Revision) : IDomainEvent;

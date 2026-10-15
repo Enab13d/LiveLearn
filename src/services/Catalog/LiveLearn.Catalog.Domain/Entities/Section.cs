@@ -13,9 +13,10 @@ public sealed class Section : Entity<Guid>
 
     private Section() { }
 
-    internal Section(Guid id, Guid courseId, string title, int order)
+    internal Section(Guid id, Guid courseId, string title, int order, long createdRevision)
     {
         Id = id;
+        CreatedRevision = createdRevision;
         CourseId = courseId;
         Title = title;
         Order = order;
@@ -29,6 +30,10 @@ public sealed class Section : Entity<Guid>
     private readonly List<SectionTask> _sectionTasks = [];
     public IReadOnlyCollection<SectionTask> SectionTasks => _sectionTasks.AsReadOnly();
 
+    public long CreatedRevision { get; private set; }
+
+    public long? ArchivedRevision { get; private set; } = null;
+
     internal void Update(string title)
     {
         Title = title;
@@ -39,14 +44,22 @@ public sealed class Section : Entity<Guid>
         Order = order;
     }
 
-    internal Lecture AddLecture(Guid lectureId, string title, LectureType lectureType, string description)
+    internal Lecture AddLecture(Guid lectureId, string title, LectureType lectureType, string description, long revision)
     {
-        int lastOrder = _lectures.Count == 0 ? 0 : _lectures.Max(l => l.Order);
-        int lectureOrder = lastOrder + GapSize;
-        var lecture = new Lecture(lectureId, Id, title, lectureType, lectureOrder, description);
+        var lecture = new Lecture(lectureId, Id, title, lectureType, NextLectureOrder(), description, revision);
         _lectures.Add(lecture);
         return lecture;
     }
+
+    internal void DetachLecture(Lecture lecture) => _lectures.Remove(lecture);
+
+    internal void AttachLecture(Lecture lecture)
+    {
+        lecture.MoveTo(Id, NextLectureOrder());
+        _lectures.Add(lecture);
+    }
+
+    private int NextLectureOrder() => (_lectures.Count == 0 ? 0 : _lectures.Max(l => l.Order)) + GapSize;
 
     internal Result<OrderUpdateResult> UpdateLectureOrder(Guid lectureId, Guid? previousLectureId, Guid? nextLectureId)
     {
@@ -142,23 +155,39 @@ public sealed class Section : Entity<Guid>
         }
     }
 
-    internal Result AddTask(Guid taskId, Guid courseId, string taskType)
+    // The caller (Course) guarantees no active link for this task exists anywhere in the course.
+    internal void AddTask(Guid taskId, Guid courseId, string taskType, long revision)
     {
-        var task = _sectionTasks.FirstOrDefault(t => t.TaskId == taskId);
-        if (task is not null) return Result.Failure(SectionErrors.TaskAlreadyAssigned);
-        _sectionTasks.Add(new SectionTask(Id, courseId, taskId, taskType));
-        return Result.Success();
+        _sectionTasks.Add(new SectionTask(Id, courseId, taskId, taskType, revision));
     }
 
-    internal Result RemoveTask(Guid taskId)
+    internal bool HasActiveTask(Guid taskId) => _sectionTasks.Any(t => t.TaskId == taskId && t.IsActive());
+
+    internal void UnassignTask(Guid taskId, long revision) =>
+        _sectionTasks.First(t => t.TaskId == taskId && t.IsActive()).Archive(revision);
+
+    internal bool IsActive() => ArchivedRevision is null;
+
+    internal bool IsVisibleAt(long revision) =>
+        CreatedRevision <= revision && (ArchivedRevision is null || ArchivedRevision > revision);
+
+    // Archives the section with its still-active lectures and task links; returns what this call archived.
+    internal SectionArchiveResult Archive(long revision)
     {
-        var task = _sectionTasks.FirstOrDefault(t => t.TaskId == taskId);
-        if (task is null) return Result.Failure(SectionErrors.TaskNotFound);
-        _sectionTasks.Remove(task);
-        return Result.Success();
+        var lectureIds = _lectures.Where(l => l.IsActive()).Select(l => l.Id).ToList();
+        var taskIds = _sectionTasks.Where(t => t.IsActive()).Select(t => t.TaskId).ToList();
+
+        ArchivedRevision ??= revision;
+        _lectures.ForEach(l => l.Archive(revision));
+        _sectionTasks.ForEach(t => t.Archive(revision));
+
+        return new SectionArchiveResult(lectureIds, taskIds);
     }
 
-    internal bool HasTask(Guid taskId) => _sectionTasks.Any(t => t.TaskId == taskId);
+    internal int ActiveTasksCount() => _sectionTasks.Count(t => t.IsActive());
 
+    internal int ActiveLecturesCount() => _lectures.Count(l => l.IsActive());
+
+    internal int ActiveItemsCount() => ActiveTasksCount() + ActiveLecturesCount();
 
 }

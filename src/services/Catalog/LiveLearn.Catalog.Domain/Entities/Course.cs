@@ -18,6 +18,8 @@ public sealed class Course : AggregateRoot<Guid>
 
     public Guid TutorId { get; private set; }
 
+    public long Revision { get; private set; }
+
     public string Title { get; private set; } = string.Empty;
 
     public string Description { get; private set; } = string.Empty;
@@ -65,8 +67,13 @@ public sealed class Course : AggregateRoot<Guid>
     {
         if (Status != CourseStatus.Draft) return Result.Failure(CourseErrors.PublishFailed);
 
+        if (ActiveItemsCount() == 0) return Result.Failure(CourseErrors.NoActiveContent);
+
         Status = CourseStatus.Published;
-        var taskIds = Sections.SelectMany(s => s.SectionTasks.Select(t => t.TaskId)).ToList();
+        var taskIds = _sections
+            .SelectMany(s => s.SectionTasks.Where(t => t.IsActive()).Select(t => t.TaskId))
+            .ToList();
+
         RaiseDomainEvent(new CoursePublishedDomainEvent(Id, TutorId, Price, taskIds, publishedAt));
         return Result.Success();
     }
@@ -83,8 +90,11 @@ public sealed class Course : AggregateRoot<Guid>
     {
         var section = _sections.FirstOrDefault(s => s.Id == sectionId);
         if (section is null) return Result.Failure(CourseErrors.SectionNotFound);
-        var lecture = section.AddLecture(lectureId, title, lectureType, description);
-        RaiseDomainEvent(new LectureAddedDomainEvent(Id, sectionId, lecture.Id));
+        if (!section.IsActive()) return Result.Failure(SectionErrors.Archived);
+
+        var revision = NextRevision();
+        var lecture = section.AddLecture(lectureId, title, lectureType, description, revision);
+        RaiseDomainEvent(new LectureAddedDomainEvent(Id, sectionId, lecture.Id, revision));
         return Result.Success();
     }
 
@@ -92,9 +102,10 @@ public sealed class Course : AggregateRoot<Guid>
     {
         int lastOrder = _sections.Count == 0 ? 0 : _sections.Max(s => s.Order);
         int order = lastOrder + GapSize;
-        Section section = new(sectionId, Id, title, order);
+        var revision = NextRevision();
+        Section section = new(sectionId, Id, title, order, revision);
         _sections.Add(section);
-        RaiseDomainEvent(new SectionAddedDomainEvent(sectionId, Id));
+        RaiseDomainEvent(new SectionAddedDomainEvent(Id, sectionId, revision));
         return Result.Success();
     }
 
@@ -214,21 +225,48 @@ public sealed class Course : AggregateRoot<Guid>
         }
     }
 
-    public Result DeleteSection(Guid sectionId)
+    public Result ArchiveSection(Guid sectionId)
     {
-        if (Status == CourseStatus.Published) return Result.Failure(CourseErrors.PublishFailed);
         var section = _sections.FirstOrDefault(s => s.Id == sectionId);
         if (section is null) return Result.Failure(CourseErrors.SectionNotFound);
+        if (!section.IsActive()) return Result.Failure(SectionErrors.Archived);
+        if (WouldLeaveNoActiveItems(section.ActiveItemsCount())) return Result.Failure(CourseErrors.LastActiveItem);
 
-        var tasksIds = section.SectionTasks
-                .Select(e => e.TaskId)
-                .ToList()
-                .AsReadOnly();
+        var revision = NextRevision();
+        var archived = section.Archive(revision);
+        RaiseDomainEvent(new SectionArchivedDomainEvent(Id, sectionId, revision, archived.LectureIds, archived.TaskIds));
+        return Result.Success();
+    }
 
-        _sections.Remove(section);
+    public Result ArchiveLecture(Guid lectureId)
+    {
+        var lecture = FindLecture(lectureId);
+        if (lecture is null) return Result.Failure(LectureErrors.NotFound);
+        if (!lecture.IsActive()) return Result.Failure(LectureErrors.Archived);
+        if (WouldLeaveNoActiveItems(1)) return Result.Failure(CourseErrors.LastActiveItem);
 
-        RaiseDomainEvent(new SectionRemovedDomainEvent(Id, sectionId, tasksIds));
+        var revision = NextRevision();
+        lecture.Archive(revision);
+        RaiseDomainEvent(new LectureArchivedDomainEvent(Id, lectureId, revision));
+        return Result.Success();
+    }
 
+    // Minor change: never bumps Revision. Appends to the end of the target section.
+    public Result MoveLecture(Guid lectureId, Guid targetSectionId)
+    {
+        var source = _sections.FirstOrDefault(s => s.Lectures.Any(l => l.Id == lectureId));
+        if (source is null) return Result.Failure(LectureErrors.NotFound);
+
+        var target = _sections.FirstOrDefault(s => s.Id == targetSectionId);
+        if (target is null) return Result.Failure(CourseErrors.SectionNotFound);
+        if (!target.IsActive()) return Result.Failure(SectionErrors.Archived);
+        if (source.Id == target.Id) return Result.Success();
+
+        var lecture = source.Lectures.First(l => l.Id == lectureId);
+        if (!lecture.IsActive()) return Result.Failure(LectureErrors.Archived);
+
+        source.DetachLecture(lecture);
+        target.AttachLecture(lecture);
         return Result.Success();
     }
 
@@ -236,28 +274,31 @@ public sealed class Course : AggregateRoot<Guid>
     {
         var section = _sections.FirstOrDefault(s => s.Id == sectionId);
         if (section is null) return Result.Failure(CourseErrors.SectionNotFound);
-        if (section.HasTask(taskId)) return Result.Failure(SectionErrors.TaskAlreadyAssigned);
-        var result = section.AddTask(taskId, Id, taskType);
-        if (result.IsSuccess) RaiseDomainEvent(new TaskAssignedToSectionDomainEvent(taskId, section.Id, CourseId: Id));
-        return result;
+        if (!section.IsActive()) return Result.Failure(SectionErrors.Archived);
+        if (_sections.Any(s => s.HasActiveTask(taskId))) return Result.Failure(SectionErrors.TaskAlreadyAssigned);
+
+        var revision = NextRevision();
+        section.AddTask(taskId, Id, taskType, revision);
+        RaiseDomainEvent(new TaskAssignedToSectionDomainEvent(taskId, section.Id, Id, revision));
+        return Result.Success();
     }
 
-    public Result RemoveTaskFromSection(Guid sectionId, Guid taskId)
+    public Result UnassignTaskFromSection(Guid sectionId, Guid taskId)
     {
-        if (Status == CourseStatus.Published) return Result.Failure(CourseErrors.TaskRemovalBlocked);
         var section = _sections.FirstOrDefault(s => s.Id == sectionId);
         if (section is null) return Result.Failure(CourseErrors.SectionNotFound);
-        var result = section.RemoveTask(taskId);
+        if (!section.HasActiveTask(taskId)) return Result.Failure(SectionErrors.TaskNotFound);
+        if (WouldLeaveNoActiveItems(1)) return Result.Failure(CourseErrors.LastActiveItem);
 
-        if (result.IsSuccess)
-            RaiseDomainEvent(new TaskRemovedFromSectionDomainEvent(taskId, section.Id, CourseId: Id));
-
-        return result;
+        var revision = NextRevision();
+        section.UnassignTask(taskId, revision);
+        RaiseDomainEvent(new TaskUnassignedFromSectionDomainEvent(taskId, section.Id, Id, revision));
+        return Result.Success();
     }
 
     public Guid? GetIdOfSectionContainingTask(Guid taskId)
     {
-        return Sections.FirstOrDefault(e => e.HasTask(taskId))?.Id;
+        return _sections.FirstOrDefault(s => s.HasActiveTask(taskId))?.Id;
     }
 
     public Result RequestLectureVideoUpload(Guid lectureId, Guid videoId)
@@ -309,4 +350,16 @@ public sealed class Course : AggregateRoot<Guid>
 
     private Lecture? FindLecture(Guid lectureId) =>
         _sections.SelectMany(s => s.Lectures).FirstOrDefault(l => l.Id == lectureId);
+
+    private long NextRevision()
+    {
+        Revision++;
+        return Revision;
+    }
+
+    private int ActiveItemsCount() => _sections.Where(s => s.IsActive()).Sum(s => s.ActiveItemsCount());
+
+    // A published course must keep at least one active lecture or task.
+    private bool WouldLeaveNoActiveItems(int archivedCount) =>
+        Status == CourseStatus.Published && ActiveItemsCount() - archivedCount <= 0;
 }

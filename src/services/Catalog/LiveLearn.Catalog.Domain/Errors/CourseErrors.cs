@@ -16,5 +16,7 @@ public static class CourseErrors
 
     public static readonly Error InvalidSectionNeighbors = Error.Validation("Course.InvalidSectionNeighbors", "PreviousSectionId and NextSectionId must be immediately adjacent siblings in the course");
 
-    public static readonly Error TaskRemovalBlocked = Error.Conflict("Course.TaskRemovalBlocked", "Cannot unassign a task from a section on a published course");
+    public static readonly Error NoActiveContent = Error.Conflict("Course.NoActiveContent", "Course must have at least one active lecture or task to be published");
+
+    public static readonly Error LastActiveItem = Error.Conflict("Course.LastActiveItem", "A published course must keep at least one active lecture or task");
 }

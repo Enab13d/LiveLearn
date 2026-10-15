@@ -7,9 +7,10 @@ namespace LiveLearn.Catalog.Domain.Entities;
 public sealed class Lecture : Entity<Guid>
 {
     private Lecture() { }
-    internal Lecture(Guid id, Guid sectionId, string title, LectureType type, int order, string description)
+    internal Lecture(Guid id, Guid sectionId, string title, LectureType type, int order, string description, long createdRevision)
     {
         Id = id;
+        CreatedRevision = createdRevision;
         SectionId = sectionId;
         Title = title;
         Type = type;
@@ -33,8 +34,18 @@ public sealed class Lecture : Entity<Guid>
 
     public VideoStatus VideoStatus { get; private set; } = VideoStatus.None;
 
+    public long CreatedRevision { get; private set; }
+
+    public long? ArchivedRevision { get; private set; } = null;
+
     internal void SetOrder(int order)
     {
+        Order = order;
+    }
+
+    internal void MoveTo(Guid sectionId, int order)
+    {
+        SectionId = sectionId;
         Order = order;
     }
 
@@ -69,5 +80,15 @@ public sealed class Lecture : Entity<Guid>
     {
         if (VideoId != videoId || VideoStatus != VideoStatus.Processing) return;
         VideoStatus = VideoStatus.Failed;
+    }
+
+    internal bool IsActive() => ArchivedRevision is null;
+
+    internal bool IsVisibleAt(long revision) =>
+        CreatedRevision <= revision && (ArchivedRevision is null || ArchivedRevision > revision);
+
+    internal void Archive(long revision)
+    {
+        ArchivedRevision ??= revision;
     }
 }
