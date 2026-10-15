@@ -296,11 +296,6 @@ public sealed class Course : AggregateRoot<Guid>
         return Result.Success();
     }
 
-    public Guid? GetIdOfSectionContainingTask(Guid taskId)
-    {
-        return _sections.FirstOrDefault(s => s.HasActiveTask(taskId))?.Id;
-    }
-
     public Result RequestLectureVideoUpload(Guid lectureId, Guid videoId)
     {
         var lecture = FindLecture(lectureId);

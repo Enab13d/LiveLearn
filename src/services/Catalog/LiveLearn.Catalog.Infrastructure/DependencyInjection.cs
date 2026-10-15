@@ -64,7 +64,7 @@ public static class DependencyInjectionExtensions
         services.AddMassTransit(x =>
         {
             x.AddConsumer<TaskCreatedConsumer>();
-            x.AddConsumer<TaskDeletedConsumer, TaskDeletedConsumerDefinition>();
+            x.AddConsumer<TaskArchivedConsumer>();
             x.AddConsumer<EnrollmentActivatedConsumer, EnrollmentActivatedConsumerDefinition>();
             x.AddConsumer<EnrollmentRevokedConsumer, EnrollmentRevokedConsumerDefinition>();
             x.AddConsumer<VideoTranscodingCompletedConsumer, VideoTranscodingCompletedConsumerDefinition>();
