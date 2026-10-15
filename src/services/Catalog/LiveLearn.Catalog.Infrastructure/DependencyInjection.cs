@@ -67,6 +67,8 @@ public static class DependencyInjectionExtensions
             x.AddConsumer<TaskDeletedConsumer, TaskDeletedConsumerDefinition>();
             x.AddConsumer<EnrollmentActivatedConsumer, EnrollmentActivatedConsumerDefinition>();
             x.AddConsumer<EnrollmentRevokedConsumer, EnrollmentRevokedConsumerDefinition>();
+            x.AddConsumer<VideoTranscodingCompletedConsumer, VideoTranscodingCompletedConsumerDefinition>();
+            x.AddConsumer<VideoTranscodingFailedConsumer, VideoTranscodingFailedConsumerDefinition>();
             x.SetKebabCaseEndpointNameFormatter();
             x.UsingRabbitMq((context, cfg) =>
             {

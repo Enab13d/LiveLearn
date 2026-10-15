@@ -278,12 +278,12 @@ public sealed class Course : AggregateRoot<Guid>
         return result;
     }
 
-    public Result MarkLectureVideoReady(Guid lectureId, Guid videoId)
+    public Result MarkLectureVideoReady(Guid lectureId, Guid videoId, TimeSpan duration)
     {
         var lecture = FindLecture(lectureId);
         if (lecture is null) return Result.Failure(LectureErrors.NotFound);
 
-        lecture.MarkVideoReady(videoId);
+        lecture.MarkVideoReady(videoId, duration);
         return Result.Success();
     }
 

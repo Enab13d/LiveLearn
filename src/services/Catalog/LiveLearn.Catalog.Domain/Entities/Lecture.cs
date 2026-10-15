@@ -58,10 +58,11 @@ public sealed class Lecture : Entity<Guid>
         return Result.Success();
     }
 
-    internal void MarkVideoReady(Guid videoId)
+    internal void MarkVideoReady(Guid videoId, TimeSpan duration)
     {
         if (VideoId != videoId || VideoStatus != VideoStatus.Processing) return;
         VideoStatus = VideoStatus.Ready;
+        Duration = duration;
     }
 
     internal void MarkVideoFailed(Guid videoId)
