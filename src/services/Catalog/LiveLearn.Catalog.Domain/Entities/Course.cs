@@ -296,6 +296,17 @@ public sealed class Course : AggregateRoot<Guid>
         return Result.Success();
     }
 
+    public Result<Guid> GetPlayableVideoId(Guid lectureId)
+    {
+        var lecture = FindLecture(lectureId);
+        if (lecture is null) return Result<Guid>.Failure(LectureErrors.NotFound);
+        if (lecture.Type != LectureType.Video) return Result<Guid>.Failure(LectureErrors.NotVideo);
+        if (lecture.VideoStatus != VideoStatus.Ready || lecture.VideoId is not Guid videoId)
+            return Result<Guid>.Failure(LectureErrors.VideoNotReady);
+
+        return Result<Guid>.Success(videoId);
+    }
+
     private Lecture? FindLecture(Guid lectureId) =>
         _sections.SelectMany(s => s.Lectures).FirstOrDefault(l => l.Id == lectureId);
 }
