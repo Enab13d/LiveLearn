@@ -12,20 +12,21 @@ internal sealed class GetSectionByIdQueryHandler(ReadDbContext dbContext) : IQue
     public async Task<Result<SectionDto>> Handle(GetSectionByIdQuery request, CancellationToken ct)
     {
         var section = await dbContext.Sections
-            .Where(e => e.Id == request.SectionId && e.CourseId == request.CourseId)
+            .Where(e => e.Id == request.SectionId && e.CourseId == request.CourseId && e.ArchivedRevision == null)
             .Select(e => new SectionDto(
                 e.Id,
                 e.Title,
                 e.Order,
                 e.Lectures
-                    .Select(l => new LectureDto(l.Id, l.Title, l.Type, l.Order, l.DurationInSeconds))
+                    .Where(l => l.ArchivedRevision == null)
+                    .Select(l => new LectureDto(l.Id, l.Title, l.Type, l.Order, l.DurationInSeconds, false))
                     .ToList(),
                 e.SectionTasks
+                    .Where(t => t.ArchivedRevision == null)
                     .Select(e => new SectionTaskDto(
-                        e.SectionId, e.CourseId, e.TaskId, e.TaskType))
-                    .ToList()
-
-                )
+                        e.SectionId, e.CourseId, e.TaskId, e.TaskType, false))
+                    .ToList(),
+                false)
                 )
             .AsSplitQuery()
             .FirstOrDefaultAsync(ct);

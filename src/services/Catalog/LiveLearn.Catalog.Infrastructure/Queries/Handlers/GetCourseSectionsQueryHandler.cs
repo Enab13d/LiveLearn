@@ -15,19 +15,21 @@ internal sealed class GetCourseSectionsQueryHandler(ReadDbContext dbContext) : I
         if (!courseExists) return Result<IReadOnlyList<SectionDto>>.Failure(CourseErrors.NotFound);
 
         var sections = await dbContext.Sections
-            .Where(e => e.CourseId == request.CourseId)
+            .Where(e => e.CourseId == request.CourseId && e.ArchivedRevision == null)
             .OrderBy(e => e.Order)
             .Select(e => new SectionDto(
                 e.Id,
                 e.Title,
                 e.Order,
                 e.Lectures
-                    .Select(l => new LectureDto(l.Id, l.Title, l.Type, l.Order, l.DurationInSeconds))
+                    .Where(l => l.ArchivedRevision == null)
+                    .Select(l => new LectureDto(l.Id, l.Title, l.Type, l.Order, l.DurationInSeconds, false))
                     .ToList(),
                 e.SectionTasks
-                    .Select(e => new SectionTaskDto(e.SectionId, e.CourseId, e.TaskId, e.TaskType))
-                    .ToList()
-                ))
+                    .Where(t => t.ArchivedRevision == null)
+                    .Select(e => new SectionTaskDto(e.SectionId, e.CourseId, e.TaskId, e.TaskType, false))
+                    .ToList(),
+                false))
             .AsSplitQuery()
             .ToListAsync(ct);
 

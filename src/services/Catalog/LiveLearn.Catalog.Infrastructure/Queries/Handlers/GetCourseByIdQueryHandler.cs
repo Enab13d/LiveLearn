@@ -11,31 +11,36 @@ internal sealed class GetCourseByIdQueryHandler(ReadDbContext dbContext) : IQuer
 {
     public async Task<Result<CourseDetailDto>> Handle(GetCourseByIdQuery request, CancellationToken ct)
     {
-
         var courseDetails = await dbContext.Courses
         .Where(e => e.Id == request.CourseId)
-        .Select(e => new CourseDetailDto(e.Id,
-            e.CategoryId,
-            e.Category.Name,
-            e.TutorId,
-            e.Title,
-            e.Description,
-            e.ThumbnailUrl,
-            e.Price,
-            e.Status,
-            e.Sections
-            .Select(e => new SectionDto(
-                e.Id,
-                e.Title,
-                e.Order,
-                e.Lectures
-                .Select(e => new LectureDto(
-                    e.Id, e.Title, e.Type, e.Order, e.DurationInSeconds))
+        .Select(c => new CourseDetailDto(c.Id,
+            c.CategoryId,
+            c.Category.Name,
+            c.TutorId,
+            c.Title,
+            c.Description,
+            c.ThumbnailUrl,
+            c.Price,
+            c.Status,
+            c.Sections
+            .Where(s => s.ArchivedRevision == null || c.TutorId == request.RequesterId)
+            .OrderBy(s => s.Order)
+            .Select(s => new SectionDto(
+                s.Id,
+                s.Title,
+                s.Order,
+                s.Lectures
+                .Where(l => l.ArchivedRevision == null || c.TutorId == request.RequesterId)
+                .OrderBy(l => l.Order)
+                .Select(l => new LectureDto(
+                    l.Id, l.Title, l.Type, l.Order, l.DurationInSeconds, l.ArchivedRevision != null))
                 .ToList(),
-                e.SectionTasks
-                .Select(e => new SectionTaskDto(
-                    e.SectionId, e.CourseId, e.TaskId, e.TaskType))
-                .ToList()
+                s.SectionTasks
+                .Where(t => t.ArchivedRevision == null || c.TutorId == request.RequesterId)
+                .Select(t => new SectionTaskDto(
+                    t.SectionId, t.CourseId, t.TaskId, t.TaskType, t.ArchivedRevision != null))
+                .ToList(),
+                s.ArchivedRevision != null
                 ))
             .ToList()
             )
@@ -45,7 +50,5 @@ internal sealed class GetCourseByIdQueryHandler(ReadDbContext dbContext) : IQuer
 
         if (courseDetails is null) return Result<CourseDetailDto>.Failure(CourseErrors.NotFound);
         return courseDetails;
-
-
     }
 }

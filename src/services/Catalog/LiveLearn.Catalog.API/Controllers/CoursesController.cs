@@ -35,7 +35,7 @@ public sealed class CoursesController(ISender mediator) : ControllerBase
     [HttpGet("{courseId:guid}")]
     public async Task<IActionResult> GetCourseDetails(Guid courseId, CancellationToken ct)
     {
-        var result = await mediator.Send(new GetCourseByIdQuery(courseId), ct);
+        var result = await mediator.Send(new GetCourseByIdQuery(courseId, User.GetUserId()), ct);
 
         return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
     }

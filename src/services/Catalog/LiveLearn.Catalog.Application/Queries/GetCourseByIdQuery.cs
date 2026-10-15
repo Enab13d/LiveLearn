@@ -4,4 +4,5 @@ using LiveLearn.Catalog.Application.Dto;
 namespace LiveLearn.Catalog.Application.Queries;
 
 
-public sealed record GetCourseByIdQuery(Guid CourseId): IQuery<CourseDetailDto>;
+// RequesterId is null for anonymous callers. The owner also sees archived items (flagged); everyone else sees active items only.
+public sealed record GetCourseByIdQuery(Guid CourseId, Guid? RequesterId) : IQuery<CourseDetailDto>;
