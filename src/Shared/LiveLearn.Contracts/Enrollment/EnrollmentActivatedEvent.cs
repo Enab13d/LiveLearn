@@ -5,5 +5,6 @@ public sealed record EnrollmentActivatedEvent(
     Guid StudentId,
     Guid CourseId,
     long Version,
+    long CourseRevision,
     DateTimeOffset OccurredOn
 );
