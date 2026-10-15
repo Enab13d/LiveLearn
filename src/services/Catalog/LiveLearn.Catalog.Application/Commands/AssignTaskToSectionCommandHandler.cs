@@ -16,6 +16,7 @@ internal sealed class AssignTaskToSectionCommandHandler(ICourseRepository course
 
         var taskReference = await taskReferenceLookup.GetByTaskIdAsync(request.TaskId, ct);
         if (taskReference is null) return Result.Failure(SectionErrors.TaskNotFound);
+        if (taskReference.IsArchived) return Result.Failure(TaskErrors.Archived);
 
         var result = course.AssignTaskToSection(request.SectionId, request.TaskId, taskReference.TaskType);
         if (!result.IsSuccess) return Result.Failure(result.FirstError);

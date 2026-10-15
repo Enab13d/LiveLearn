@@ -35,7 +35,7 @@ internal sealed class TaskDeletedConsumer(
         var sectionId = course.GetIdOfSectionContainingTask(msg.TaskId);
         if (sectionId is not null)
         {
-            var command = new RemoveTaskFromSectionCommand(course.TutorId, course.Id, sectionId.Value, msg.TaskId);
+            var command = new UnassignTaskFromSectionCommand(course.TutorId, course.Id, sectionId.Value, msg.TaskId);
             await mediator.Send(command, ct);
 
         }

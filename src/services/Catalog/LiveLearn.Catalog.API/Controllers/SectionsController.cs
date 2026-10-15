@@ -66,15 +66,4 @@ public sealed class SectionsController(ISender mediator) : ControllerBase
 
         return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
     }
-
-    [HttpDelete("{sectionId:guid}")]
-    public async Task<IActionResult> DeleteSection(Guid courseId, Guid sectionId, CancellationToken ct)
-    {
-        if (User.GetUserId() is not Guid tutorId)
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
-
-        var result = await mediator.Send(new DeleteSectionCommand(courseId, tutorId, sectionId), ct);
-
-        return result.IsSuccess ? NoContent() : this.ToProblemResult(result.Errors);
-    }
 }

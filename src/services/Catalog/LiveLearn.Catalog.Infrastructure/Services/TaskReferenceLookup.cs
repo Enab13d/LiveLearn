@@ -12,7 +12,7 @@ internal sealed class TaskReferenceLookup(WriteDbContext dbContext) : ITaskRefer
     {
         var taskReference = await dbContext.TaskReplicas.FirstOrDefaultAsync(e => e.TaskId == taskId, ct);
         
-        return taskReference is null ? null : new TaskReferenceDto(taskReference.TaskId, taskReference.TutorId, taskReference.TaskType);
+        return taskReference is null ? null : new TaskReferenceDto(taskReference.TaskId, taskReference.TutorId, taskReference.TaskType, taskReference.IsArchived);
 
     }
 }

@@ -26,12 +26,12 @@ public sealed class SectionTasksController(ISender mediator) : ControllerBase
 
     [HttpDelete]
     [Route("{taskId:guid}")]
-    public async Task<IActionResult> RemoveTaskFromSection(Guid courseId, Guid sectionId, Guid taskId, CancellationToken ct)
+    public async Task<IActionResult> UnassignTaskFromSection(Guid courseId, Guid sectionId, Guid taskId, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
             return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
 
-        var result = await mediator.Send(new RemoveTaskFromSectionCommand(tutorId, courseId, sectionId, taskId), ct);
+        var result = await mediator.Send(new UnassignTaskFromSectionCommand(tutorId, courseId, sectionId, taskId), ct);
 
         return result.IsSuccess ? NoContent() : this.ToProblemResult(result.Errors);
     }

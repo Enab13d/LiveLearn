@@ -14,4 +14,6 @@ public sealed class TaskReplica
     public Guid TutorId { get; set; }
 
     public string TaskType { get; set; } = string.Empty;
+
+    public bool IsArchived { get; set; }
 }
