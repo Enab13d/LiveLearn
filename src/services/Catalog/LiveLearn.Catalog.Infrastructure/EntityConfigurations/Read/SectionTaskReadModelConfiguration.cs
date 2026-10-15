@@ -10,6 +10,6 @@ internal sealed class SectionTaskReadModelConfiguration : IEntityTypeConfigurati
     public void Configure(EntityTypeBuilder<SectionTaskReadModel> builder)
     {
         builder.ToTable("section_tasks");
-        builder.HasKey(e => e.TaskId);
+        builder.HasKey(e => e.Id);
     }
 }

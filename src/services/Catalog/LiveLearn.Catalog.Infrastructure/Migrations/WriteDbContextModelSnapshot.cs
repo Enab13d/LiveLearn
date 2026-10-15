@@ -65,6 +65,10 @@ namespace LiveLearn.Catalog.Infrastructure.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
 
+                    b.Property<long>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint");
+
                     b.Property<NpgsqlTsVector>("SearchVector")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("tsvector")
@@ -102,6 +106,12 @@ namespace LiveLearn.Catalog.Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
+
+                    b.Property<long?>("ArchivedRevision")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("CreatedRevision")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -146,8 +156,14 @@ namespace LiveLearn.Catalog.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
+                    b.Property<long?>("ArchivedRevision")
+                        .HasColumnType("bigint");
+
                     b.Property<Guid>("CourseId")
                         .HasColumnType("uuid");
+
+                    b.Property<long>("CreatedRevision")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("Order")
                         .HasColumnType("integer");
@@ -170,6 +186,9 @@ namespace LiveLearn.Catalog.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<long?>("ArchivedRevision")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTimeOffset>("AssignedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -177,6 +196,9 @@ namespace LiveLearn.Catalog.Infrastructure.Migrations
 
                     b.Property<Guid>("CourseId")
                         .HasColumnType("uuid");
+
+                    b.Property<long>("CreatedRevision")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid>("SectionId")
                         .HasColumnType("uuid");
@@ -191,12 +213,11 @@ namespace LiveLearn.Catalog.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CourseId");
-
                     b.HasIndex("SectionId");
 
-                    b.HasIndex("TaskId")
-                        .IsUnique();
+                    b.HasIndex("CourseId", "TaskId")
+                        .IsUnique()
+                        .HasFilter("\"ArchivedRevision\" IS NULL");
 
                     b.ToTable("section_tasks", (string)null);
                 });
@@ -233,6 +254,9 @@ namespace LiveLearn.Catalog.Infrastructure.Migrations
                 {
                     b.Property<Guid>("TaskId")
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("TaskType")
                         .IsRequired()

@@ -6,6 +6,8 @@ internal class CourseReadModel
     public Guid CategoryId { get; set; }
     public Guid TutorId { get; set; }
 
+    public long Revision { get; set; }
+
     public string Title { get; set; } = string.Empty;
 
     public string Description { get; set; } = string.Empty;

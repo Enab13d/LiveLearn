@@ -7,6 +7,8 @@ internal class SectionReadModel
     public Guid CourseId { get; set; }
     public string Title { get; set; } = string.Empty;
     public int Order { get; set; }
+    public long CreatedRevision { get; set; }
+    public long? ArchivedRevision { get; set; }
     public List<LectureReadModel> Lectures { get; set; } = [];
 
     public List<SectionTaskReadModel> SectionTasks { get; set; } = [];

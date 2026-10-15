@@ -19,4 +19,8 @@ internal class LectureReadModel
 
     public string VideoStatus { get; set; } = string.Empty;
 
+    public long CreatedRevision { get; set; }
+
+    public long? ArchivedRevision { get; set; }
+
 }

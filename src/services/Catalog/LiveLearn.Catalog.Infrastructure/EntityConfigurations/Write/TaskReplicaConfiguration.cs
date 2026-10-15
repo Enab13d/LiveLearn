@@ -13,5 +13,6 @@ internal sealed class TaskReplicaConfiguration : IEntityTypeConfiguration<TaskRe
         builder.Property(e => e.TaskId).ValueGeneratedNever();
         builder.Property(e => e.TutorId).IsRequired();
         builder.Property(e => e.TaskType).IsRequired().HasMaxLength(16);
+        builder.Property(e => e.IsArchived).IsRequired();
     }
 }
