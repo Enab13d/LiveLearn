@@ -16,6 +16,8 @@ internal sealed class CourseConfiguration : IEntityTypeConfiguration<Course>
         builder.Property(e => e.ThumbnailUrl).IsRequired(false).HasMaxLength(2048);
         builder.Property(e => e.Price).HasPrecision(18, 2);
         builder.Property(e => e.Status).HasConversion<string>();
+        // Every structural change bumps Revision, so two concurrent ones conflict instead of sharing a revision.
+        builder.Property(e => e.Revision).IsConcurrencyToken();
         builder.HasMany(e => e.Sections).WithOne().HasForeignKey(e => e.CourseId);
 
         builder.HasOne<Category>().WithMany().HasForeignKey(e => e.CategoryId);

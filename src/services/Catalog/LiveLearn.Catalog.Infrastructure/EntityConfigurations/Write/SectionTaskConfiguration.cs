@@ -11,7 +11,10 @@ internal sealed class SectionTaskConfiguration : IEntityTypeConfiguration<Sectio
     {
         builder.ToTable("section_tasks");
         builder.HasKey(e => e.Id);
-        builder.HasIndex(e => e.TaskId).IsUnique();
+        // A task can be linked to a course again after its previous link was archived.
+        builder.HasIndex(e => new { e.CourseId, e.TaskId })
+            .IsUnique()
+            .HasFilter("\"ArchivedRevision\" IS NULL");
         builder.Property(e => e.TaskType).HasMaxLength(16);
         builder.Property(e => e.AssignedAt)
             .ValueGeneratedOnAdd()
