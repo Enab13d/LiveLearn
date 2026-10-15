@@ -111,6 +111,12 @@ public static class DependencyInjectionExtensions
             ResponseChecksumValidation = ResponseChecksumValidation.WHEN_REQUIRED,
         }));
 
+        services.AddOptions<WatchTicketOptions>()
+            .Bind(configuration.GetRequiredSection(WatchTicketOptions.SectionName))
+            .Validate(o => !string.IsNullOrWhiteSpace(o.PrivateKey), "WatchTicket:PrivateKey is not configured")
+            .ValidateOnStart();
+        services.AddSingleton<IWatchTicketSigner, JwtWatchTicketSigner>();
+
         services.AddScoped<ICourseRepository, CourseRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<ITaskReferenceLookup, TaskReferenceLookup>();
