@@ -13,7 +13,7 @@ internal sealed class ArchiveLectureCommandHandler(ICourseRepository courseRepos
         if (course is null) return Result.Failure(CourseErrors.NotFound);
         if (course.TutorId != request.TutorId) return Result.Failure(CourseErrors.Forbidden);
 
-        var result = course.ArchiveLecture(request.LectureId);
+        var result = course.ArchiveLecture(request.SectionId, request.LectureId);
         if (!result.IsSuccess) return result;
 
         await unitOfWork.CommitAsync(ct);

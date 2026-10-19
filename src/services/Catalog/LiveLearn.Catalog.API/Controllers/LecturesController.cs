@@ -41,13 +41,13 @@ public sealed class LecturesController(ISender mediator) : ControllerBase
     }
 
     [HttpPost("{lectureId:guid}/watch-ticket")]
-    public async Task<IActionResult> IssueWatchTicket(Guid courseId, Guid lectureId, CancellationToken ct)
+    public async Task<IActionResult> IssueWatchTicket(Guid courseId, Guid sectionId, Guid lectureId, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid userId)
             return this.MisconfiguredTokenProblem();
 
         var result = await mediator.Send(
-            new IssueWatchTicketCommand(userId, courseId, lectureId, User.IsInRole("Admin")), ct);
+            new IssueWatchTicketCommand(userId, courseId, sectionId, lectureId, User.IsInRole("Admin")), ct);
 
         return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
     }
@@ -62,5 +62,27 @@ public sealed class LecturesController(ISender mediator) : ControllerBase
             new UpdateLectureOrderCommand(courseId, tutorId, sectionId, lectureId, request.PreviousLectureId, request.NextLectureId), ct);
 
         return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
+    }
+
+    [HttpPost("{lectureId:guid}/archive")]
+    public async Task<IActionResult> ArchiveLecture(Guid courseId, Guid sectionId, Guid lectureId, CancellationToken ct)
+    {
+        if (User.GetUserId() is not Guid userId)
+            return this.MisconfiguredTokenProblem();
+
+        var result = await mediator.Send(new ArchiveLectureCommand(courseId, userId, sectionId, lectureId), ct);
+
+        return result.IsSuccess ? NoContent() : this.ToProblemResult(result.Errors);
+    }
+
+    [HttpPatch("{lectureId:guid}/section")]
+    public async Task<IActionResult> MoveLecture([FromBody] RequestMoveLectureDto request, Guid courseId, Guid sectionId, Guid lectureId, CancellationToken ct)
+    {
+        if (User.GetUserId() is not Guid userId)
+            return this.MisconfiguredTokenProblem();
+
+        var command = new MoveLectureCommand(courseId, userId, sectionId, lectureId, request.TargetSectionId);
+        var result = await mediator.Send(command, ct);
+        return result.IsSuccess ? NoContent() : this.ToProblemResult(result.Errors);
     }
 }

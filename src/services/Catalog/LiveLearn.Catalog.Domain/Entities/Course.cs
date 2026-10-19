@@ -238,9 +238,12 @@ public sealed class Course : AggregateRoot<Guid>
         return Result.Success();
     }
 
-    public Result ArchiveLecture(Guid lectureId)
+    public Result ArchiveLecture(Guid sectionId, Guid lectureId)
     {
-        var lecture = FindLecture(lectureId);
+        var section = _sections.FirstOrDefault(s => s.Id == sectionId);
+        if (section is null) return Result.Failure(CourseErrors.SectionNotFound);
+
+        var lecture = section.Lectures.FirstOrDefault(l => l.Id == lectureId);
         if (lecture is null) return Result.Failure(LectureErrors.NotFound);
         if (!lecture.IsActive()) return Result.Failure(LectureErrors.Archived);
         if (WouldLeaveNoActiveItems(1)) return Result.Failure(CourseErrors.LastActiveItem);
@@ -252,17 +255,18 @@ public sealed class Course : AggregateRoot<Guid>
     }
 
     // Minor change: never bumps Revision. Appends to the end of the target section.
-    public Result MoveLecture(Guid lectureId, Guid targetSectionId)
+    public Result MoveLecture(Guid sectionId, Guid lectureId, Guid targetSectionId)
     {
-        var source = _sections.FirstOrDefault(s => s.Lectures.Any(l => l.Id == lectureId));
-        if (source is null) return Result.Failure(LectureErrors.NotFound);
+        var source = _sections.FirstOrDefault(s => s.Id == sectionId);
+        if (source is null) return Result.Failure(CourseErrors.SectionNotFound);
+
+        var lecture = source.Lectures.FirstOrDefault(l => l.Id == lectureId);
+        if (lecture is null) return Result.Failure(LectureErrors.NotFound);
 
         var target = _sections.FirstOrDefault(s => s.Id == targetSectionId);
         if (target is null) return Result.Failure(CourseErrors.SectionNotFound);
         if (!target.IsActive()) return Result.Failure(SectionErrors.Archived);
         if (source.Id == target.Id) return Result.Success();
-
-        var lecture = source.Lectures.First(l => l.Id == lectureId);
         if (!lecture.IsActive()) return Result.Failure(LectureErrors.Archived);
 
         source.DetachLecture(lecture);
@@ -332,9 +336,12 @@ public sealed class Course : AggregateRoot<Guid>
         return Result.Success();
     }
 
-    public Result<Guid> GetPlayableVideoId(Guid lectureId)
+    public Result<Guid> GetPlayableVideoId(Guid sectionId, Guid lectureId)
     {
-        var lecture = FindLecture(lectureId);
+        var section = _sections.FirstOrDefault(s => s.Id == sectionId);
+        if (section is null) return Result<Guid>.Failure(CourseErrors.SectionNotFound);
+
+        var lecture = section.Lectures.FirstOrDefault(l => l.Id == lectureId);
         if (lecture is null) return Result<Guid>.Failure(LectureErrors.NotFound);
         if (lecture.Type != LectureType.Video) return Result<Guid>.Failure(LectureErrors.NotVideo);
         if (lecture.VideoStatus != VideoStatus.Ready || lecture.VideoId is not Guid videoId)

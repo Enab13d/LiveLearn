@@ -20,7 +20,7 @@ internal sealed class IssueWatchTicketCommandHandler(
         if (!await contentAccess.CanAccessAsync(request.UserId, request.IsAdmin, course.TutorId, course.Id, ct))
             return Result<WatchTicketDto>.Failure(LectureErrors.Forbidden);
 
-        var videoId = course.GetPlayableVideoId(request.LectureId);
+        var videoId = course.GetPlayableVideoId(request.SectionId, request.LectureId);
         if (!videoId.IsSuccess) return Result<WatchTicketDto>.Failure(videoId.Errors);
 
         return watchTicketSigner.IssueWatchTicket(request.UserId, request.LectureId, videoId.Value);

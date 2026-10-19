@@ -3,4 +3,4 @@
 namespace LiveLearn.Catalog.Application.Commands;
 
 
-public sealed record MoveLectureCommand(Guid CourseId, Guid TutorId, Guid LectureId, Guid TargetSectionId) : ICommand;
+public sealed record MoveLectureCommand(Guid CourseId, Guid TutorId, Guid SectionId, Guid LectureId, Guid TargetSectionId) : ICommand;

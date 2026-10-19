@@ -13,7 +13,7 @@ internal sealed class MoveLectureCommandHandler(ICourseRepository courseReposito
         if (course is null) return Result.Failure(CourseErrors.NotFound);
         if (course.TutorId != request.TutorId) return Result.Failure(CourseErrors.Forbidden);
 
-        var result = course.MoveLecture(request.LectureId, request.TargetSectionId);
+        var result = course.MoveLecture(request.SectionId, request.LectureId, request.TargetSectionId);
         if (!result.IsSuccess) return result;
 
         await unitOfWork.CommitAsync(ct);

@@ -36,7 +36,7 @@ public sealed class SectionsController(ISender mediator) : ControllerBase
     public async Task<IActionResult> AddSection([FromBody] RequestSectionDto request, Guid courseId, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
+            return this.MisconfiguredTokenProblem();
 
         var result = await mediator.Send(new AddSectionCommand(courseId, tutorId, request.Title), ct);
 
@@ -49,7 +49,7 @@ public sealed class SectionsController(ISender mediator) : ControllerBase
     public async Task<IActionResult> UpdateSection([FromBody] RequestSectionDto request, Guid courseId, Guid sectionId, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
+            return this.MisconfiguredTokenProblem();
 
         var result = await mediator.Send(new UpdateSectionCommand(courseId, tutorId, sectionId, request.Title), ct);
 
@@ -60,7 +60,7 @@ public sealed class SectionsController(ISender mediator) : ControllerBase
     public async Task<IActionResult> UpdateSectionOrder([FromBody] RequestSectionUpdateOrder request, Guid courseId, Guid sectionId, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
+            return this.MisconfiguredTokenProblem();
 
         var result = await mediator.Send(new UpdateSectionOrderCommand(courseId, tutorId, sectionId, request.PreviousSectionId, request.NextSectionId), ct);
 
@@ -68,12 +68,12 @@ public sealed class SectionsController(ISender mediator) : ControllerBase
     }
 
     [HttpPost("{sectionId:guid}/archive")]
-    public async Task<IActionResult> ArchiveSection(Guid courseId, Guid sectionId)
+    public async Task<IActionResult> ArchiveSection(Guid courseId, Guid sectionId, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
             return this.MisconfiguredTokenProblem();
 
-        var result = await mediator.Send(new ArchiveSectionCommand(courseId, tutorId, sectionId));
+        var result = await mediator.Send(new ArchiveSectionCommand(courseId, tutorId, sectionId), ct);
 
         return result.IsSuccess ? NoContent() : this.ToProblemResult(result.Errors);
     }
