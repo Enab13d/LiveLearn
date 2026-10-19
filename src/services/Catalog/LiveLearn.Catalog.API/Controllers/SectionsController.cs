@@ -66,4 +66,15 @@ public sealed class SectionsController(ISender mediator) : ControllerBase
 
         return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
     }
+
+    [HttpPost("{sectionId:guid}/archive")]
+    public async Task<IActionResult> ArchiveSection(Guid courseId, Guid sectionId)
+    {
+        if (User.GetUserId() is not Guid tutorId)
+            return this.MisconfiguredTokenProblem();
+
+        var result = await mediator.Send(new ArchiveSectionCommand(courseId, tutorId, sectionId));
+
+        return result.IsSuccess ? NoContent() : this.ToProblemResult(result.Errors);
+    }
 }
