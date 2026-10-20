@@ -14,6 +14,8 @@ public static class CourseErrors
 
     public static readonly Error Forbidden = Error.Forbidden("Course.Forbidden", "Access to course modification is restricted for this user");
 
+    public static readonly Error NotEnrolled = Error.Forbidden("Course.NotEnrolled", "Only enrolled students may access the learning outline");
+
     public static readonly Error InvalidSectionNeighbors = Error.Validation("Course.InvalidSectionNeighbors", "PreviousSectionId and NextSectionId must be immediately adjacent siblings in the course");
 
     public static readonly Error NoActiveContent = Error.Conflict("Course.NoActiveContent", "Course must have at least one active lecture or task to be published");

@@ -1,6 +1,7 @@
 ﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Catalog.Application.Dto;
 using LiveLearn.Catalog.Application.Queries;
+using LiveLearn.Catalog.Domain.Enums;
 using LiveLearn.Catalog.Domain.Errors;
 using LiveLearn.Catalog.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,7 @@ internal sealed class GetCourseByIdQueryHandler(ReadDbContext dbContext) : IQuer
     public async Task<Result<CourseDetailDto>> Handle(GetCourseByIdQuery request, CancellationToken ct)
     {
         var courseDetails = await dbContext.Courses
-        .Where(e => e.Id == request.CourseId)
+        .Where(e => e.Id == request.CourseId && (e.Status == CourseStatus.Published.ToString() || e.TutorId == request.RequesterId))
         .Select(c => new CourseDetailDto(c.Id,
             c.CategoryId,
             c.Category.Name,
