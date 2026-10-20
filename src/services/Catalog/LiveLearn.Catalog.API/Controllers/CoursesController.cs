@@ -40,12 +40,23 @@ public sealed class CoursesController(ISender mediator) : ControllerBase
         return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
     }
 
+    [HttpGet("{courseId:guid}/outline")]
+    public async Task<IActionResult> GetLearningOutline(Guid courseId)
+    {
+        if (User.GetUserId() is not Guid userId)
+            return this.MisconfiguredTokenProblem();
+
+        var result = await mediator.Send(new GetLearningOutlineQuery(courseId, userId));
+
+        return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
+    }
+
 
     [HttpPost]
     public async Task<IActionResult> CreateCourse([FromBody] RequestCourseDto request, CancellationToken ct)
     {
-        if (User.GetUserId() is not Guid tutorId) 
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
+        if (User.GetUserId() is not Guid tutorId)
+            return this.MisconfiguredTokenProblem();
 
         var result = await mediator.Send(
             new CreateCourseCommand(request.CategoryId, tutorId, request.Title, request.Description, request.Price), ct);
@@ -58,8 +69,8 @@ public sealed class CoursesController(ISender mediator) : ControllerBase
     [HttpPut("{courseId:guid}")]
     public async Task<IActionResult> UpdateCourse(Guid courseId, [FromBody] RequestCourseDto request, CancellationToken ct)
     {
-        if (User.GetUserId() is not Guid tutorId) 
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
+        if (User.GetUserId() is not Guid tutorId)
+            return this.MisconfiguredTokenProblem();
 
         var result = await mediator.Send(
             new UpdateCourseCommand(courseId, tutorId, request.Title, request.Description, request.Price, request.CategoryId), ct);
@@ -71,8 +82,8 @@ public sealed class CoursesController(ISender mediator) : ControllerBase
     public async Task<IActionResult> PublishCourse(Guid courseId, CancellationToken ct)
     {
 
-        if (User.GetUserId() is not Guid tutorId) 
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
+        if (User.GetUserId() is not Guid tutorId)
+            return this.MisconfiguredTokenProblem();
 
         var result = await mediator.Send(new PublishCourseCommand(courseId, tutorId), ct);
 
