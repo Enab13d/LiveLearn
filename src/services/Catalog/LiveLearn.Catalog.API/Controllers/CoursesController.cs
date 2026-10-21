@@ -1,4 +1,5 @@
-﻿using LiveLearn.Catalog.API.Dto.Requests;
+﻿using LiveLearn.Catalog.API.Dto.QueryParameters;
+using LiveLearn.Catalog.API.Dto.Requests;
 using LiveLearn.Catalog.API.Extensions;
 using LiveLearn.Catalog.Application.Commands;
 using LiveLearn.Catalog.Application.Queries;
@@ -16,16 +17,23 @@ public sealed class CoursesController(ISender mediator) : ControllerBase
     [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> GetCatalog(
+        [FromQuery] PageableQueryParams paging,
         CancellationToken ct,
-        int pageNumber = 1,
-        int pageSize = 20,
         Guid? categoryId = null,
         Guid? tutorId = null,
         decimal? maxPrice = null,
         string? query = null
     )
     {
-        var result = await mediator.Send(new GetCatalogQuery(pageNumber, pageSize, categoryId, tutorId, maxPrice, query), ct);
+        var result = await mediator.Send(new GetCatalogQuery(paging.PageNumber, paging.PageSize, categoryId, tutorId, maxPrice, query), ct);
+
+        return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
+    }
+
+    [HttpGet("mine")]
+    public async Task<IActionResult> GetMyCourses([FromQuery] PageableQueryParams paging, CancellationToken ct)
+    {
+        var result = await mediator.Send(new GetMyCoursesQuery(paging.PageNumber, paging.PageSize), ct);
 
         return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
     }
