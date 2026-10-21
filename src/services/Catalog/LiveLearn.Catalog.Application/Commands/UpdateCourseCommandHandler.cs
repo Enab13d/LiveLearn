@@ -1,13 +1,14 @@
 ﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Catalog.Application.Dto;
 using LiveLearn.Catalog.Application.Repositories;
+using LiveLearn.Catalog.Application.Services;
 using LiveLearn.Catalog.Domain.Errors;
 
 
 namespace LiveLearn.Catalog.Application.Commands;
 
 
-public sealed class UpdateCourseCommandHandler(ICourseRepository courseRepository, IUnitOfWork unitOfWork) : ICommandHandler<UpdateCourseCommand, CourseDto>
+public sealed class UpdateCourseCommandHandler(ICurrentUser currentUser, ICourseRepository courseRepository, IUnitOfWork unitOfWork) : ICommandHandler<UpdateCourseCommand, CourseDto>
 {
     public async Task<Result<CourseDto>> Handle(UpdateCourseCommand request, CancellationToken ct)
     {
@@ -16,7 +17,7 @@ public sealed class UpdateCourseCommandHandler(ICourseRepository courseRepositor
         if (course is null)
             return Result<CourseDto>.Failure(CourseErrors.NotFound);
 
-        if (course.TutorId != request.TutorId)
+        if (course.TutorId != currentUser.UserId)
             return Result<CourseDto>.Failure(CourseErrors.Forbidden);
 
         course.Update(request.Title, request.Description, request.Price, request.CategoryId);

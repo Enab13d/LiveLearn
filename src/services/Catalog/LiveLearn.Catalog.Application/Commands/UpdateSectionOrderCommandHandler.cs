@@ -1,11 +1,12 @@
-using LiveLearn.BuildingBlocks;
+﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Catalog.Application.Repositories;
+using LiveLearn.Catalog.Application.Services;
 using LiveLearn.Catalog.Domain.Common;
 using LiveLearn.Catalog.Domain.Errors;
 
 namespace LiveLearn.Catalog.Application.Commands;
 
-internal sealed class UpdateSectionOrderCommandHandler(ICourseRepository courseRepository, IUnitOfWork unitOfWork) : ICommandHandler<UpdateSectionOrderCommand, OrderUpdateResult>
+internal sealed class UpdateSectionOrderCommandHandler(ICurrentUser currentUser, ICourseRepository courseRepository, IUnitOfWork unitOfWork) : ICommandHandler<UpdateSectionOrderCommand, OrderUpdateResult>
 {
     public async Task<Result<OrderUpdateResult>> Handle(UpdateSectionOrderCommand request, CancellationToken ct)
     {
@@ -14,7 +15,7 @@ internal sealed class UpdateSectionOrderCommandHandler(ICourseRepository courseR
         if (course is null)
             return Result<OrderUpdateResult>.Failure(CourseErrors.NotFound);
 
-        if (course.TutorId != request.TutorId)
+        if (course.TutorId != currentUser.UserId)
             return Result<OrderUpdateResult>.Failure(CourseErrors.Forbidden);
 
         var result = course.UpdateSectionOrder(request.SectionId, request.PreviousSectionId, request.NextSectionId);

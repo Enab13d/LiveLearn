@@ -1,4 +1,4 @@
-using LiveLearn.BuildingBlocks;
+﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Catalog.Application.Dto;
 using LiveLearn.Catalog.Application.Repositories;
 using LiveLearn.Catalog.Application.Services;
@@ -7,6 +7,7 @@ using LiveLearn.Catalog.Domain.Errors;
 namespace LiveLearn.Catalog.Application.Commands;
 
 internal sealed class RequestLectureVideoUploadCommandHandler(
+    ICurrentUser currentUser,
     ICourseRepository courseRepository,
     IStorageService storageService,
     IUnitOfWork unitOfWork) : ICommandHandler<RequestLectureVideoUploadCommand, VideoUploadUrlDto>
@@ -17,7 +18,7 @@ internal sealed class RequestLectureVideoUploadCommandHandler(
 
         if (course is null) return Result<VideoUploadUrlDto>.Failure(CourseErrors.NotFound);
 
-        if (course.TutorId != request.TutorId) return Result<VideoUploadUrlDto>.Failure(CourseErrors.Forbidden);
+        if (course.TutorId != currentUser.UserId) return Result<VideoUploadUrlDto>.Failure(CourseErrors.Forbidden);
 
         var videoId = Guid.NewGuid();
 

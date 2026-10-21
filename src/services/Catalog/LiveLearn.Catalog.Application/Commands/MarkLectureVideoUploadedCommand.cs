@@ -1,5 +1,5 @@
-using LiveLearn.BuildingBlocks;
+﻿using LiveLearn.BuildingBlocks;
 
 namespace LiveLearn.Catalog.Application.Commands;
 
-public sealed record MarkLectureVideoUploadedCommand(Guid CourseId, Guid TutorId, Guid LectureId, Guid VideoId) : ICommand;
+public sealed record MarkLectureVideoUploadedCommand(Guid CourseId, Guid LectureId, Guid VideoId) : ICommand;

@@ -1,10 +1,12 @@
 ﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Catalog.Application.Repositories;
+using LiveLearn.Catalog.Application.Services;
 using LiveLearn.Catalog.Domain.Errors;
 
 namespace LiveLearn.Catalog.Application.Commands;
 
 internal sealed class PublishCourseCommandHandler(
+    ICurrentUser currentUser,
     ICourseRepository courseRepository, 
     IUnitOfWork unitOfWork, 
     TimeProvider timeProvider
@@ -16,7 +18,7 @@ internal sealed class PublishCourseCommandHandler(
 
         if (course is null) return Result.Failure(CourseErrors.NotFound);
 
-        if (course.TutorId != request.TutorId) return Result.Failure(CourseErrors.Forbidden);
+        if (course.TutorId != currentUser.UserId) return Result.Failure(CourseErrors.Forbidden);
 
         var result = course.Publish(timeProvider.GetUtcNow());
 

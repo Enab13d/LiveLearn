@@ -1,5 +1,5 @@
-using LiveLearn.BuildingBlocks;
+﻿using LiveLearn.BuildingBlocks;
 
 namespace LiveLearn.Catalog.Application.Commands;
 
-public sealed record UpdateSectionCommand(Guid CourseId, Guid TutorId, Guid SectionId, string Title) : ICommand;
+public sealed record UpdateSectionCommand(Guid CourseId, Guid SectionId, string Title) : ICommand;

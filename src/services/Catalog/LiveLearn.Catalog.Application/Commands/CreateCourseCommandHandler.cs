@@ -1,12 +1,13 @@
 ﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Catalog.Application.Dto;
 using LiveLearn.Catalog.Application.Repositories;
+using LiveLearn.Catalog.Application.Services;
 using LiveLearn.Catalog.Domain.Entities;
 using LiveLearn.Catalog.Domain.Errors;
 
 namespace LiveLearn.Catalog.Application.Commands;
 
-internal sealed class CreateCourseCommandHandler(ICourseRepository courseRepository, ICategoryRepository categoryRepository, IUnitOfWork unitOfWork) : ICommandHandler<CreateCourseCommand, CourseDto>
+internal sealed class CreateCourseCommandHandler(ICurrentUser currentUser, ICourseRepository courseRepository, ICategoryRepository categoryRepository, IUnitOfWork unitOfWork) : ICommandHandler<CreateCourseCommand, CourseDto>
 {
     public async Task<Result<CourseDto>> Handle(CreateCourseCommand request, CancellationToken ct)
     {
@@ -14,7 +15,7 @@ internal sealed class CreateCourseCommandHandler(ICourseRepository courseReposit
         if(category is null)
             return Result<CourseDto>.Failure(CategoryErrors.NotFound);
 
-        var course = Course.Create(Guid.NewGuid(), request.TutorId, request.CategoryId, request.Title, request.Description, request.Price);
+        var course = Course.Create(Guid.NewGuid(), currentUser.UserId, request.CategoryId, request.Title, request.Description, request.Price);
         await courseRepository.AddAsync(course, ct);
         await unitOfWork.CommitAsync(ct);
         CourseDto dto = new(course.Id, course.TutorId, course.CategoryId, course.Title, course.Description, course.ThumbnailUrl, course.Price, course.Status.ToString());

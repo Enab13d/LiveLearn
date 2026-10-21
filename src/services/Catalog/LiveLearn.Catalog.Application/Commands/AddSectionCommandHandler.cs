@@ -1,11 +1,12 @@
 ﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Catalog.Application.Repositories;
+using LiveLearn.Catalog.Application.Services;
 using LiveLearn.Catalog.Domain.Errors;
 
 namespace LiveLearn.Catalog.Application.Commands;
 
 
-internal sealed class AddSectionCommandHandler(ICourseRepository courseRepository, IUnitOfWork unitOfWork) : ICommandHandler<AddSectionCommand, Guid>
+internal sealed class AddSectionCommandHandler(ICurrentUser currentUser, ICourseRepository courseRepository, IUnitOfWork unitOfWork) : ICommandHandler<AddSectionCommand, Guid>
 {
     public async Task<Result<Guid>> Handle(AddSectionCommand request, CancellationToken ct)
     {
@@ -13,7 +14,7 @@ internal sealed class AddSectionCommandHandler(ICourseRepository courseRepositor
 
         if (course is null) return Result<Guid>.Failure(CourseErrors.NotFound);
 
-        if (course.TutorId != request.TutorId) return Result<Guid>.Failure(CourseErrors.Forbidden);
+        if (course.TutorId != currentUser.UserId) return Result<Guid>.Failure(CourseErrors.Forbidden);
 
         var sectionId = Guid.NewGuid();
 

@@ -7,7 +7,6 @@ public sealed record AddLectureCommand
 (
     Guid CourseId,
     Guid SectionId,
-    Guid TutorId,
     string Title,
     LectureType LectureType,
     string Description

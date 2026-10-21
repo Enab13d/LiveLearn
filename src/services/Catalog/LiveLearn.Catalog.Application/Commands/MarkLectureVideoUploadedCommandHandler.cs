@@ -1,10 +1,11 @@
-using LiveLearn.BuildingBlocks;
+﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Catalog.Application.Repositories;
+using LiveLearn.Catalog.Application.Services;
 using LiveLearn.Catalog.Domain.Errors;
 
 namespace LiveLearn.Catalog.Application.Commands;
 
-internal sealed class MarkLectureVideoUploadedCommandHandler(ICourseRepository courseRepository, IUnitOfWork unitOfWork) : ICommandHandler<MarkLectureVideoUploadedCommand>
+internal sealed class MarkLectureVideoUploadedCommandHandler(ICurrentUser currentUser, ICourseRepository courseRepository, IUnitOfWork unitOfWork) : ICommandHandler<MarkLectureVideoUploadedCommand>
 {
     public async Task<Result> Handle(MarkLectureVideoUploadedCommand request, CancellationToken ct)
     {
@@ -12,7 +13,7 @@ internal sealed class MarkLectureVideoUploadedCommandHandler(ICourseRepository c
 
         if (course is null) return Result.Failure(CourseErrors.NotFound);
 
-        if (course.TutorId != request.TutorId) return Result.Failure(CourseErrors.Forbidden);
+        if (course.TutorId != currentUser.UserId) return Result.Failure(CourseErrors.Forbidden);
 
         var result = course.MarkLectureVideoUploaded(request.LectureId, request.VideoId);
 
