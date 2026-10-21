@@ -4,8 +4,7 @@ namespace LiveLearn.Assessment.Domain.DomainEvents;
 
 
 public sealed record TaskCompletedDomainEvent(
-    Guid TaskId, 
-    Guid StudentId, 
-    Guid SectionId,
+    Guid StudentId,
+    Guid TaskId,
     Guid CourseId
 ) : IDomainEvent;
