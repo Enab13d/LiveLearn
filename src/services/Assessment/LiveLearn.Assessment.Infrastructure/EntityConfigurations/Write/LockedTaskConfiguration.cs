@@ -12,9 +12,8 @@ internal sealed class LockedTaskConfiguration : IEntityTypeConfiguration<LockedT
     {
         builder.ToTable("locked_tasks");
 
-        builder.HasKey(e => e.TaskId);
-        builder.Property(e => e.TaskId).ValueGeneratedNever();
-        builder.HasOne<AssessmentTask>().WithOne().HasForeignKey<LockedTask>(e => e.TaskId);
-        builder.Property(e => e.CourseId).IsRequired();
+        // a reused task is locked once per published course
+        builder.HasKey(e => new { e.TaskId, e.CourseId });
+        builder.HasOne<AssessmentTask>().WithMany().HasForeignKey(e => e.TaskId);
     }
 }
