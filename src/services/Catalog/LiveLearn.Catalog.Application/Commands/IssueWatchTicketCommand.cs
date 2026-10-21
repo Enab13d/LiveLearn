@@ -4,4 +4,4 @@ using LiveLearn.Catalog.Application.Dto;
 namespace LiveLearn.Catalog.Application.Commands;
 
 
-public sealed record IssueWatchTicketCommand(Guid UserId, Guid CourseId, Guid SectionId, Guid LectureId, bool IsAdmin) : ICommand<WatchTicketDto>;
+public sealed record IssueWatchTicketCommand(Guid CourseId, Guid SectionId, Guid LectureId) : ICommand<WatchTicketDto>;

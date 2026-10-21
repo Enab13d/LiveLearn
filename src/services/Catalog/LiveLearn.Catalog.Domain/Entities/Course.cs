@@ -336,13 +336,22 @@ public sealed class Course : AggregateRoot<Guid>
         return Result.Success();
     }
 
-    public Result<Guid> GetPlayableVideoId(Guid sectionId, Guid lectureId)
+    public Result<Guid> GetPlayableVideoId(Guid sectionId, Guid lectureId, CourseAccessContext access)
     {
         var section = _sections.FirstOrDefault(s => s.Id == sectionId);
         if (section is null) return Result<Guid>.Failure(CourseErrors.SectionNotFound);
 
         var lecture = section.Lectures.FirstOrDefault(l => l.Id == lectureId);
         if (lecture is null) return Result<Guid>.Failure(LectureErrors.NotFound);
+
+        var canView = access switch
+        {
+            { Mode: CourseAccessMode.Full } => true,
+            { Mode: CourseAccessMode.EnrolledRevision, Revision: long revision } => lecture.IsVisibleAt(revision),
+            _ => false
+        };
+        if (!canView) return Result<Guid>.Failure(LectureErrors.Forbidden);
+
         if (lecture.Type != LectureType.Video) return Result<Guid>.Failure(LectureErrors.NotVideo);
         if (lecture.VideoStatus != VideoStatus.Ready || lecture.VideoId is not Guid videoId)
             return Result<Guid>.Failure(LectureErrors.VideoNotReady);
