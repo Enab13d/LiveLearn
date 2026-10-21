@@ -38,6 +38,12 @@ public sealed class Lecture : Entity<Guid>
 
     public long? ArchivedRevision { get; private set; } = null;
 
+    internal void Update(string title, string description)
+    {
+        Title = title;
+        Description = description;
+    }
+
     internal void SetOrder(int order)
     {
         Order = order;

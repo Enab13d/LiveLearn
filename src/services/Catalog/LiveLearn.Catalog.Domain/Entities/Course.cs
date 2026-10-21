@@ -63,6 +63,11 @@ public sealed class Course : AggregateRoot<Guid>
 
     }
 
+    public void SetThumbnail(string thumbnailUrl)
+    {
+        ThumbnailUrl = thumbnailUrl;
+    }
+
     public Result Publish(DateTimeOffset publishedAt)
     {
         if (Status != CourseStatus.Draft) return Result.Failure(CourseErrors.PublishFailed);
@@ -125,6 +130,19 @@ public sealed class Course : AggregateRoot<Guid>
 
         section.Update(title);
         RaiseDomainEvent(new SectionUpdatedDomainEvent(Id, sectionId));
+        return Result.Success();
+    }
+
+    // Minor change: never bumps Revision. Archived lectures stay editable — students enrolled at older revisions still see them.
+    public Result UpdateLecture(Guid sectionId, Guid lectureId, string title, string description)
+    {
+        var section = _sections.FirstOrDefault(s => s.Id == sectionId);
+        if (section is null) return Result.Failure(CourseErrors.SectionNotFound);
+
+        var lecture = section.Lectures.FirstOrDefault(l => l.Id == lectureId);
+        if (lecture is null) return Result.Failure(LectureErrors.NotFound);
+
+        lecture.Update(title, description);
         return Result.Success();
     }
 
@@ -266,8 +284,8 @@ public sealed class Course : AggregateRoot<Guid>
         var target = _sections.FirstOrDefault(s => s.Id == targetSectionId);
         if (target is null) return Result.Failure(CourseErrors.SectionNotFound);
         if (!target.IsActive()) return Result.Failure(SectionErrors.Archived);
-        if (source.Id == target.Id) return Result.Success();
         if (!lecture.IsActive()) return Result.Failure(LectureErrors.Archived);
+        if (source.Id == target.Id) return Result.Success();
 
         source.DetachLecture(lecture);
         target.AttachLecture(lecture);

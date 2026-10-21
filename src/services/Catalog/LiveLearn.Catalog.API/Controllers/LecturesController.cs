@@ -23,6 +23,14 @@ public sealed class LecturesController(ISender mediator) : ControllerBase
         return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
     }
 
+    [HttpPut("{lectureId:guid}")]
+    public async Task<IActionResult> UpdateLecture([FromBody] RequestUpdateLectureDto request, Guid courseId, Guid sectionId, Guid lectureId, CancellationToken ct)
+    {
+        var result = await mediator.Send(new UpdateLectureCommand(courseId, sectionId, lectureId, request.Title, request.Description), ct);
+
+        return result.IsSuccess ? NoContent() : this.ToProblemResult(result.Errors);
+    }
+
     [HttpGet("{lectureId:guid}/content")]
     public async Task<IActionResult> GetLectureContent(Guid courseId, Guid sectionId, Guid lectureId, CancellationToken ct)
     {
