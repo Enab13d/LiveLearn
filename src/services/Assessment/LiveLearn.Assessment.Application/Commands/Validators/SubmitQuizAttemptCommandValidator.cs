@@ -9,6 +9,7 @@ public sealed class SubmitQuizAttemptCommandValidator : AbstractValidator<Submit
     {
         RuleFor(x => x.QuizId).NotEmpty();
         RuleFor(x => x.StudentId).NotEmpty();
+        RuleFor(x => x.CourseId).NotEmpty();
         RuleFor(x => x.Answers).NotEmpty();
         RuleForEach(x => x.Answers).Must(kvp => kvp.Key != Guid.Empty && kvp.Value != Guid.Empty);
     }

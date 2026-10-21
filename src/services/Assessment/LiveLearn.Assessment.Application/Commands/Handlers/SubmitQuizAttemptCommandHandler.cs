@@ -12,6 +12,7 @@ internal sealed class SubmitQuizAttemptCommandHandler(
     IAssessmentTaskRepository assessmentTaskRepository,
     IQuizAttemptRepository quizAttemptRepository,
     IEnrollmentLookup enrollmentLookup,
+    ICourseTaskLookup courseTaskLookup,
     IUnitOfWork unitOfWork
 ) : ICommandHandler<SubmitQuizAttemptCommand, QuizEvaluationResult>
 {
@@ -20,16 +21,17 @@ internal sealed class SubmitQuizAttemptCommandHandler(
 
         var quiz = await assessmentTaskRepository.GetQuizAsync(request.QuizId, ct);
         if (quiz is null) return Result<QuizEvaluationResult>.Failure(TaskErrors.NotFound);
- 
-        if (quiz.CourseId is not Guid courseId || !await enrollmentLookup.IsEnrolledAsync(request.StudentId, courseId, ct))
+
+        // archived tasks stay submittable
+        if (!await enrollmentLookup.IsEnrolledAsync(request.StudentId, request.CourseId, ct)
+            || !await courseTaskLookup.WasEverAssignedAsync(request.CourseId, quiz.Id, ct))
             return Result<QuizEvaluationResult>.Failure(TaskErrors.Forbidden);
 
-        var result = quiz.Evaluate(request.Answers, request.StudentId);
+        var result = quiz.Evaluate(request.Answers, request.StudentId, request.CourseId);
         if (!result.IsSuccess) return result;
 
-        // null-forgiving operator used below, since quiz.Evaluate() already has guard against null 
         var quizAttempt = QuizAttempt.Create(
-            request.QuizId, request.StudentId, quiz.SectionId!.Value, quiz.CourseId!.Value, result.Value.Score, result.Value.IsPassed);
+            request.QuizId, request.StudentId, request.CourseId, result.Value.Score, result.Value.IsPassed);
 
         await quizAttemptRepository.AddAsync(quizAttempt, ct);
         await unitOfWork.CommitAsync(ct);

@@ -12,6 +12,7 @@ internal sealed class SubmitHomeworkCommandHandler(
     IAssessmentTaskRepository assessmentTaskRepository,
     IHomeworkSubmissionRepository homeworkSubmissionRepository,
     IEnrollmentLookup enrollmentLookup,
+    ICourseTaskLookup courseTaskLookup,
     IUnitOfWork unitOfWork
 ) : ICommandHandler<SubmitHomeworkCommand>
 {
@@ -21,12 +22,10 @@ internal sealed class SubmitHomeworkCommandHandler(
         var homework = await assessmentTaskRepository.GetHomeworkAsync(request.HomeworkId, ct);
         if (homework is null) return Result.Failure(TaskErrors.NotFound);
 
-        if (homework.CourseId is not Guid courseId
-            || !await enrollmentLookup.IsEnrolledAsync(request.StudentId, courseId, ct))
+        // archived tasks stay submittable
+        if (!await enrollmentLookup.IsEnrolledAsync(request.StudentId, request.CourseId, ct)
+            || !await courseTaskLookup.WasEverAssignedAsync(request.CourseId, homework.Id, ct))
             return Result.Failure(TaskErrors.Forbidden);
-
-        if (homework.SectionId is not Guid sectionId)
-            return Result.Failure(TaskErrors.UnassignedTaskEvaluation);
 
         var existingSubmissions = await homeworkSubmissionRepository
             .FindAsync(
@@ -38,7 +37,7 @@ internal sealed class SubmitHomeworkCommandHandler(
         if (existingSubmissions.Any()) return Result.Failure(HomeworkErrors.SubmissionAlreadyPending);
 
         var submission = HomeworkSubmission.Create(
-            Guid.NewGuid(), request.HomeworkId, request.StudentId, sectionId, courseId, request.Content);
+            Guid.NewGuid(), request.HomeworkId, request.StudentId, request.CourseId, request.Content);
 
         await homeworkSubmissionRepository.AddAsync(submission, ct);
         await unitOfWork.CommitAsync(ct);

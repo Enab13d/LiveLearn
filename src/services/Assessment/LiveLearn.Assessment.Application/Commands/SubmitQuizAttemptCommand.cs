@@ -4,4 +4,4 @@ using LiveLearn.BuildingBlocks;
 namespace LiveLearn.Assessment.Application.Commands;
 
 
-public sealed record SubmitQuizAttemptCommand(Guid StudentId, Guid QuizId, Dictionary<Guid, Guid> Answers) : ICommand<QuizEvaluationResult>;
+public sealed record SubmitQuizAttemptCommand(Guid StudentId, Guid CourseId, Guid QuizId, Dictionary<Guid, Guid> Answers) : ICommand<QuizEvaluationResult>;
