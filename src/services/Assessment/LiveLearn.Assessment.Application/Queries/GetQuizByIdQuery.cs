@@ -4,4 +4,4 @@ using LiveLearn.BuildingBlocks;
 namespace LiveLearn.Assessment.Application.Queries;
 
 
-public sealed record GetQuizByIdQuery(Guid Id, Guid RequesterId) : IQuery<QuizDto>;
+public sealed record GetQuizByIdQuery(Guid Id, Guid RequesterId, Guid? CourseId) : IQuery<QuizDto>;

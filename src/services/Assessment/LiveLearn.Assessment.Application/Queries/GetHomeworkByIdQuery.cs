@@ -4,4 +4,4 @@ using LiveLearn.BuildingBlocks;
 namespace LiveLearn.Assessment.Application.Queries;
 
 
-public sealed record GetHomeworkByIdQuery(Guid Id) : IQuery<HomeworkDto>;
+public sealed record GetHomeworkByIdQuery(Guid Id, Guid RequesterId, Guid? CourseId) : IQuery<HomeworkDto>;
