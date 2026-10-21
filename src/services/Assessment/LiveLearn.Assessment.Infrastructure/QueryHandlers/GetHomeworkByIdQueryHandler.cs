@@ -10,6 +10,7 @@ namespace LiveLearn.Assessment.Infrastructure.QueryHandlers;
 
 
 internal sealed class GetHomeworkByIdQueryHandler(
+    ICurrentUser currentUser,
     ReadDbContext dbContext,
     IEnrollmentLookup enrollmentLookup,
     ICourseTaskLookup courseTaskLookup
@@ -21,9 +22,9 @@ internal sealed class GetHomeworkByIdQueryHandler(
         if (homework is null) return Result<HomeworkDto>.Failure(TaskErrors.NotFound);
 
         // owner, or enrolled in a course the homework was ever assigned to
-        if (request.RequesterId != homework.TutorId
+        if (currentUser.UserId != homework.TutorId
             && (request.CourseId is not Guid courseId
-                || !await enrollmentLookup.IsEnrolledAsync(request.RequesterId, courseId, ct)
+                || !await enrollmentLookup.IsEnrolledAsync(currentUser.UserId, courseId, ct)
                 || !await courseTaskLookup.WasEverAssignedAsync(courseId, homework.Id, ct)))
             return Result<HomeworkDto>.Failure(TaskErrors.Forbidden);
 

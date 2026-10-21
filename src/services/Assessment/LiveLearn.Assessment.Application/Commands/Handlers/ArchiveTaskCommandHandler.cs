@@ -1,4 +1,5 @@
 ﻿using LiveLearn.Assessment.Application.Repositories;
+using LiveLearn.Assessment.Application.Services;
 using LiveLearn.Assessment.Domain.Errors;
 using LiveLearn.BuildingBlocks;
 
@@ -7,6 +8,7 @@ namespace LiveLearn.Assessment.Application.Commands.Handlers;
 
 // Always allowed, locked or not — enrolled students keep submitting an archived task.
 internal sealed class ArchiveTaskCommandHandler(
+    ICurrentUser currentUser,
     IAssessmentTaskRepository repository,
     TimeProvider timeProvider,
     IUnitOfWork unitOfWork
@@ -16,7 +18,7 @@ internal sealed class ArchiveTaskCommandHandler(
     {
         var task = await repository.GetByIdAsync(request.TaskId, ct);
         if (task is null) return Result.Failure(TaskErrors.NotFound);
-        if (task.TutorId != request.TutorId) return Result.Failure(TaskErrors.Forbidden);
+        if (task.TutorId != currentUser.UserId) return Result.Failure(TaskErrors.Forbidden);
         task.Archive(timeProvider.GetUtcNow());
         await unitOfWork.CommitAsync(ct);
         return Result.Success();

@@ -8,7 +8,6 @@ public sealed class SubmitHomeworkCommandValidator : AbstractValidator<SubmitHom
     public SubmitHomeworkCommandValidator()
     {
         RuleFor(x => x.HomeworkId).NotEmpty();
-        RuleFor(x => x.StudentId).NotEmpty();
         RuleFor(x => x.CourseId).NotEmpty();
         RuleFor(x => x.Content).NotEmpty()
             .Must(uri => Uri.TryCreate(uri, UriKind.Absolute, out var parsed))

@@ -1,4 +1,5 @@
 ﻿using LiveLearn.Assessment.Application.Repositories;
+using LiveLearn.Assessment.Application.Services;
 using LiveLearn.Assessment.Domain.Errors;
 using LiveLearn.BuildingBlocks;
 
@@ -6,6 +7,7 @@ namespace LiveLearn.Assessment.Application.Commands.Handlers;
 
 
 internal sealed class ReviewHomeworkSubmissionCommandHandler(
+    ICurrentUser currentUser,
     IHomeworkSubmissionRepository homeworkSubmissionRepository,
     IAssessmentTaskRepository assessmentTaskRepository,
     IUnitOfWork unitOfWork
@@ -20,7 +22,7 @@ internal sealed class ReviewHomeworkSubmissionCommandHandler(
         {
             return Result.Failure(TaskErrors.NotFound);
         }
-        if (homework.TutorId != request.TutorId)
+        if (homework.TutorId != currentUser.UserId)
             return Result.Failure(TaskErrors.Forbidden);
 
         var result = submission.Review(request.Feedback, request.IsAccepted);

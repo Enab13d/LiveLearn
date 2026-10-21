@@ -2,7 +2,9 @@
 using System.Text.Json.Serialization;
 using HealthChecks.UI.Client;
 using LiveLearn.Assessment.API.ExceptionHandlers;
+using LiveLearn.Assessment.API.Services;
 using LiveLearn.Assessment.Application;
+using LiveLearn.Assessment.Application.Services;
 using LiveLearn.Assessment.Infrastructure;
 using LiveLearn.Assessment.Infrastructure.Configuration;
 using LiveLearn.Assessment.Infrastructure.Contexts;
@@ -116,6 +118,8 @@ try
 
     builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
+    builder.Services.AddHttpContextAccessor();
+    builder.Services.AddScoped<ICurrentUser, CurrentUser>();
     builder.Services.AddAssessmentApplication();
     builder.Services.AddAssessmentInfrastructure(builder.Configuration, builder.Environment.IsDevelopment());
 

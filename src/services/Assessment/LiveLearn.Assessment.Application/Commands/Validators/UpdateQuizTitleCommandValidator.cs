@@ -9,7 +9,6 @@ public sealed class UpdateQuizTitleCommandValidator : AbstractValidator<UpdateQu
     public UpdateQuizTitleCommandValidator()
     {
         RuleFor(x => x.QuizId).NotEmpty();
-        RuleFor(x => x.TutorId).NotEmpty();
         RuleFor(x => x.NewTitle).NotEmpty().MinimumLength(8).MaximumLength(128);
     }
 }

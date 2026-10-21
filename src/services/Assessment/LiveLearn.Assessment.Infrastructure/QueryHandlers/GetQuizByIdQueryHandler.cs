@@ -10,6 +10,7 @@ namespace LiveLearn.Assessment.Infrastructure.QueryHandlers;
 
 
 internal sealed class GetQuizByIdQueryHandler(
+    ICurrentUser currentUser,
     ReadDbContext dbContext,
     IEnrollmentLookup enrollmentLookup,
     ICourseTaskLookup courseTaskLookup
@@ -21,10 +22,10 @@ internal sealed class GetQuizByIdQueryHandler(
         if (quiz is null) return Result<QuizDto>.Failure(TaskErrors.NotFound);
 
         // owner → full DTO; otherwise enrolled in a course the quiz was ever assigned to → student DTO
-        bool isOwner = request.RequesterId == quiz.TutorId;
+        bool isOwner = currentUser.UserId == quiz.TutorId;
         if (!isOwner
             && (request.CourseId is not Guid courseId
-                || !await enrollmentLookup.IsEnrolledAsync(request.RequesterId, courseId, ct)
+                || !await enrollmentLookup.IsEnrolledAsync(currentUser.UserId, courseId, ct)
                 || !await courseTaskLookup.WasEverAssignedAsync(courseId, quiz.Id, ct)))
             return Result<QuizDto>.Failure(TaskErrors.Forbidden);
 

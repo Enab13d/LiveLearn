@@ -3,4 +3,4 @@
 namespace LiveLearn.Assessment.Application.Commands;
 
 
-public sealed record CreateHomeworkCommand(Guid TutorId, string Title, string Description) : ICommand<Guid>;
+public sealed record CreateHomeworkCommand(string Title, string Description) : ICommand<Guid>;

@@ -9,6 +9,7 @@ namespace LiveLearn.Assessment.Application.Commands.Handlers;
 
 
 internal sealed class SubmitHomeworkCommandHandler(
+    ICurrentUser currentUser,
     IAssessmentTaskRepository assessmentTaskRepository,
     IHomeworkSubmissionRepository homeworkSubmissionRepository,
     IEnrollmentLookup enrollmentLookup,
@@ -18,12 +19,13 @@ internal sealed class SubmitHomeworkCommandHandler(
 {
     public async Task<Result> Handle(SubmitHomeworkCommand request, CancellationToken ct)
     {
+        var studentId = currentUser.UserId;
 
         var homework = await assessmentTaskRepository.GetHomeworkAsync(request.HomeworkId, ct);
         if (homework is null) return Result.Failure(TaskErrors.NotFound);
 
         // archived tasks stay submittable
-        if (!await enrollmentLookup.IsEnrolledAsync(request.StudentId, request.CourseId, ct)
+        if (!await enrollmentLookup.IsEnrolledAsync(studentId, request.CourseId, ct)
             || !await courseTaskLookup.WasEverAssignedAsync(request.CourseId, homework.Id, ct))
             return Result.Failure(TaskErrors.Forbidden);
 
@@ -31,13 +33,13 @@ internal sealed class SubmitHomeworkCommandHandler(
             .FindAsync(
                 e => e.HomeworkId == request.HomeworkId
                 && e.Status == HomeworkStatus.PendingReview
-                && e.StudentId == request.StudentId,
+                && e.StudentId == studentId,
                 ct);
 
         if (existingSubmissions.Any()) return Result.Failure(HomeworkErrors.SubmissionAlreadyPending);
 
         var submission = HomeworkSubmission.Create(
-            Guid.NewGuid(), request.HomeworkId, request.StudentId, request.CourseId, request.Content);
+            Guid.NewGuid(), request.HomeworkId, studentId, request.CourseId, request.Content);
 
         await homeworkSubmissionRepository.AddAsync(submission, ct);
         await unitOfWork.CommitAsync(ct);

@@ -1,5 +1,6 @@
 ﻿using LiveLearn.Assessment.Application.Dto;
 using LiveLearn.Assessment.Application.Queries;
+using LiveLearn.Assessment.Application.Services;
 using LiveLearn.Assessment.Infrastructure.Contexts;
 using LiveLearn.BuildingBlocks;
 using Microsoft.EntityFrameworkCore;
@@ -7,13 +8,13 @@ using Microsoft.EntityFrameworkCore;
 namespace LiveLearn.Assessment.Infrastructure.QueryHandlers;
 
 
-internal sealed class GetTasksByTutorQueryHandler(ReadDbContext dbContext) : IQueryHandler<GetTasksByTutorQuery, PagedResult<TaskSummaryDto>>
+internal sealed class GetTasksByTutorQueryHandler(ICurrentUser currentUser, ReadDbContext dbContext) : IQueryHandler<GetTasksByTutorQuery, PagedResult<TaskSummaryDto>>
 {
     public async Task<Result<PagedResult<TaskSummaryDto>>> Handle(GetTasksByTutorQuery request, CancellationToken ct)
     {
         var query = dbContext.AssessmentTasks
             .AsQueryable()
-            .Where(e => e.TutorId == request.TutorId);
+            .Where(e => e.TutorId == currentUser.UserId);
 
         if (!request.IncludeArchived)
             query = query.Where(e => e.ArchivedAt == null);

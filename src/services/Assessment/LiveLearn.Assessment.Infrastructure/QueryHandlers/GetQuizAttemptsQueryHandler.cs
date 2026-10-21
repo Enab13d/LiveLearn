@@ -1,5 +1,6 @@
 ﻿using LiveLearn.Assessment.Application.Dto;
 using LiveLearn.Assessment.Application.Queries;
+using LiveLearn.Assessment.Application.Services;
 using LiveLearn.Assessment.Infrastructure.Contexts;
 using LiveLearn.BuildingBlocks;
 using Microsoft.EntityFrameworkCore;
@@ -7,13 +8,13 @@ using Microsoft.EntityFrameworkCore;
 namespace LiveLearn.Assessment.Infrastructure.QueryHandlers;
 
 
-internal sealed class GetQuizAttemptsQueryHandler(ReadDbContext dbContext) : IQueryHandler<GetQuizAttemptsQuery, PagedResult<QuizAttemptDto>>
+internal sealed class GetQuizAttemptsQueryHandler(ICurrentUser currentUser, ReadDbContext dbContext) : IQueryHandler<GetQuizAttemptsQuery, PagedResult<QuizAttemptDto>>
 {
     public async Task<Result<PagedResult<QuizAttemptDto>>> Handle(GetQuizAttemptsQuery request, CancellationToken ct)
     {
         var query = dbContext.QuizAttempts
             .AsQueryable()
-            .Where(e => e.StudentId == request.StudentId && e.QuizId == request.QuizId);
+            .Where(e => e.StudentId == currentUser.UserId && e.QuizId == request.QuizId);
 
         int totalCount = await query.CountAsync(ct);
 

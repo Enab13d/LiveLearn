@@ -4,7 +4,6 @@ using LiveLearn.Assessment.API.Extensions;
 using LiveLearn.Assessment.Application.Authorization;
 using LiveLearn.Assessment.Application.Commands;
 using LiveLearn.Assessment.Application.Queries;
-using LiveLearn.BuildingBlocks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,10 +18,7 @@ public sealed class QuizzesController(ISender mediator) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateQuiz([FromBody] CreateQuizRequestDto request, CancellationToken ct)
     {
-        if (User.GetUserId() is not Guid tutorId)
-            return this.MisconfiguredTokenProblem();
-
-        var result = await mediator.Send(new CreateQuizCommand(tutorId, request.Title, request.PassingScore), ct);
+        var result = await mediator.Send(new CreateQuizCommand(request.Title, request.PassingScore), ct);
 
         return result.IsSuccess
             ? CreatedAtAction(nameof(GetQuiz), new { taskId = result.Value }, result.Value)
@@ -34,11 +30,8 @@ public sealed class QuizzesController(ISender mediator) : ControllerBase
     [Route("{taskId:guid}/questions")]
     public async Task<IActionResult> AddQuestion(Guid taskId, [FromBody] AddQuestionToQuizRequest request, CancellationToken ct)
     {
-        if (User.GetUserId() is not Guid tutorId)
-            return this.MisconfiguredTokenProblem();
-
         var result = await mediator.Send(
-            new AddQuestionToQuizCommand(tutorId, taskId, request.Text, request.Answers, request.CorrectAnswerIdx), ct);
+            new AddQuestionToQuizCommand(taskId, request.Text, request.Answers, request.CorrectAnswerIdx), ct);
 
         return result.IsSuccess
             ? Created()
@@ -49,10 +42,7 @@ public sealed class QuizzesController(ISender mediator) : ControllerBase
     [Route("{taskId:guid}/questions/{questionId:guid}")]
     public async Task<IActionResult> RemoveQuestion(Guid taskId, Guid questionId, CancellationToken ct)
     {
-        if (User.GetUserId() is not Guid tutorId)
-            return this.MisconfiguredTokenProblem();
-
-        var result = await mediator.Send(new RemoveQuestionFromQuizCommand(taskId, tutorId, questionId), ct);
+        var result = await mediator.Send(new RemoveQuestionFromQuizCommand(taskId, questionId), ct);
 
         return result.IsSuccess
             ? NoContent()
@@ -63,10 +53,7 @@ public sealed class QuizzesController(ISender mediator) : ControllerBase
     [Route("{taskId:guid}")]
     public async Task<IActionResult> GetQuiz(Guid taskId, Guid? courseId, CancellationToken ct)
     {
-        if (User.GetUserId() is not Guid requesterId)
-            return this.MisconfiguredTokenProblem();
-
-        var result = await mediator.Send(new GetQuizByIdQuery(taskId, requesterId, courseId), ct);
+        var result = await mediator.Send(new GetQuizByIdQuery(taskId, courseId), ct);
 
         return result.IsSuccess
             ? Ok(result.Value)
@@ -77,10 +64,7 @@ public sealed class QuizzesController(ISender mediator) : ControllerBase
     [Route("{taskId:guid}/attempts")]
     public async Task<IActionResult> SubmitAttempt(Guid taskId, [FromBody] SubmitQuizAttemptRequestDto request, CancellationToken ct)
     {
-        if (User.GetUserId() is not Guid studentId)
-            return this.MisconfiguredTokenProblem();
-
-        var result = await mediator.Send(new SubmitQuizAttemptCommand(studentId, request.CourseId, taskId, request.Answers), ct);
+        var result = await mediator.Send(new SubmitQuizAttemptCommand(request.CourseId, taskId, request.Answers), ct);
         return result.IsSuccess
             ? Ok(result.Value)
             : this.ToProblemResult(result.Errors);
@@ -91,10 +75,7 @@ public sealed class QuizzesController(ISender mediator) : ControllerBase
     [Route("{taskId:guid}/attempts")]
     public async Task<IActionResult> GetAttempts(Guid taskId, [FromQuery] PageableQueryParams query, CancellationToken ct)
     {
-        if (User.GetUserId() is not Guid studentId)
-            return this.MisconfiguredTokenProblem();
-
-        var result = await mediator.Send(new GetQuizAttemptsQuery(studentId, taskId, query.PageNumber, query.PageSize), ct);
+        var result = await mediator.Send(new GetQuizAttemptsQuery(taskId, query.PageNumber, query.PageSize), ct);
 
         return result.IsSuccess
             ? Ok(result.Value)
@@ -105,10 +86,7 @@ public sealed class QuizzesController(ISender mediator) : ControllerBase
     [Route("{taskId:guid}")]
     public async Task<IActionResult> UpdateTitle(Guid taskId, [FromBody] UpdateQuizTitleRequestDto request, CancellationToken ct)
     {
-        if (User.GetUserId() is not Guid tutorId)
-            return this.MisconfiguredTokenProblem();
-
-        var result = await mediator.Send(new UpdateQuizTitleCommand(tutorId, taskId, request.Title), ct);
+        var result = await mediator.Send(new UpdateQuizTitleCommand(taskId, request.Title), ct);
 
         return result.IsSuccess
             ? Ok()

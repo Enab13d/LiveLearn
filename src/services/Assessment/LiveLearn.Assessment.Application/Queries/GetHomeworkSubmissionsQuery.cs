@@ -7,7 +7,6 @@ namespace LiveLearn.Assessment.Application.Queries;
 
 public sealed record GetHomeworkSubmissionsQuery(
     Guid HomeworkId,
-    Guid TutorId,
     int PageNumber = 1,
     int PageSize = 10,
     Guid? StudentId = null,

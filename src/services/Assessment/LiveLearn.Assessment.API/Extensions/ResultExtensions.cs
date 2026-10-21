@@ -26,7 +26,4 @@ internal static class ResultExtensions
 
         return controller.Problem(statusCode: statusCode, detail: first.Message, title: first.Code);
     }
-
-    public static IActionResult MisconfiguredTokenProblem(this ControllerBase controller) =>
-        controller.Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
 }

@@ -1,4 +1,5 @@
 ﻿using LiveLearn.Assessment.Application.Repositories;
+using LiveLearn.Assessment.Application.Services;
 using LiveLearn.Assessment.Domain.Errors;
 using LiveLearn.BuildingBlocks;
 
@@ -6,6 +7,7 @@ namespace LiveLearn.Assessment.Application.Commands.Handlers;
 
 
 internal sealed class UpdateQuizTitleCommandHandler(
+    ICurrentUser currentUser,
     IAssessmentTaskRepository repository,
     IUnitOfWork unitOfWork
 ) : ICommandHandler<UpdateQuizTitleCommand>
@@ -14,7 +16,7 @@ internal sealed class UpdateQuizTitleCommandHandler(
     {
         var quiz = await repository.GetQuizAsync(request.QuizId, ct);
         if (quiz is null) return Result.Failure(TaskErrors.NotFound);
-        if (quiz.TutorId != request.TutorId) return Result.Failure(TaskErrors.Forbidden);
+        if (quiz.TutorId != currentUser.UserId) return Result.Failure(TaskErrors.Forbidden);
         quiz.UpdateTitle(request.NewTitle);
         await unitOfWork.CommitAsync(ct);
         return Result.Success();

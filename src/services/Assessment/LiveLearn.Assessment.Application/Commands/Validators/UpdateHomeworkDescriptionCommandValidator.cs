@@ -8,7 +8,6 @@ public sealed class UpdateHomeworkDescriptionCommandValidator : AbstractValidato
     public UpdateHomeworkDescriptionCommandValidator()
     {
         RuleFor(x => x.HomeworkId).NotEmpty();
-        RuleFor(x => x.TutorId).NotEmpty();
         RuleFor(x => x.Description).NotEmpty().MinimumLength(64).MaximumLength(4096);
     }
 }

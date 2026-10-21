@@ -2,4 +2,4 @@
 
 namespace LiveLearn.Assessment.Application.Commands;
 
-public sealed record ArchiveTaskCommand(Guid TutorId, Guid TaskId) : ICommand;
+public sealed record ArchiveTaskCommand(Guid TaskId) : ICommand;

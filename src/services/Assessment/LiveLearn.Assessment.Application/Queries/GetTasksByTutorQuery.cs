@@ -5,7 +5,6 @@ namespace LiveLearn.Assessment.Application.Queries;
 
 
 public sealed record GetTasksByTutorQuery(
-    Guid TutorId,
     bool IncludeArchived = false,
     int PageNumber = 1,
     int PageSize = 10

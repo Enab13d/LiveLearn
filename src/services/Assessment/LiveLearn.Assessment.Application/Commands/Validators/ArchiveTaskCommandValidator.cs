@@ -8,6 +8,5 @@ public sealed class ArchiveTaskCommandValidator : AbstractValidator<ArchiveTaskC
     public ArchiveTaskCommandValidator()
     {
         RuleFor(x => x.TaskId).NotEmpty();
-        RuleFor(x => x.TutorId).NotEmpty();
     }
 }

@@ -3,4 +3,4 @@
 namespace LiveLearn.Assessment.Application.Commands;
 
 
-public sealed record CreateQuizCommand(Guid TutorId, string Title, int PassingScore) : ICommand<Guid>;
+public sealed record CreateQuizCommand(string Title, int PassingScore) : ICommand<Guid>;
