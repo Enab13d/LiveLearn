@@ -11,8 +11,6 @@ public sealed class QuizAttempt : AggregateRoot<Guid>
 
     public Guid StudentId { get; private init; }
 
-    public Guid SectionId { get; private init; }
-
     public Guid CourseId { get; private init; }
 
     public int Score { get; private init; }
@@ -21,13 +19,12 @@ public sealed class QuizAttempt : AggregateRoot<Guid>
 
     public DateTimeOffset AttemptedAt { get; private init; }
 
-    public static QuizAttempt Create(Guid quizId, Guid studentId, Guid sectionId, Guid courseId, int score, bool isPassed)
+    public static QuizAttempt Create(Guid quizId, Guid studentId, Guid courseId, int score, bool isPassed)
     {
         QuizAttempt quizAttempt = new()
         {
             QuizId = quizId,
             StudentId = studentId,
-            SectionId = sectionId,
             CourseId = courseId,
             Score = score,
             IsPassed = isPassed
