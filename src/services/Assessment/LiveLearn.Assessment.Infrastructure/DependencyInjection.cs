@@ -60,10 +60,8 @@ public static class DependencyInjectionExtensions
         services.AddMassTransit(x =>
         {
 
-            x.AddConsumer<CourseArchivedConsumer, CourseArchivedConsumerDefinition>();
             x.AddConsumer<CoursePublishedConsumer, CoursePublishedConsumerDefinition>();
-            x.AddConsumer<TaskAssignedConsumer>();
-            x.AddConsumer<TaskRemovedFromSectionConsumer>();
+            x.AddConsumer<CourseStructureRevisedConsumer, CourseStructureRevisedConsumerDefinition>();
             x.AddConsumer<EnrollmentActivatedConsumer, EnrollmentActivatedConsumerDefinition>();
             x.AddConsumer<EnrollmentRevokedConsumer, EnrollmentRevokedConsumerDefinition>();
             x.SetKebabCaseEndpointNameFormatter();
@@ -99,6 +97,7 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IHomeworkSubmissionRepository, HomeworkSubmissionRepository>();
         services.AddScoped<IQuizAttemptRepository, QuizAttemptRepository>();
         services.AddScoped<ILockedTaskLookup, LockedTaskLookup>();
+        services.AddScoped<ICourseTaskLookup, CourseTaskLookup>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 
