@@ -1,35 +1,31 @@
 ﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Catalog.Application.Dto;
 using LiveLearn.Catalog.Application.Queries;
+using LiveLearn.Catalog.Application.Services;
+using LiveLearn.Catalog.Domain.Enums;
 using LiveLearn.Catalog.Domain.Errors;
 using LiveLearn.Catalog.Infrastructure.Contexts;
+using LiveLearn.Catalog.Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace LiveLearn.Catalog.Infrastructure.Queries.Handlers;
 
-internal sealed class GetCourseSectionsQueryHandler(ReadDbContext dbContext) : IQueryHandler<GetCourseSectionsQuery, IReadOnlyList<SectionDto>>
+internal sealed class GetCourseSectionsQueryHandler(ICourseAccess courseAccess, ReadDbContext dbContext) : IQueryHandler<GetCourseSectionsQuery, IReadOnlyList<SectionDto>>
 {
     public async Task<Result<IReadOnlyList<SectionDto>>> Handle(GetCourseSectionsQuery request, CancellationToken ct)
     {
-        var courseExists = await dbContext.Courses.AnyAsync(e => e.Id == request.CourseId, ct);
-        if (!courseExists) return Result<IReadOnlyList<SectionDto>>.Failure(CourseErrors.NotFound);
+        //this query assume each user (even unauthenticated) can see the course sections
+        //Course owner and admin can read sections regardless of course status including archived content.
+        // Other users see only if course is published AND only current revision sections.
+        var access = await courseAccess.GetBrowseAccessAsync(request.CourseId, ct);
+        if (access is null || access.Mode == CourseAccessMode.None)
+            return Result<IReadOnlyList<SectionDto>>.Failure(CourseErrors.NotFound);
 
         var sections = await dbContext.Sections
-            .Where(e => e.CourseId == request.CourseId && e.ArchivedRevision == null)
-            .OrderBy(e => e.Order)
-            .Select(e => new SectionDto(
-                e.Id,
-                e.Title,
-                e.Order,
-                e.Lectures
-                    .Where(l => l.ArchivedRevision == null)
-                    .Select(l => new LectureDto(l.Id, l.Title, l.Type, l.Order, l.DurationInSeconds, false))
-                    .ToList(),
-                e.SectionTasks
-                    .Where(t => t.ArchivedRevision == null)
-                    .Select(e => new SectionTaskDto(e.SectionId, e.CourseId, e.TaskId, e.TaskType, false))
-                    .ToList(),
-                false))
+            .Where(s => s.CourseId == request.CourseId)
+            .Where(SectionReadModel.VisibleTo(access))
+            .OrderBy(s => s.Order)
+            .Select(CourseProjections.ToSection(access))
             .AsSplitQuery()
             .ToListAsync(ct);
 
