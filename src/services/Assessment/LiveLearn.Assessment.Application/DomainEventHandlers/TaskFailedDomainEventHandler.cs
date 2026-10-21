@@ -12,8 +12,8 @@ internal sealed class TaskFailedDomainEventHandler(
 {
     public async Task Handle(TaskFailedDomainEvent notification, CancellationToken ct)
     {
-        var (taskId, studentId, sectionId, courseId) = notification;
+        var (studentId, taskId, courseId) = notification;
         await eventBus.PublishAsync<TaskFailedEvent>(
-            new(studentId, taskId, sectionId, courseId, timeProvider.GetUtcNow()), ct);
+            new(studentId, taskId, courseId, timeProvider.GetUtcNow()), ct);
     }
 }

@@ -12,8 +12,8 @@ internal sealed class TaskCompletedDomainEventHandler(
 {
     public async Task Handle(TaskCompletedDomainEvent notification, CancellationToken ct)
     {
-        var (taskId, studentId, sectionId, courseId) = notification;
+        var (studentId, taskId, courseId) = notification;
         await eventBus.PublishAsync<TaskCompletedEvent>(
-            new(taskId, studentId, sectionId, courseId, timeProvider.GetUtcNow()), ct);
+            new(studentId, taskId, courseId, timeProvider.GetUtcNow()), ct);
     }
 }
