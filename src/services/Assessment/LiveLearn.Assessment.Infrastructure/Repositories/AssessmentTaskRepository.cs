@@ -31,12 +31,12 @@ internal sealed class AssessmentTaskRepository(WriteDbContext dbContext) : IAsse
 
     public async Task<Homework?> GetHomeworkAsync(Guid id, CancellationToken ct = default)
     {
-        return await dbContext.Homeworks.FirstOrDefaultAsync(ct);
+        return await dbContext.Homeworks.FirstOrDefaultAsync(e => e.Id == id, ct);
     }
 
     public async Task<Quiz?> GetQuizAsync(Guid id, CancellationToken ct = default)
     {
-        return await dbContext.Quizzes.FirstOrDefaultAsync(ct);
+        return await dbContext.Quizzes.FirstOrDefaultAsync(e => e.Id == id, ct);
     }
 
     public void Update(AssessmentTask entity)
