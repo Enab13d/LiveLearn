@@ -30,9 +30,12 @@ public sealed class HomeworkController(ISender mediator) : ControllerBase
 
     [HttpGet]
     [Route("{taskId:guid}")]
-    public async Task<IActionResult> GetHomework(Guid taskId, CancellationToken ct)
+    public async Task<IActionResult> GetHomework(Guid taskId, Guid? courseId, CancellationToken ct)
     {
-        var result = await mediator.Send(new GetHomeworkByIdQuery(taskId), ct);
+        if (User.GetUserId() is not Guid requesterId)
+            return this.MisconfiguredTokenProblem();
+
+        var result = await mediator.Send(new GetHomeworkByIdQuery(taskId, requesterId, courseId), ct);
 
         return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
     }
@@ -68,7 +71,7 @@ public sealed class HomeworkController(ISender mediator) : ControllerBase
         if (User.GetUserId() is not Guid studentId)
             return this.MisconfiguredTokenProblem();
 
-        var result = await mediator.Send(new SubmitHomeworkCommand(studentId, taskId, request.Content), ct);
+        var result = await mediator.Send(new SubmitHomeworkCommand(studentId, request.CourseId, taskId, request.Content), ct);
 
         return result.IsSuccess ? Ok() : this.ToProblemResult(result.Errors);
     }
@@ -91,13 +94,12 @@ public sealed class HomeworkController(ISender mediator) : ControllerBase
                 query.PageSize,
                 query.StudentId,
                 query.CourseId,
-                query.SectionId,
                 query.Status,
                 query.StartDate,
                 query.EndDate),
             ct);
 
-        return result.IsSuccess ? Ok() : this.ToProblemResult(result.Errors);
+        return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
     }
 
     [HttpPatch]

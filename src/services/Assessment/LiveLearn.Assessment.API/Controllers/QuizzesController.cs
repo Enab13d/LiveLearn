@@ -61,12 +61,12 @@ public sealed class QuizzesController(ISender mediator) : ControllerBase
 
     [HttpGet]
     [Route("{taskId:guid}")]
-    public async Task<IActionResult> GetQuiz(Guid taskId, CancellationToken ct)
+    public async Task<IActionResult> GetQuiz(Guid taskId, Guid? courseId, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid requesterId)
             return this.MisconfiguredTokenProblem();
 
-        var result = await mediator.Send(new GetQuizByIdQuery(taskId, requesterId), ct);
+        var result = await mediator.Send(new GetQuizByIdQuery(taskId, requesterId, courseId), ct);
 
         return result.IsSuccess
             ? Ok(result.Value)
@@ -80,7 +80,7 @@ public sealed class QuizzesController(ISender mediator) : ControllerBase
         if (User.GetUserId() is not Guid studentId)
             return this.MisconfiguredTokenProblem();
 
-        var result = await mediator.Send(new SubmitQuizAttemptCommand(studentId, taskId, request.Answers), ct);
+        var result = await mediator.Send(new SubmitQuizAttemptCommand(studentId, request.CourseId, taskId, request.Answers), ct);
         return result.IsSuccess
             ? Ok(result.Value)
             : this.ToProblemResult(result.Errors);
