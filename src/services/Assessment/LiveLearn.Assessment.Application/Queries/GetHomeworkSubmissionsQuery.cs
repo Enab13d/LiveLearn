@@ -12,7 +12,6 @@ public sealed record GetHomeworkSubmissionsQuery(
     int PageSize = 10,
     Guid? StudentId = null,
     Guid? CourseId = null,
-    Guid? SectionId = null,
     HomeworkStatus? Status = null,
     DateTime? StartDate = null,
     DateTime? EndDate = null

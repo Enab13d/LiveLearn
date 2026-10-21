@@ -4,7 +4,6 @@
 public sealed record HomeworkSubmissionDto(
     Guid Id,
     Guid StudentId,
-    Guid SectionId,
     Guid CourseId,
     string Content,
     string Status,

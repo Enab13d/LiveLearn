@@ -21,7 +21,7 @@ internal sealed class GetQuizAttemptsQueryHandler(ReadDbContext dbContext) : IQu
             .OrderByDescending(e => e.AttemptedAt)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
-            .Select(e => new QuizAttemptDto(e.Id, e.SectionId, e.CourseId, e.Score, e.IsPassed, e.AttemptedAt))
+            .Select(e => new QuizAttemptDto(e.Id, e.CourseId, e.Score, e.IsPassed, e.AttemptedAt))
             .ToListAsync(ct);
 
         return new PagedResult<QuizAttemptDto>(quizAttempts, totalCount, request.PageNumber, request.PageSize);

@@ -7,8 +7,6 @@ internal sealed class QuizAttemptReadModel
 
     public Guid StudentId { get; set; }
 
-    public Guid SectionId { get; set; }
-
     public Guid CourseId { get; set; }
 
     public int Score { get; set; }

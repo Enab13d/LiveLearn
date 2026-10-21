@@ -8,8 +8,6 @@ internal sealed class HomeworkSubmissionReadModel
 
     public Guid StudentId { get; set; }
 
-    public Guid SectionId { get; set; }
-
     public Guid CourseId { get; set; }
 
     public string Content { get; set; } = string.Empty;

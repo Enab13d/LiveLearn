@@ -28,11 +28,8 @@ namespace LiveLearn.Assessment.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CourseId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("SectionId")
-                        .HasColumnType("uuid");
+                    b.Property<DateTimeOffset?>("ArchivedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("TaskType")
                         .IsRequired()
@@ -75,9 +72,6 @@ namespace LiveLearn.Assessment.Infrastructure.Migrations
                     b.Property<string>("InstructorFeedback")
                         .HasMaxLength(2048)
                         .HasColumnType("character varying(2048)");
-
-                    b.Property<Guid>("SectionId")
-                        .HasColumnType("uuid");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -123,9 +117,6 @@ namespace LiveLearn.Assessment.Infrastructure.Migrations
                     b.Property<int>("Score")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("SectionId")
-                        .HasColumnType("uuid");
-
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uuid");
 
@@ -136,6 +127,21 @@ namespace LiveLearn.Assessment.Infrastructure.Migrations
                         .HasDatabaseName("IX_QuizAttempts_Quiz_Student_AttemptedAt");
 
                     b.ToTable("quiz_attempts", (string)null);
+                });
+
+            modelBuilder.Entity("LiveLearn.Assessment.Infrastructure.Models.CourseTask", b =>
+                {
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TaskId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("CourseId", "TaskId");
+
+                    b.HasIndex("TaskId");
+
+                    b.ToTable("course_tasks", (string)null);
                 });
 
             modelBuilder.Entity("LiveLearn.Assessment.Infrastructure.Models.Enrollment", b =>
@@ -154,6 +160,7 @@ namespace LiveLearn.Assessment.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<long>("Version")
+                        .IsConcurrencyToken()
                         .HasColumnType("bigint");
 
                     b.HasKey("StudentId", "CourseId");
@@ -169,9 +176,19 @@ namespace LiveLearn.Assessment.Infrastructure.Migrations
                     b.Property<Guid>("CourseId")
                         .HasColumnType("uuid");
 
-                    b.HasKey("TaskId");
+                    b.HasKey("TaskId", "CourseId");
 
                     b.ToTable("locked_tasks", (string)null);
+                });
+
+            modelBuilder.Entity("LiveLearn.Assessment.Infrastructure.Models.PublishedCourse", b =>
+                {
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("CourseId");
+
+                    b.ToTable("published_courses", (string)null);
                 });
 
             modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.InboxState", b =>
@@ -382,11 +399,20 @@ namespace LiveLearn.Assessment.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("LiveLearn.Assessment.Infrastructure.Models.CourseTask", b =>
+                {
+                    b.HasOne("LiveLearn.Assessment.Domain.Entities.AssessmentTask", null)
+                        .WithMany()
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("LiveLearn.Assessment.Infrastructure.Models.LockedTask", b =>
                 {
                     b.HasOne("LiveLearn.Assessment.Domain.Entities.AssessmentTask", null)
-                        .WithOne()
-                        .HasForeignKey("LiveLearn.Assessment.Infrastructure.Models.LockedTask", "TaskId")
+                        .WithMany()
+                        .HasForeignKey("TaskId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

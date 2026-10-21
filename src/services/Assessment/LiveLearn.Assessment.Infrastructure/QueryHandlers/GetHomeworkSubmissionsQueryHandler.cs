@@ -27,9 +27,6 @@ internal sealed class GetHomeworkSubmissionsQueryHandler(ReadDbContext dbContext
         if (request.CourseId is not null)
             query = query.Where(e => e.CourseId == request.CourseId);
 
-        if (request.SectionId is not null)
-            query = query.Where(e => e.SectionId == request.SectionId);
-
         if (request.Status is not null)
             query = query.Where(e => e.Status == request.Status.Value.ToString());
 
@@ -47,7 +44,7 @@ internal sealed class GetHomeworkSubmissionsQueryHandler(ReadDbContext dbContext
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(e => new HomeworkSubmissionDto(
-                e.Id, e.StudentId, e.SectionId, e.CourseId, e.Content, e.Status, e.InstructorFeedback, e.SubmittedAt))
+                e.Id, e.StudentId, e.CourseId, e.Content, e.Status, e.InstructorFeedback, e.SubmittedAt))
             .ToListAsync(ct);
 
         return new PagedResult<HomeworkSubmissionDto>(homeworkSubmissions, totalCount, request.PageNumber, request.PageSize);

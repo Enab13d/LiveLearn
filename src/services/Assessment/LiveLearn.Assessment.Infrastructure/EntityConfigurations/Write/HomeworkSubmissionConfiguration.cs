@@ -17,7 +17,6 @@ internal sealed class HomeworkSubmissionConfiguration : IEntityTypeConfiguration
             .HasForeignKey(e => e.HomeworkId);
 
         builder.Property(e => e.CourseId).IsRequired();
-        builder.Property(e => e.SectionId).IsRequired();
         builder.Property(e => e.StudentId).IsRequired();
         builder.Property(e => e.Content).IsRequired();
         builder.Property(e => e.Status).IsRequired().HasConversion<string>();
