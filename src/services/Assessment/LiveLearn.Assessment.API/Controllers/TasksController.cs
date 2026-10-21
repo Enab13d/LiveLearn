@@ -15,24 +15,24 @@ namespace LiveLearn.Assessment.API.Controllers;
 public sealed class TasksController(ISender mediator) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetTasksByTutor(bool assigned, [FromQuery] PageableQueryParams query, CancellationToken ct)
+    public async Task<IActionResult> GetTasksByTutor(bool includeArchived, [FromQuery] PageableQueryParams query, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
             return this.MisconfiguredTokenProblem();
 
-        var result = await mediator.Send(new GetTasksByTutorQuery(tutorId, assigned, query.PageNumber, query.PageSize), ct);
+        var result = await mediator.Send(new GetTasksByTutorQuery(tutorId, includeArchived, query.PageNumber, query.PageSize), ct);
 
         return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
     }
 
-    [HttpDelete]
-    [Route("{taskId:guid}")]
-    public async Task<IActionResult> DeleteTask(Guid taskId, CancellationToken ct)
+    [HttpPost]
+    [Route("{taskId:guid}/archive")]
+    public async Task<IActionResult> ArchiveTask(Guid taskId, CancellationToken ct)
     {
         if (User.GetUserId() is not Guid tutorId)
             return this.MisconfiguredTokenProblem();
 
-        var result = await mediator.Send(new DeleteTaskCommand(tutorId, taskId), ct);
+        var result = await mediator.Send(new ArchiveTaskCommand(tutorId, taskId), ct);
 
         return result.IsSuccess ? NoContent() : this.ToProblemResult(result.Errors);
     }
