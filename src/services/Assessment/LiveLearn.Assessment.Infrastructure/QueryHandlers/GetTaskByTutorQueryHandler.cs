@@ -15,15 +15,17 @@ internal sealed class GetTasksByTutorQueryHandler(ReadDbContext dbContext) : IQu
             .AsQueryable()
             .Where(e => e.TutorId == request.TutorId);
 
-        if (request.Assigned)
-            query = query.Where(e => e.CourseId != null && e.SectionId != null);
+        if (!request.IncludeArchived)
+            query = query.Where(e => e.ArchivedAt == null);
 
         int totalCount = await query.CountAsync(ct);
 
         var taskSummaries = await query
+            .OrderBy(e => e.Title)
+            .ThenBy(e => e.Id)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
-            .Select(e => new TaskSummaryDto(e.Id, e.Title, e.TaskType, e.SectionId, e.CourseId))
+            .Select(e => new TaskSummaryDto(e.Id, e.Title, e.TaskType, e.ArchivedAt))
             .ToListAsync(ct);
 
         return new PagedResult<TaskSummaryDto>(taskSummaries, totalCount, request.PageNumber, request.PageSize);
