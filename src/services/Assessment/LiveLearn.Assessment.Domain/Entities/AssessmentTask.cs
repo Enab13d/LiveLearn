@@ -10,20 +10,14 @@ public abstract class AssessmentTask : AggregateRoot<Guid>
     protected AssessmentTask() { }
     public string Title { get; protected set; } = string.Empty;
     public Guid TutorId { get; protected set; }
-    public Guid? SectionId { get; protected set; }
-    public Guid? CourseId { get; protected set; }
+    public DateTimeOffset? ArchivedAt { get; protected set; }
 
-    public void MarkAsDeleted() => RaiseDomainEvent(new TaskDeletedDomainEvent(Id));
-
-    public void AssignToCourseAndSection(Guid courseId, Guid sectionId)
+    // Archived tasks are hidden from the assignment picker but stay submittable; a task is never deleted.
+    public void Archive(DateTimeOffset at)
     {
-        CourseId = courseId;
-        SectionId = sectionId;
-    }
+        if (ArchivedAt is not null) return;
 
-    public void Unassign()
-    {
-        CourseId = null;
-        SectionId = null;
+        ArchivedAt = at;
+        RaiseDomainEvent(new TaskArchivedDomainEvent(Id));
     }
 }

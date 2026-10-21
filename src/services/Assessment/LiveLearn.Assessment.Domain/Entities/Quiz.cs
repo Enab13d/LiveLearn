@@ -53,11 +53,8 @@ public sealed class Quiz : AssessmentTask
         return Result.Success();
     }
 
-    public Result<QuizEvaluationResult> Evaluate(Dictionary<Guid, Guid> questionAnswerMap, Guid studentId)
+    public Result<QuizEvaluationResult> Evaluate(Dictionary<Guid, Guid> questionAnswerMap, Guid studentId, Guid courseId)
     {
-        if (SectionId is null || CourseId is null)
-            return Result<QuizEvaluationResult>.Failure(TaskErrors.UnassignedTaskEvaluation);
-
         int totalQuestions = _questions.Count;
         if (totalQuestions <= 0) return Result<QuizEvaluationResult>.Failure(QuizErrors.EmptyQuizEvaluation);
 
@@ -86,11 +83,11 @@ public sealed class Quiz : AssessmentTask
 
         if (passed)
         {
-            RaiseDomainEvent(new TaskCompletedDomainEvent(Id, studentId, SectionId.Value, CourseId.Value));
+            RaiseDomainEvent(new TaskCompletedDomainEvent(studentId, Id, courseId));
         }
         else
         {
-            RaiseDomainEvent(new TaskFailedDomainEvent(Id, studentId, SectionId.Value, CourseId.Value));
+            RaiseDomainEvent(new TaskFailedDomainEvent(studentId, Id, courseId));
         }
 
         return new QuizEvaluationResult(passed, score, correctAnswerIds, wrongAnswerIds);

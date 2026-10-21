@@ -3,4 +3,4 @@
 namespace LiveLearn.Assessment.Domain.DomainEvents;
 
 
-public sealed record TaskDeletedDomainEvent(Guid TaskId) : IDomainEvent;
+public sealed record TaskArchivedDomainEvent(Guid TaskId) : IDomainEvent;
