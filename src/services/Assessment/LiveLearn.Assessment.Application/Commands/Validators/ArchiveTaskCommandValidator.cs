@@ -3,9 +3,9 @@
 namespace LiveLearn.Assessment.Application.Commands.Validators;
 
 
-public sealed class DeleteTaskCommandValidator : AbstractValidator<DeleteTaskCommand>
+public sealed class ArchiveTaskCommandValidator : AbstractValidator<ArchiveTaskCommand>
 {
-    public DeleteTaskCommandValidator()
+    public ArchiveTaskCommandValidator()
     {
         RuleFor(x => x.TaskId).NotEmpty();
         RuleFor(x => x.TutorId).NotEmpty();
