@@ -3,4 +3,4 @@
 namespace LiveLearn.Catalog.Application.Queries;
 
 
-public sealed record GetLectureVideoStatusQuery(Guid CourseId, Guid TutorId, Guid LectureId) : IQuery<string>;
+public sealed record GetLectureVideoStatusQuery(Guid CourseId, Guid LectureId) : IQuery<string>;

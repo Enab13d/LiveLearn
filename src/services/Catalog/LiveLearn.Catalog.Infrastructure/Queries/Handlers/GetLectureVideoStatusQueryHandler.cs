@@ -1,5 +1,6 @@
 ﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Catalog.Application.Queries;
+using LiveLearn.Catalog.Application.Services;
 using LiveLearn.Catalog.Domain.Errors;
 using LiveLearn.Catalog.Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -7,12 +8,14 @@ using Microsoft.EntityFrameworkCore;
 namespace LiveLearn.Catalog.Infrastructure.Queries.Handlers;
 
 
-internal sealed class GetLectureVideoStatusQueryHandler(ReadDbContext dbContext) : IQueryHandler<GetLectureVideoStatusQuery, string>
+internal sealed class GetLectureVideoStatusQueryHandler(ICurrentUser currentUser, ReadDbContext dbContext) : IQueryHandler<GetLectureVideoStatusQuery, string>
 {
     public async Task<Result<string>> Handle(GetLectureVideoStatusQuery request, CancellationToken ct)
     {
+        var tutorId = currentUser.UserId;
+
         var status = await dbContext.Courses
-            .Where(e => e.Id == request.CourseId && e.TutorId == request.TutorId)
+            .Where(e => e.Id == request.CourseId && e.TutorId == tutorId)
             .SelectMany(e => e.Sections)
             .SelectMany(e => e.Lectures)
             .Where(l => l.Id == request.LectureId)
