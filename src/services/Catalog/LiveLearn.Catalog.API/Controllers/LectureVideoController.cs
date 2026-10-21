@@ -1,5 +1,4 @@
-﻿using LiveLearn.BuildingBlocks;
-using LiveLearn.Catalog.API.Dto.Requests;
+﻿using LiveLearn.Catalog.API.Dto.Requests;
 using LiveLearn.Catalog.API.Extensions;
 using LiveLearn.Catalog.Application.Commands;
 using LiveLearn.Catalog.Application.Queries;
@@ -17,10 +16,7 @@ public sealed class LectureVideoController(ISender mediator) : ControllerBase
     [HttpPost("upload-url")]
     public async Task<IActionResult> RequestVideoUpload(Guid courseId, Guid lectureId, CancellationToken ct)
     {
-        if (User.GetUserId() is not Guid tutorId)
-            return this.MisconfiguredTokenProblem();
-
-        var result = await mediator.Send(new RequestLectureVideoUploadCommand(courseId, tutorId, lectureId), ct);
+        var result = await mediator.Send(new RequestLectureVideoUploadCommand(courseId, lectureId), ct);
 
         return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
     }
@@ -28,10 +24,7 @@ public sealed class LectureVideoController(ISender mediator) : ControllerBase
     [HttpPatch("uploaded")]
     public async Task<IActionResult> MarkVideoUploaded([FromBody] RequestMarkVideoUploadedDto request, Guid courseId, Guid lectureId, CancellationToken ct)
     {
-        if (User.GetUserId() is not Guid tutorId)
-            return this.MisconfiguredTokenProblem();
-
-        var result = await mediator.Send(new MarkLectureVideoUploadedCommand(courseId, tutorId, lectureId, request.VideoId), ct);
+        var result = await mediator.Send(new MarkLectureVideoUploadedCommand(courseId, lectureId, request.VideoId), ct);
 
         return result.IsSuccess ? NoContent() : this.ToProblemResult(result.Errors);
     }
@@ -39,10 +32,7 @@ public sealed class LectureVideoController(ISender mediator) : ControllerBase
     [HttpGet("status")]
     public async Task<IActionResult> GetVideoStatus(Guid courseId, Guid lectureId, CancellationToken ct)
     {
-        if (User.GetUserId() is not Guid tutorId)
-            return this.MisconfiguredTokenProblem();
-
-        var result = await mediator.Send(new GetLectureVideoStatusQuery(courseId, tutorId, lectureId), ct);
+        var result = await mediator.Send(new GetLectureVideoStatusQuery(courseId, lectureId), ct);
 
         return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
     }

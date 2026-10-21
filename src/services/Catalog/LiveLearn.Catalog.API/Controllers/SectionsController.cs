@@ -1,5 +1,4 @@
-﻿using LiveLearn.BuildingBlocks;
-using LiveLearn.Catalog.API.Dto.Requests;
+﻿using LiveLearn.Catalog.API.Dto.Requests;
 using LiveLearn.Catalog.API.Extensions;
 using LiveLearn.Catalog.Application.Commands;
 using LiveLearn.Catalog.Application.Queries;
@@ -35,10 +34,7 @@ public sealed class SectionsController(ISender mediator) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> AddSection([FromBody] RequestSectionDto request, Guid courseId, CancellationToken ct)
     {
-        if (User.GetUserId() is not Guid tutorId)
-            return this.MisconfiguredTokenProblem();
-
-        var result = await mediator.Send(new AddSectionCommand(courseId, tutorId, request.Title), ct);
+        var result = await mediator.Send(new AddSectionCommand(courseId, request.Title), ct);
 
         return result.IsSuccess
             ? CreatedAtAction(nameof(GetSectionById), new { courseId, sectionId = result.Value }, result.Value)
@@ -48,10 +44,7 @@ public sealed class SectionsController(ISender mediator) : ControllerBase
     [HttpPut("{sectionId:guid}")]
     public async Task<IActionResult> UpdateSection([FromBody] RequestSectionDto request, Guid courseId, Guid sectionId, CancellationToken ct)
     {
-        if (User.GetUserId() is not Guid tutorId)
-            return this.MisconfiguredTokenProblem();
-
-        var result = await mediator.Send(new UpdateSectionCommand(courseId, tutorId, sectionId, request.Title), ct);
+        var result = await mediator.Send(new UpdateSectionCommand(courseId, sectionId, request.Title), ct);
 
         return result.IsSuccess ? NoContent() : this.ToProblemResult(result.Errors);
     }
@@ -59,10 +52,7 @@ public sealed class SectionsController(ISender mediator) : ControllerBase
     [HttpPatch("{sectionId:guid}/order")]
     public async Task<IActionResult> UpdateSectionOrder([FromBody] RequestSectionUpdateOrder request, Guid courseId, Guid sectionId, CancellationToken ct)
     {
-        if (User.GetUserId() is not Guid tutorId)
-            return this.MisconfiguredTokenProblem();
-
-        var result = await mediator.Send(new UpdateSectionOrderCommand(courseId, tutorId, sectionId, request.PreviousSectionId, request.NextSectionId), ct);
+        var result = await mediator.Send(new UpdateSectionOrderCommand(courseId, sectionId, request.PreviousSectionId, request.NextSectionId), ct);
 
         return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
     }
@@ -70,10 +60,7 @@ public sealed class SectionsController(ISender mediator) : ControllerBase
     [HttpPost("{sectionId:guid}/archive")]
     public async Task<IActionResult> ArchiveSection(Guid courseId, Guid sectionId, CancellationToken ct)
     {
-        if (User.GetUserId() is not Guid tutorId)
-            return this.MisconfiguredTokenProblem();
-
-        var result = await mediator.Send(new ArchiveSectionCommand(courseId, tutorId, sectionId), ct);
+        var result = await mediator.Send(new ArchiveSectionCommand(courseId, sectionId), ct);
 
         return result.IsSuccess ? NoContent() : this.ToProblemResult(result.Errors);
     }

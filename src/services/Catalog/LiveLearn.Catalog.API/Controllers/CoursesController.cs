@@ -1,5 +1,4 @@
-﻿using LiveLearn.BuildingBlocks;
-using LiveLearn.Catalog.API.Dto.Requests;
+﻿using LiveLearn.Catalog.API.Dto.Requests;
 using LiveLearn.Catalog.API.Extensions;
 using LiveLearn.Catalog.Application.Commands;
 using LiveLearn.Catalog.Application.Queries;
@@ -35,18 +34,15 @@ public sealed class CoursesController(ISender mediator) : ControllerBase
     [HttpGet("{courseId:guid}")]
     public async Task<IActionResult> GetCourseDetails(Guid courseId, CancellationToken ct)
     {
-        var result = await mediator.Send(new GetCourseByIdQuery(courseId, User.GetUserId()), ct);
+        var result = await mediator.Send(new GetCourseByIdQuery(courseId), ct);
 
         return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
     }
 
     [HttpGet("{courseId:guid}/outline")]
-    public async Task<IActionResult> GetLearningOutline(Guid courseId)
+    public async Task<IActionResult> GetLearningOutline(Guid courseId, CancellationToken ct)
     {
-        if (User.GetUserId() is not Guid userId)
-            return this.MisconfiguredTokenProblem();
-
-        var result = await mediator.Send(new GetLearningOutlineQuery(courseId, userId));
+        var result = await mediator.Send(new GetLearningOutlineQuery(courseId), ct);
 
         return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
     }
@@ -55,11 +51,8 @@ public sealed class CoursesController(ISender mediator) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateCourse([FromBody] RequestCourseDto request, CancellationToken ct)
     {
-        if (User.GetUserId() is not Guid tutorId)
-            return this.MisconfiguredTokenProblem();
-
         var result = await mediator.Send(
-            new CreateCourseCommand(request.CategoryId, tutorId, request.Title, request.Description, request.Price), ct);
+            new CreateCourseCommand(request.CategoryId, request.Title, request.Description, request.Price), ct);
 
         return result.IsSuccess
             ? CreatedAtAction(nameof(GetCourseDetails), new { courseId = result.Value.Id }, result.Value)
@@ -69,11 +62,8 @@ public sealed class CoursesController(ISender mediator) : ControllerBase
     [HttpPut("{courseId:guid}")]
     public async Task<IActionResult> UpdateCourse(Guid courseId, [FromBody] RequestCourseDto request, CancellationToken ct)
     {
-        if (User.GetUserId() is not Guid tutorId)
-            return this.MisconfiguredTokenProblem();
-
         var result = await mediator.Send(
-            new UpdateCourseCommand(courseId, tutorId, request.Title, request.Description, request.Price, request.CategoryId), ct);
+            new UpdateCourseCommand(courseId, request.Title, request.Description, request.Price, request.CategoryId), ct);
 
         return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
     }
@@ -81,11 +71,7 @@ public sealed class CoursesController(ISender mediator) : ControllerBase
     [HttpPost("{courseId:guid}/publish")]
     public async Task<IActionResult> PublishCourse(Guid courseId, CancellationToken ct)
     {
-
-        if (User.GetUserId() is not Guid tutorId)
-            return this.MisconfiguredTokenProblem();
-
-        var result = await mediator.Send(new PublishCourseCommand(courseId, tutorId), ct);
+        var result = await mediator.Send(new PublishCourseCommand(courseId), ct);
 
         return result.IsSuccess ? Ok() : this.ToProblemResult(result.Errors);
     }

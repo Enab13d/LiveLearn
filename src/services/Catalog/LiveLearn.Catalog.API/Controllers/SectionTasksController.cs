@@ -1,5 +1,4 @@
-﻿using LiveLearn.BuildingBlocks;
-using LiveLearn.Catalog.API.Dto.Requests;
+﻿using LiveLearn.Catalog.API.Dto.Requests;
 using LiveLearn.Catalog.API.Extensions;
 using LiveLearn.Catalog.Application.Commands;
 using MediatR;
@@ -16,10 +15,7 @@ public sealed class SectionTasksController(ISender mediator) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> AssignTaskToSection([FromBody] RequestSectionTaskDto request, Guid courseId, Guid sectionId, CancellationToken ct)
     {
-        if (User.GetUserId() is not Guid tutorId)
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
-
-        var result = await mediator.Send(new AssignTaskToSectionCommand(tutorId, courseId, sectionId, request.TaskId), ct);
+        var result = await mediator.Send(new AssignTaskToSectionCommand(courseId, sectionId, request.TaskId), ct);
 
         return result.IsSuccess ? Ok() : this.ToProblemResult(result.Errors);
     }
@@ -28,10 +24,7 @@ public sealed class SectionTasksController(ISender mediator) : ControllerBase
     [Route("{taskId:guid}")]
     public async Task<IActionResult> UnassignTaskFromSection(Guid courseId, Guid sectionId, Guid taskId, CancellationToken ct)
     {
-        if (User.GetUserId() is not Guid tutorId)
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
-
-        var result = await mediator.Send(new UnassignTaskFromSectionCommand(tutorId, courseId, sectionId, taskId), ct);
+        var result = await mediator.Send(new UnassignTaskFromSectionCommand(courseId, sectionId, taskId), ct);
 
         return result.IsSuccess ? NoContent() : this.ToProblemResult(result.Errors);
     }
