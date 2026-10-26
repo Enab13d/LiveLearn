@@ -9,6 +9,7 @@ internal sealed class CoursePublishedDomainEventHandler(IEventBus eventBus) : ID
     public async Task Handle(CoursePublishedDomainEvent notification, CancellationToken ct)
     {
         await eventBus.PublishAsync<CoursePublishedEvent>(
-            new(notification.CourseId, notification.TutorId, notification.Price, notification.TaskIds, notification.PublishedAt), ct);
+            new(notification.CourseId, notification.TutorId, notification.Price, notification.Revision, notification.LectureIds,
+                notification.TaskIds, notification.PublishedAt), ct);
     }
 }

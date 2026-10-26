@@ -75,11 +75,14 @@ public sealed class Course : AggregateRoot<Guid>
         if (ActiveItemsCount() == 0) return Result.Failure(CourseErrors.NoActiveContent);
 
         Status = CourseStatus.Published;
+        var lectureIds = _sections
+            .SelectMany(s => s.Lectures.Where(l => l.IsActive()).Select(l => l.Id))
+            .ToList();
         var taskIds = _sections
             .SelectMany(s => s.SectionTasks.Where(t => t.IsActive()).Select(t => t.TaskId))
             .ToList();
 
-        RaiseDomainEvent(new CoursePublishedDomainEvent(Id, TutorId, Price, taskIds, publishedAt));
+        RaiseDomainEvent(new CoursePublishedDomainEvent(Id, TutorId, Price, Revision, lectureIds, taskIds, publishedAt));
         return Result.Success();
     }
 
@@ -380,9 +383,10 @@ public sealed class Course : AggregateRoot<Guid>
     private Lecture? FindLecture(Guid lectureId) =>
         _sections.SelectMany(s => s.Lectures).FirstOrDefault(l => l.Id == lectureId);
 
+    // A draft stays at revision 0 (nobody can enroll in it); revisions count from the first change after publishing.
     private long NextRevision()
     {
-        Revision++;
+        if (Status != CourseStatus.Draft) Revision++;
         return Revision;
     }
 
