@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace LiveLearn.Enrollment.Infrastructure.Services;
 
 
-public sealed class CourseStructureReadModel(WriteDbContext dbContext) : ICourseStructureReadModel
+public sealed class CourseStructureLookup(WriteDbContext dbContext) : ICourseStructureLookup
 {
     public async Task<CourseSnapshot?> GetSnapshotAsync(Guid courseId, CancellationToken ct = default)
     {
