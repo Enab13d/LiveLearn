@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using LiveLearn.Identity.API.Extensions;
+﻿using LiveLearn.Identity.API.Extensions;
 using LiveLearn.Identity.Application.Authorization;
 using LiveLearn.Identity.Application.Commands;
 using LiveLearn.Identity.Application.Queries;
@@ -25,32 +24,14 @@ public sealed class UsersController(ISender mediator) : ControllerBase
     [HttpGet("profile")]
     public async Task<IActionResult> GetProfileData(CancellationToken ct)
     {
-        var id = HttpContext.User.FindFirstValue("sub");
-        if (Guid.TryParse(id, out var userId))
-        {
-            var result = await mediator.Send(new GetUserProfileQuery(userId), ct);
-            return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
-        };
-
-        return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
+        var result = await mediator.Send(new GetCurrentUserProfileQuery(), ct);
+        return result.IsSuccess ? Ok(result.Value) : this.ToProblemResult(result.Errors);
     }
 
     [HttpPost("sync")]
     public async Task<IActionResult> SyncAuthData(CancellationToken ct)
     {
-        var claims = HttpContext.User;
-
-        string sub = claims.FindFirstValue("sub") ?? "";
-        string firstName = claims.FindFirstValue("given_name") ?? "";
-        string lastName = claims.FindFirstValue("family_name") ?? "";
-        string email = claims.FindFirstValue("email") ?? "";
-
-        if (!Guid.TryParse(sub, out var id))
-        {
-            return Problem("Token sub claim is not a valid identifier. Identity provider misconfigured.");
-        }
-        
-        var result = await mediator.Send(new ProvisionUserCommand(id, email, firstName, lastName), ct);
+        var result = await mediator.Send(new ProvisionUserCommand(), ct);
         return result.IsSuccess ? NoContent() : this.ToProblemResult(result.Errors);
     }
 }

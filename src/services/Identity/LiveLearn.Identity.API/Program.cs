@@ -1,6 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 using LiveLearn.Identity.Application;
 using LiveLearn.Identity.API.ExceptionHandlers;
+using LiveLearn.Identity.API.Services;
+using LiveLearn.Identity.Application.Services;
 using LiveLearn.Identity.Infrastructure;
 using LiveLearn.Identity.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
@@ -75,6 +77,8 @@ try
      });
     builder.Services.AddControllers()
         .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+    builder.Services.AddHttpContextAccessor();
+    builder.Services.AddScoped<ICurrentUser, CurrentUser>();
     builder.Services.AddIdentityApplication();
     builder.Services.AddIdentityInfrastructure(builder.Configuration, builder.Environment.IsDevelopment());
 
