@@ -8,7 +8,8 @@ using Microsoft.EntityFrameworkCore;
 namespace LiveLearn.Assessment.Infrastructure.Messaging.Consumers;
 
 
-// Records every task ever assigned to the course and locks it if the course is published.
+// Records every task ever assigned to the course and locks it if the course is published. Catalog bumps the
+// revision only after publishing, so Revision > 0 means published — no dependency on CoursePublishedEvent order.
 // ArchivedTaskIds are ignored: an unassigned task stays submittable for the course and stays locked.
 internal sealed class CourseStructureRevisedConsumer(WriteDbContext dbContext, IUnitOfWork unitOfWork) : IConsumer<CourseStructureRevisedEvent>
 {
@@ -30,7 +31,7 @@ internal sealed class CourseStructureRevisedConsumer(WriteDbContext dbContext, I
             .Except(knownTaskIds)
             .Select(taskId => new CourseTask { CourseId = msg.CourseId, TaskId = taskId }));
 
-        if (await dbContext.PublishedCourses.AnyAsync(e => e.CourseId == msg.CourseId, ct))
+        if (msg.Revision > 0)
         {
             var alreadyLocked = await dbContext.LockedTasks
                 .Where(e => e.CourseId == msg.CourseId && taskIds.Contains(e.TaskId))

@@ -181,16 +181,6 @@ namespace LiveLearn.Assessment.Infrastructure.Migrations
                     b.ToTable("locked_tasks", (string)null);
                 });
 
-            modelBuilder.Entity("LiveLearn.Assessment.Infrastructure.Models.PublishedCourse", b =>
-                {
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("CourseId");
-
-                    b.ToTable("published_courses", (string)null);
-                });
-
             modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.InboxState", b =>
                 {
                     b.Property<long>("Id")

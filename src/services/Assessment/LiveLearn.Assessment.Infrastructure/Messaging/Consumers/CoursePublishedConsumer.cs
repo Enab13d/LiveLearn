@@ -8,16 +8,14 @@ using Microsoft.EntityFrameworkCore;
 namespace LiveLearn.Assessment.Infrastructure.Messaging.Consumers;
 
 
-// Insert-if-absent: redelivery and a concurrent CourseStructureRevisedConsumer are both no-ops on existing rows.
+// Locks the tasks active at publish; insert-if-absent, so redelivery and a concurrent CourseStructureRevisedConsumer
+// are no-ops on existing rows.
 internal sealed class CoursePublishedConsumer(WriteDbContext dbContext, IUnitOfWork unitOfWork) : IConsumer<CoursePublishedEvent>
 {
     public async Task Consume(ConsumeContext<CoursePublishedEvent> context)
     {
         var msg = context.Message;
         var ct = context.CancellationToken;
-
-        if (!await dbContext.PublishedCourses.AnyAsync(e => e.CourseId == msg.CourseId, ct))
-            dbContext.PublishedCourses.Add(new PublishedCourse { CourseId = msg.CourseId });
 
         var alreadyLocked = await dbContext.LockedTasks
             .Where(e => e.CourseId == msg.CourseId && msg.TaskIds.Contains(e.TaskId))
