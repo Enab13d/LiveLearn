@@ -94,6 +94,8 @@ public static class DependencyInjectionExtensions
         services.AddScoped<ICourseStructureLookup, CourseStructureLookup>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DependencyInjectionExtensions).Assembly));
+
         services.AddHealthChecks().AddNpgSql(connectionString);
 
         return services;

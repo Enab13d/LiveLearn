@@ -1,11 +1,14 @@
+using LiveLearn.Enrollment.Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace LiveLearn.Enrollment.Infrastructure.Contexts;
 
 
-// Backs the query handlers; read models are added with the queries.
 internal sealed class ReadDbContext(DbContextOptions<ReadDbContext> options) : DbContext(options)
 {
+    public DbSet<EnrollmentReadModel> Enrollments { get; set; } = null!;
+    public DbSet<EnrollmentItemReadModel> EnrollmentItems { get; set; } = null!;
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
