@@ -41,6 +41,13 @@ internal sealed class EnrollmentRepository(WriteDbContext dbContext) : IEnrollme
             .FirstOrDefaultAsync(e => e.StudentId == studentId && e.CourseId == courseId, ct);
     }
 
+    public async Task<IReadOnlyList<CourseEnrollment>> GetAllAsync(CancellationToken ct = default)
+    {
+        return await dbContext.CourseEnrollments
+            .AsNoTracking()
+            .ToListAsync(ct);
+    }
+
     public void Update(CourseEnrollment entity)
     {
         dbContext.CourseEnrollments.Update(entity);
