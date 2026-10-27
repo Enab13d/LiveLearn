@@ -58,6 +58,22 @@ services:
     networks:
       - livelearn-private-network
 
+  enrollment-service:
+    image: ${DOCKER_REGISTRY-}enrollment-service
+    build:
+      context: .
+      dockerfile: src/services/Enrollment/LiveLearn.Enrollment.API/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
+      - ConnectionStrings__EnrollmentDb=Host=postgres;Port=5432;Database=livelearn_enrollment;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};GSS Encryption Mode=Disable
+    networks:
+      - livelearn-private-network
+
   postgres:
     image: postgres
     restart: unless-stopped
