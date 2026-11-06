@@ -1,4 +1,4 @@
-using LiveLearn.BuildingBlocks;
+﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Enrollment.Application.Authorization;
 using LiveLearn.Enrollment.Application.Repositories;
 using LiveLearn.Enrollment.Application.Services;
@@ -62,7 +62,7 @@ public static class DependencyInjectionExtensions
             x.AddConsumer<PaymentFailedConsumer, PaymentFailedConsumerDefinition>();
             x.AddConsumer<RefundCompletedConsumer, RefundCompletedConsumerDefinition>();
             x.AddConsumer<TaskCompletedConsumer, TaskCompletedConsumerDefinition>();
-            x.SetKebabCaseEndpointNameFormatter();
+            x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("enrollment", false));
             x.UsingRabbitMq((context, cfg) =>
             {
                 cfg.Host(rabbitMQOptions.Host, rabbitMQOptions.VirtualHost, h =>

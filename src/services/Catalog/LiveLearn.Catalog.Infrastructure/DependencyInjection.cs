@@ -69,7 +69,7 @@ public static class DependencyInjectionExtensions
             x.AddConsumer<EnrollmentRevokedConsumer, EnrollmentRevokedConsumerDefinition>();
             x.AddConsumer<VideoTranscodingCompletedConsumer, VideoTranscodingCompletedConsumerDefinition>();
             x.AddConsumer<VideoTranscodingFailedConsumer, VideoTranscodingFailedConsumerDefinition>();
-            x.SetKebabCaseEndpointNameFormatter();
+            x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("catalog", false));
             x.UsingRabbitMq((context, cfg) =>
             {
 
