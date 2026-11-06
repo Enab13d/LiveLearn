@@ -15,22 +15,22 @@ internal sealed class TaskCompletedConsumer(ISender mediator, ILogger<TaskComple
         var msg = context.Message;
 
         logger.LogInformation(
-            "Processing message {messageName} with correlationId {correlationId}, data: {@message}",
-            nameof(TaskCompletedEvent), context.CorrelationId, msg);
+            "Processing message {messageName}, data: {@message}",
+            nameof(TaskCompletedEvent), msg);
 
         var result = await mediator.Send(new CompleteTaskCommand(msg.StudentId, msg.CourseId, msg.TaskId), context.CancellationToken);
 
         if (result.IsSuccess)
         {
             logger.LogInformation(
-                "Successfully processed message {messageName} with correlation id {correlationId}",
-                nameof(TaskCompletedEvent), context.CorrelationId);
+                "Successfully processed message {messageName}",
+                nameof(TaskCompletedEvent));
         }
         else
         {
             logger.LogWarning(
-                "Failed to process message {messageName} with correlation id {correlationId}. Errors: {@errors}",
-                nameof(TaskCompletedEvent), context.CorrelationId, result.Errors);
+                "Failed to process message {messageName}. Errors: {@errors}",
+                nameof(TaskCompletedEvent), result.Errors);
         }
     }
 }

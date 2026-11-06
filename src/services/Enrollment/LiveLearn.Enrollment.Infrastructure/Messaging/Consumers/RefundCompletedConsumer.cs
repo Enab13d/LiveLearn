@@ -16,22 +16,22 @@ internal sealed class RefundCompletedConsumer(ISender mediator, ILogger<RefundCo
         var msg = context.Message;
 
         logger.LogInformation(
-            "Processing message {messageName} with correlationId {correlationId}, data: {@message}",
-            nameof(RefundCompletedEvent), context.CorrelationId, msg);
+            "Processing message {messageName}, data: {@message}",
+            nameof(RefundCompletedEvent), msg);
 
         var result = await mediator.Send(new RevokeEnrollmentCommand(msg.StudentId, msg.CourseId, RevocationReason.Refund), context.CancellationToken);
 
         if (result.IsSuccess)
         {
             logger.LogInformation(
-                "Successfully processed message {messageName} with correlation id {correlationId}",
-                nameof(RefundCompletedEvent), context.CorrelationId);
+                "Successfully processed message {messageName}",
+                nameof(RefundCompletedEvent));
         }
         else
         {
             logger.LogWarning(
-                "Failed to process message {messageName} with correlation id {correlationId}. Errors: {@errors}",
-                nameof(RefundCompletedEvent), context.CorrelationId, result.Errors);
+                "Failed to process message {messageName}. Errors: {@errors}",
+                nameof(RefundCompletedEvent), result.Errors);
         }
     }
 }

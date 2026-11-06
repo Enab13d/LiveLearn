@@ -16,16 +16,16 @@ internal sealed class PaymentConfirmedConsumer(ISender mediator, ILogger<Payment
         var msg = context.Message;
 
         logger.LogInformation(
-            "Processing message {messageName} with correlationId {correlationId}, data: {@message}",
-            nameof(PaymentConfirmedEvent), context.CorrelationId, msg);
+            "Processing message {messageName}, data: {@message}",
+            nameof(PaymentConfirmedEvent), msg);
 
         var result = await mediator.Send(new CreateEnrollmentCommand(msg.StudentId, msg.CourseId), context.CancellationToken);
 
         if (result.IsSuccess)
         {
             logger.LogInformation(
-                "Successfully processed message {messageName} with correlation id {correlationId}",
-                nameof(PaymentConfirmedEvent), context.CorrelationId);
+                "Successfully processed message {messageName}",
+                nameof(PaymentConfirmedEvent));
             return;
         }
 
@@ -35,8 +35,8 @@ internal sealed class PaymentConfirmedConsumer(ISender mediator, ILogger<Payment
                 $"Course {msg.CourseId} structure is not available yet for student {msg.StudentId}");
 
         logger.LogWarning(
-            "Failed to process message {messageName} with correlation id {correlationId}. Errors: {@errors}",
-            nameof(PaymentConfirmedEvent), context.CorrelationId, result.Errors);
+            "Failed to process message {messageName}. Errors: {@errors}",
+            nameof(PaymentConfirmedEvent), result.Errors);
     }
 }
 

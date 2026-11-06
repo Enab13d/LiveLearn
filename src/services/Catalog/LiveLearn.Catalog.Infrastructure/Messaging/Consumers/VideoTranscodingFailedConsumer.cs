@@ -14,8 +14,8 @@ internal sealed class VideoTranscodingFailedConsumer(ISender mediator, ILogger<V
         var msg = context.Message;
 
         logger.LogInformation(
-            "Processing message {messageName} with correlationId {correlationId}, data: {@message}",
-            nameof(VideoTranscodingFailedEvent), context.CorrelationId, msg);
+            "Processing message {messageName}, data: {@message}",
+            nameof(VideoTranscodingFailedEvent), msg);
 
         var result = await mediator.Send(
             new MarkLectureVideoFailedCommand(msg.CourseId, msg.LectureId, msg.VideoId), context.CancellationToken);
@@ -23,14 +23,14 @@ internal sealed class VideoTranscodingFailedConsumer(ISender mediator, ILogger<V
         if (result.IsSuccess)
         {
             logger.LogInformation(
-                "Successfully processed message {messageName} with correlation id {correlationId}",
-                nameof(VideoTranscodingFailedEvent), context.CorrelationId);
+                "Successfully processed message {messageName}",
+                nameof(VideoTranscodingFailedEvent));
         }
         else
         {
             logger.LogWarning(
-                "Failed to process message {messageName} with correlation id {correlationId}. Errors: {@errors}",
-                nameof(VideoTranscodingFailedEvent), context.CorrelationId, result.Errors);
+                "Failed to process message {messageName}. Errors: {@errors}",
+                nameof(VideoTranscodingFailedEvent), result.Errors);
         }
     }
 }

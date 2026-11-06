@@ -21,8 +21,8 @@ internal sealed class EnrollmentActivatedConsumer(
         var ct = context.CancellationToken;
 
         logger.LogInformation(
-            "Processing message {messageName} with correlationId {correlationId}, data: {@message}",
-            nameof(EnrollmentActivatedEvent), context.CorrelationId, msg);
+            "Processing message {messageName}, data: {@message}",
+            nameof(EnrollmentActivatedEvent), msg);
 
         var existing = await writeDbContext.CourseEnrollments
             .FirstOrDefaultAsync(e =>
@@ -61,8 +61,8 @@ internal sealed class EnrollmentActivatedConsumer(
         await unitOfWork.CommitAsync(ct);
 
         logger.LogInformation(
-            "Successfully processed message {messageName} with correlation id {correlationId}",
-            nameof(EnrollmentActivatedEvent), context.CorrelationId);
+            "Successfully processed message {messageName}",
+            nameof(EnrollmentActivatedEvent));
     }
 }
 

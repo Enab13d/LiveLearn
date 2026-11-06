@@ -61,8 +61,7 @@ try
     builder.Services.AddOpenTelemetry()
     .WithTracing(tracing => tracing
         .AddAspNetCoreInstrumentation()
-        .AddHttpClientInstrumentation()
-        .AddSource("Yarp.ReverseProxy"))
+        .AddHttpClientInstrumentation())
     .WithMetrics(metrics => metrics
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
