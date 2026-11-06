@@ -95,23 +95,23 @@ services:
     networks:
       - livelearn-private-network
 
-  mongo:
-    image: mongo:8.0
-    restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-    volumes:
-      - mongo-data:/data/db
-      - mongo-configdb:/data/configdb
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping').ok", "--quiet"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    networks:
-      - livelearn-private-network
+  # mongo:
+  #   image: mongo:8.0
+  #   restart: unless-stopped
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+  #     MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+  #   volumes:
+  #     - mongo-data:/data/db
+  #     - mongo-configdb:/data/configdb
+  #   healthcheck:
+  #     test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping').ok", "--quiet"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #     start_period: 10s
+  #   networks:
+  #     - livelearn-private-network
 
   redis:
     image: redis:7-alpine
@@ -224,8 +224,8 @@ services:
 
 volumes:
   pgdata:
-  mongo-data:
-  mongo-configdb:
+  # mongo-data:
+  # mongo-configdb:
   redis-data:
   rabbitmq-data:
   minio-data:
