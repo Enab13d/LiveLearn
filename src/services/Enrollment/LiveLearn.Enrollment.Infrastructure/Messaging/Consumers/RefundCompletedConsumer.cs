@@ -19,7 +19,8 @@ internal sealed class RefundCompletedConsumer(ISender mediator, ILogger<RefundCo
             "Processing message {messageName}, data: {@message}",
             nameof(RefundCompletedEvent), msg);
 
-        var result = await mediator.Send(new RevokeEnrollmentCommand(msg.StudentId, msg.CourseId, RevocationReason.Refund), context.CancellationToken);
+        // Single-course refund has no order line; null matches enrollments created without one. Replaced by OrderLineRefundedConsumer.
+        var result = await mediator.Send(new RevokeEnrollmentCommand(msg.StudentId, msg.CourseId, RevocationReason.Refund, OrderLineId: null), context.CancellationToken);
 
         if (result.IsSuccess)
         {

@@ -11,11 +11,11 @@ internal sealed class RevokeEnrollmentCommandHandler(
     public async Task<Result> Handle(RevokeEnrollmentCommand request, CancellationToken ct)
     {
         var enrollment = await enrollmentRepository.GetByStudentAndCourseAsync(request.StudentId, request.CourseId, ct);
+        // E.g. the compensation refund of an order line that never enrolled; the consumer acknowledges and logs.
         if (enrollment is null) return Result.Failure(EnrollmentErrors.NotFound);
 
         // Already revoked: a redelivered refund or a repeated admin removal, no-op in the aggregate.
-        // No order line yet: a null OrderLineId matches enrollments created without one (all current ones).
-        enrollment.Revoke(request.Reason, null);
+        enrollment.Revoke(request.Reason, request.OrderLineId);
 
         await unitOfWork.CommitAsync(ct);
 

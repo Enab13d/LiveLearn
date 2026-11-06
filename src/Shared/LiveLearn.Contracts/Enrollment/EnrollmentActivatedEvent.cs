@@ -6,5 +6,7 @@ public sealed record EnrollmentActivatedEvent(
     Guid CourseId,
     long Version,
     long CourseRevision,
-    DateTimeOffset OccurredOn
+    DateTimeOffset OccurredOn,
+    Guid? OrderId,      // the order line that granted access; null for admin/backfill paths
+    Guid? OrderLineId
 );

@@ -51,7 +51,7 @@ public sealed class EnrollmentsController(ISender mediator) : ControllerBase
     [Authorize(Policy = AuthorizationPolicies.AdminPolicy)]
     public async Task<IActionResult> RemoveEnrollment(Guid studentId, Guid courseId, CancellationToken ct)
     {
-        var result = await mediator.Send(new RevokeEnrollmentCommand(studentId, courseId, RevocationReason.AdminRemoval), ct);
+        var result = await mediator.Send(new RevokeEnrollmentCommand(studentId, courseId, RevocationReason.AdminRemoval, OrderLineId: null), ct);
 
         return result.IsSuccess ? NoContent() : this.ToProblemResult(result.Errors);
     }
