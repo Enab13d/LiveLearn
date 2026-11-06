@@ -62,7 +62,8 @@ try
     builder.Services.AddOpenTelemetry()
         .WithTracing(tracing => tracing
             .AddAspNetCoreInstrumentation()
-            .AddHttpClientInstrumentation())
+            .AddHttpClientInstrumentation()
+            .AddSource("MassTransit"))
         .WithMetrics(metrics => metrics
             .AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation()
