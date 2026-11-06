@@ -28,11 +28,13 @@ internal sealed class CreateEnrollmentCommandHandler(
 
         var now = timeProvider.GetUtcNow();
 
+        // Single-course payment path (no order line): OrderId/OrderLineId stay null. Replaced by EnrollStudentCommand.
+
         if (enrollment is null)
             await enrollmentRepository.AddAsync(
-                CourseEnrollment.Create(Guid.NewGuid(), request.StudentId, request.CourseId, snapshot, now), ct);
+                CourseEnrollment.Create(Guid.NewGuid(), request.StudentId, request.CourseId, snapshot, now, null, null), ct);
         else
-            enrollment.Reactivate(snapshot, now);
+            enrollment.Reactivate(snapshot, now, null, null);
 
         await unitOfWork.CommitAsync(ct);
 

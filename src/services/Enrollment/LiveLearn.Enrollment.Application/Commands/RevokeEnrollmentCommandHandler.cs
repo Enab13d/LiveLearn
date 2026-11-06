@@ -14,7 +14,8 @@ internal sealed class RevokeEnrollmentCommandHandler(
         if (enrollment is null) return Result.Failure(EnrollmentErrors.NotFound);
 
         // Already revoked: a redelivered refund or a repeated admin removal, no-op in the aggregate.
-        enrollment.Revoke(request.Reason);
+        // No order line yet: a null OrderLineId matches enrollments created without one (all current ones).
+        enrollment.Revoke(request.Reason, null);
 
         await unitOfWork.CommitAsync(ct);
 

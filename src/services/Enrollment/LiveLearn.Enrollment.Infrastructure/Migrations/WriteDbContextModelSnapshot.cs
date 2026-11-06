@@ -39,6 +39,12 @@ namespace LiveLearn.Enrollment.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("EnrolledAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("OrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("OrderLineId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("RevocationReason")
                         .HasMaxLength(16)
                         .HasColumnType("character varying(16)");

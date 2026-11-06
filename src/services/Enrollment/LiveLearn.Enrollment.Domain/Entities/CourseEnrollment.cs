@@ -25,6 +25,11 @@ public sealed class CourseEnrollment : AggregateRoot<Guid>
 
     public DateTimeOffset? CompletedAt { get; private set; }
 
+    // The order line that granted the current access; null for admin/backfill paths.
+    public Guid? OrderId { get; private set; }
+
+    public Guid? OrderLineId { get; private set; }
+
     private readonly List<EnrollmentItem> _items = [];
 
     public IReadOnlyCollection<EnrollmentItem> Items => _items.AsReadOnly();
@@ -32,7 +37,9 @@ public sealed class CourseEnrollment : AggregateRoot<Guid>
     private CourseEnrollment() { }
 
 
-    public static CourseEnrollment Create(Guid id, Guid studentId, Guid courseId, CourseSnapshot snapshot, DateTimeOffset enrolledAt)
+    public static CourseEnrollment Create(
+        Guid id, Guid studentId, Guid courseId, CourseSnapshot snapshot, DateTimeOffset enrolledAt,
+        Guid? orderId, Guid? orderLineId)
     {
         CourseEnrollment enrollment = new()
         {
@@ -42,11 +49,14 @@ public sealed class CourseEnrollment : AggregateRoot<Guid>
             EnrolledAt = enrolledAt,
             Status = EnrollmentStatus.Active,
             CourseRevision = snapshot.Revision,
+            OrderId = orderId,
+            OrderLineId = orderLineId,
         };
 
         enrollment._items.AddRange(enrollment.BuildItems(snapshot, new Dictionary<Guid, DateTimeOffset>()));
 
-        enrollment.RaiseDomainEvent(new EnrollmentCreatedDomainEvent(id, studentId, courseId, enrollment.Version, enrollment.CourseRevision));
+        enrollment.RaiseDomainEvent(new EnrollmentCreatedDomainEvent(
+            id, studentId, courseId, enrollment.Version, enrollment.CourseRevision, orderId, orderLineId));
 
         return enrollment;
     }
@@ -65,10 +75,12 @@ public sealed class CourseEnrollment : AggregateRoot<Guid>
         return Result.Success();
     }
 
-    public void Revoke(RevocationReason revocationReason)
+    // A refund revokes only the access its own order line granted, so a late refund of an older line
+    // never revokes a newer purchase.
+    public void Revoke(RevocationReason revocationReason, Guid? orderLineId)
     {
-
         if (Status == EnrollmentStatus.Revoked) return;
+        if (revocationReason == Enums.RevocationReason.Refund && orderLineId != OrderLineId) return;
 
         Status = EnrollmentStatus.Revoked;
         RevocationReason = revocationReason;
@@ -80,10 +92,12 @@ public sealed class CourseEnrollment : AggregateRoot<Guid>
     }
 
     // Repurchase after refund: moves to the latest snapshot, carrying over progress by item ID.
-    public void Reactivate(CourseSnapshot snapshot, DateTimeOffset reactivatedAt)
+    public void Reactivate(CourseSnapshot snapshot, DateTimeOffset reactivatedAt, Guid? orderId, Guid? orderLineId)
     {
         if (Status != EnrollmentStatus.Revoked) return;
         RevocationReason = null;
+        OrderId = orderId;
+        OrderLineId = orderLineId;
         Version++;
         CourseRevision = snapshot.Revision;
 
@@ -98,7 +112,7 @@ public sealed class CourseEnrollment : AggregateRoot<Guid>
         // A course completed once stays completed and never raises a second CourseCompletedDomainEvent.
         Status = CompletedAt is not null ? EnrollmentStatus.Completed : EnrollmentStatus.Active;
 
-        RaiseDomainEvent(new EnrollmentActivatedDomainEvent(Id, StudentId, CourseId, Version, CourseRevision));
+        RaiseDomainEvent(new EnrollmentActivatedDomainEvent(Id, StudentId, CourseId, Version, CourseRevision, OrderId, OrderLineId));
 
         TryComplete(reactivatedAt);
     }

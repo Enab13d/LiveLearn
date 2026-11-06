@@ -24,6 +24,10 @@ internal sealed class CourseEnrollmentConfiguration : IEntityTypeConfiguration<C
 
         builder.Property(e => e.EnrolledAt).IsRequired();
 
+        builder.Property(e => e.OrderId).IsRequired(false);
+
+        builder.Property(e => e.OrderLineId).IsRequired(false);
+
         builder.HasIndex(e => new { e.StudentId, e.CourseId }).IsUnique();
 
         builder.HasMany(e => e.Items)
