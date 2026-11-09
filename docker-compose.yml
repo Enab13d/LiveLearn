@@ -74,6 +74,24 @@ services:
     networks:
       - livelearn-private-network
 
+  ordering-service:
+    image: ${DOCKER_REGISTRY-}ordering-service
+    build:
+      context: .
+      dockerfile: src/services/Ordering/LiveLearn.Ordering.API/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
+      - ConnectionStrings__OrderingDb=Host=postgres;Port=5432;Database=livelearn_ordering;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};GSS Encryption Mode=Disable
+    networks:
+      - livelearn-private-network
+
   postgres:
     image: postgres
     restart: unless-stopped
