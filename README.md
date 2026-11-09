@@ -54,5 +54,45 @@ dotnet user-secrets set "RabbitMQ:Password" "YOUR_PASS" \
     -c WriteDbContext \
     -s src/services/Assessment/LiveLearn.Assessment.API
 
+# Enrollment service
+*init and set user-secrets*
+dotnet user-secrets init --project src/services/Enrollment/LiveLearn.Enrollment.API
+
+dotnet user-secrets set "ConnectionStrings:EnrollmentDb" \
+  "Host=localhost;Port=5432;Database=livelearn_enrollment;Username=YOUR_USERNAME;Password=YOUR_PASS" \
+  --project src/services/Enrollment/LiveLearn.Enrollment.API
+
+dotnet user-secrets set "RabbitMQ:Username" "YOUR_USERNAME" \
+--project "src/services/Enrollment/LiveLearn.Enrollment.API"
+
+dotnet user-secrets set "RabbitMQ:Password" "YOUR_PASS" \
+--project "src/services/Enrollment/LiveLearn.Enrollment.API"
+
+*Create migrations*
+ dotnet ef migrations add InitialCreate \
+    -p src/services/Enrollment/LiveLearn.Enrollment.Infrastructure \
+    -c WriteDbContext \
+    -s src/services/Enrollment/LiveLearn.Enrollment.API
+
+# Ordering service
+*init and set user-secrets*
+dotnet user-secrets init --project src/services/Ordering/LiveLearn.Ordering.API
+
+dotnet user-secrets set "ConnectionStrings:OrderingDb" \
+  "Host=localhost;Port=5432;Database=livelearn_ordering;Username=YOUR_USERNAME;Password=YOUR_PASS" \
+  --project src/services/Ordering/LiveLearn.Ordering.API
+
+dotnet user-secrets set "RabbitMQ:Username" "YOUR_USERNAME" \
+--project "src/services/Ordering/LiveLearn.Ordering.API"
+
+dotnet user-secrets set "RabbitMQ:Password" "YOUR_PASS" \
+--project "src/services/Ordering/LiveLearn.Ordering.API"
+
+*Create migrations*
+ dotnet ef migrations add InitialCreate \
+    -p src/services/Ordering/LiveLearn.Ordering.Infrastructure \
+    -c WriteDbContext \
+    -s src/services/Ordering/LiveLearn.Ordering.API
+
 **Start in dev mode**
 docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
