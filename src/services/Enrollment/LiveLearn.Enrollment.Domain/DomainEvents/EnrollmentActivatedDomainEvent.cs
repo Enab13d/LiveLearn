@@ -8,7 +8,5 @@ public sealed record EnrollmentActivatedDomainEvent(
     Guid StudentId,
     Guid CourseId,
     long Version,
-    long CourseRevision,
-    Guid? OrderId,
-    Guid? OrderLineId
+    long CourseRevision
 ) : IDomainEvent;

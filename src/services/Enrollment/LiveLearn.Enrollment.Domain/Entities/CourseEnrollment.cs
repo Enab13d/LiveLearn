@@ -55,8 +55,7 @@ public sealed class CourseEnrollment : AggregateRoot<Guid>
 
         enrollment._items.AddRange(enrollment.BuildItems(snapshot, new Dictionary<Guid, DateTimeOffset>()));
 
-        enrollment.RaiseDomainEvent(new EnrollmentCreatedDomainEvent(
-            id, studentId, courseId, enrollment.Version, enrollment.CourseRevision, orderId, orderLineId));
+        enrollment.RaiseDomainEvent(new EnrollmentCreatedDomainEvent(id, studentId, courseId, enrollment.Version, enrollment.CourseRevision));
 
         return enrollment;
     }
@@ -112,7 +111,7 @@ public sealed class CourseEnrollment : AggregateRoot<Guid>
         // A course completed once stays completed and never raises a second CourseCompletedDomainEvent.
         Status = CompletedAt is not null ? EnrollmentStatus.Completed : EnrollmentStatus.Active;
 
-        RaiseDomainEvent(new EnrollmentActivatedDomainEvent(Id, StudentId, CourseId, Version, CourseRevision, OrderId, OrderLineId));
+        RaiseDomainEvent(new EnrollmentActivatedDomainEvent(Id, StudentId, CourseId, Version, CourseRevision));
 
         TryComplete(reactivatedAt);
     }

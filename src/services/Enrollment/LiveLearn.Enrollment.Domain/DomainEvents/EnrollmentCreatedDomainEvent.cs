@@ -4,11 +4,4 @@ namespace LiveLearn.Enrollment.Domain.DomainEvents;
 
 
 public sealed record EnrollmentCreatedDomainEvent(
-    Guid EnrollmentId,
-    Guid StudentId,
-    Guid CourseId,
-    long Version,
-    long CourseRevision,
-    Guid? OrderId,
-    Guid? OrderLineId
-) : IDomainEvent;
+    Guid EnrollmentId, Guid StudentId, Guid CourseId, long Version, long CourseRevision) : IDomainEvent;
