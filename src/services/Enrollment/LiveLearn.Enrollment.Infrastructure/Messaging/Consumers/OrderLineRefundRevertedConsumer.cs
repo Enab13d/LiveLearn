@@ -1,6 +1,5 @@
 using LiveLearn.Contracts.Payment;
 using LiveLearn.Enrollment.Application.Commands;
-using LiveLearn.Enrollment.Domain.Enums;
 using LiveLearn.Enrollment.Infrastructure.Contexts;
 using MassTransit;
 using MediatR;
@@ -9,39 +8,39 @@ using Microsoft.Extensions.Logging;
 namespace LiveLearn.Enrollment.Infrastructure.Messaging.Consumers;
 
 
-internal sealed class RefundCompletedConsumer(ISender mediator, ILogger<RefundCompletedConsumer> logger) : IConsumer<RefundCompletedEvent>
+// The refund failed at Stripe, so the access its OrderLineRefunded revoked comes back.
+internal sealed class OrderLineRefundRevertedConsumer(ISender mediator, ILogger<OrderLineRefundRevertedConsumer> logger) : IConsumer<OrderLineRefundReverted>
 {
-    public async Task Consume(ConsumeContext<RefundCompletedEvent> context)
+    public async Task Consume(ConsumeContext<OrderLineRefundReverted> context)
     {
         var msg = context.Message;
 
         logger.LogInformation(
             "Processing message {messageName}, data: {@message}",
-            nameof(RefundCompletedEvent), msg);
+            nameof(OrderLineRefundReverted), msg);
 
-        // Single-course refund has no order line; null matches enrollments created without one. Replaced by OrderLineRefundedConsumer.
-        var result = await mediator.Send(new RevokeEnrollmentCommand(msg.StudentId, msg.CourseId, RevocationReason.Refund, OrderLineId: null), context.CancellationToken);
+        var result = await mediator.Send(new RestoreRefundedEnrollmentCommand(msg.StudentId, msg.CourseId, msg.OrderId, msg.OrderLineId), context.CancellationToken);
 
         if (result.IsSuccess)
         {
             logger.LogInformation(
                 "Successfully processed message {messageName}",
-                nameof(RefundCompletedEvent));
+                nameof(OrderLineRefundReverted));
         }
         else
         {
             logger.LogWarning(
                 "Failed to process message {messageName}. Errors: {@errors}",
-                nameof(RefundCompletedEvent), result.Errors);
+                nameof(OrderLineRefundReverted), result.Errors);
         }
     }
 }
 
-internal sealed class RefundCompletedConsumerDefinition : ConsumerDefinition<RefundCompletedConsumer>
+internal sealed class OrderLineRefundRevertedConsumerDefinition : ConsumerDefinition<OrderLineRefundRevertedConsumer>
 {
     protected override void ConfigureConsumer(
         IReceiveEndpointConfigurator endpointConfigurator,
-        IConsumerConfigurator<RefundCompletedConsumer> consumerConfigurator,
+        IConsumerConfigurator<OrderLineRefundRevertedConsumer> consumerConfigurator,
         IRegistrationContext context)
     {
         endpointConfigurator.UseMessageRetry(cfg =>
