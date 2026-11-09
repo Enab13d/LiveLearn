@@ -2,6 +2,7 @@
 using LiveLearn.Ordering.Infrastructure.Configuration;
 using LiveLearn.Ordering.Infrastructure.Contexts;
 using LiveLearn.Ordering.Infrastructure.Messaging;
+using LiveLearn.Ordering.Infrastructure.Messaging.Consumers;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -49,6 +50,9 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IEventBus, MassTransitEventBus>();
         services.AddMassTransit(x =>
         {
+            x.AddConsumer<CourseArchivedConsumer, CourseArchivedConsumerDefinition>();
+            x.AddConsumer<CoursePriceChangedConsumer, CoursePriceChangedConsumerDefinition>();
+            x.AddConsumer<CoursePublishedConsumer, CoursePublishedConsumerDefinition>();
             x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("ordering", false));
             x.UsingRabbitMq((context, cfg) =>
             {

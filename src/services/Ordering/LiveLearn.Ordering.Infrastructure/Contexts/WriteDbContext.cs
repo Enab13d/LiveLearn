@@ -1,4 +1,5 @@
-﻿using MassTransit;
+﻿using LiveLearn.Ordering.Infrastructure.Models;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 namespace LiveLearn.Ordering.Infrastructure.Contexts;
@@ -6,6 +7,8 @@ namespace LiveLearn.Ordering.Infrastructure.Contexts;
 
 public sealed class WriteDbContext(DbContextOptions<WriteDbContext> options) : DbContext(options)
 {
+    public DbSet<CourseProjection> CourseProjections { get; set; } = null!;
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
