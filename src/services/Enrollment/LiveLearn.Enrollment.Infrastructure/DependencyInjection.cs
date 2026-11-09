@@ -58,8 +58,7 @@ public static class DependencyInjectionExtensions
         {
             x.AddConsumer<CoursePublishedConsumer, CoursePublishedConsumerDefinition>();
             x.AddConsumer<CourseStructureRevisedConsumer, CourseStructureRevisedConsumerDefinition>();
-            x.AddConsumer<PaymentConfirmedConsumer, PaymentConfirmedConsumerDefinition>();
-            x.AddConsumer<PaymentFailedConsumer, PaymentFailedConsumerDefinition>();
+            x.AddConsumer<EnrollStudentConsumer, EnrollStudentConsumerDefinition>();
             x.AddConsumer<RefundCompletedConsumer, RefundCompletedConsumerDefinition>();
             x.AddConsumer<TaskCompletedConsumer, TaskCompletedConsumerDefinition>();
             x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("enrollment", false));
