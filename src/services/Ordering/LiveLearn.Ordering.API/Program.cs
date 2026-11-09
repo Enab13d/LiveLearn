@@ -7,7 +7,9 @@ using LiveLearn.Ordering.Application;
 using LiveLearn.Ordering.Application.Services;
 using LiveLearn.Ordering.Infrastructure;
 using LiveLearn.Ordering.Infrastructure.Configuration;
+using LiveLearn.Ordering.Infrastructure.Contexts;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
@@ -127,6 +129,10 @@ try
     if (app.Environment.IsDevelopment())
     {
         app.MapOpenApi();
+
+        using var scope = app.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<WriteDbContext>();
+        await db.Database.MigrateAsync();
     }
 
     app.UseExceptionHandler();
