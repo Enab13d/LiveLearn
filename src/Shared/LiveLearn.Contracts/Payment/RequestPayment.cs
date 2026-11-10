@@ -8,11 +8,13 @@ public sealed record RequestPayment(
     IReadOnlyList<RequestPaymentLine> Lines
 );
 
-// One order line to charge. Price and Currency are as placed; Payment validates them (D8).
+// One order line to charge. CourseTitle names the Checkout line item the student sees; Price and
+// Currency are as placed, and Payment validates them (D8).
 public sealed record RequestPaymentLine(
     Guid OrderLineId,
     Guid CourseId,
     Guid TutorId,
+    string CourseTitle,
     decimal Price,
     string Currency
 );

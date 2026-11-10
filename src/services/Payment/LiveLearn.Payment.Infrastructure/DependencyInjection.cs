@@ -1,10 +1,12 @@
 ﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Payment.Application.Configuration;
 using LiveLearn.Payment.Application.Repositories;
+using LiveLearn.Payment.Application.Services;
 using LiveLearn.Payment.Infrastructure.Configuration;
 using LiveLearn.Payment.Infrastructure.Contexts;
 using LiveLearn.Payment.Infrastructure.Messaging;
 using LiveLearn.Payment.Infrastructure.Repositories;
+using LiveLearn.Payment.Infrastructure.Services;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -105,6 +107,7 @@ public static class DependencyInjectionExtensions
             .ValidateOnStart();
         // StripeClient is thread-safe and reuses its HTTP connections, so one instance serves the app (D9).
         services.AddSingleton(sp => new StripeClient(sp.GetRequiredService<IOptions<StripeOptions>>().Value.SecretKey));
+        services.AddScoped<ICheckoutGateway, StripeCheckoutGateway>();
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DependencyInjectionExtensions).Assembly));
 

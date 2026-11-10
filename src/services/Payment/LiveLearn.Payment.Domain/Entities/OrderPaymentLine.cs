@@ -15,6 +15,9 @@ public sealed class OrderPaymentLine : Entity<Guid>
     // Course owner at placement; receives the tutor share.
     public Guid TutorId { get; private set; }
 
+    // Title at placement; names the Checkout line item.
+    public string CourseTitle { get; private set; } = null!;
+
     public Money Price { get; private set; } = null!;
 
     // Snapshotted at creation so a later rate change never touches existing sales (D5).
@@ -22,7 +25,7 @@ public sealed class OrderPaymentLine : Entity<Guid>
 
     private OrderPaymentLine() { }
 
-    internal static OrderPaymentLine Create(Guid orderPaymentId, Guid orderLineId, Guid courseId, Guid tutorId, Money price, decimal tutorShareRate)
+    internal static OrderPaymentLine Create(Guid orderPaymentId, Guid orderLineId, Guid courseId, Guid tutorId, string courseTitle, Money price, decimal tutorShareRate)
     {
         return new OrderPaymentLine()
         {
@@ -31,6 +34,7 @@ public sealed class OrderPaymentLine : Entity<Guid>
             OrderLineId = orderLineId,
             CourseId = courseId,
             TutorId = tutorId,
+            CourseTitle = courseTitle,
             Price = price,
             TutorShareRate = tutorShareRate,
         };

@@ -18,6 +18,10 @@ public sealed class OrderPayment : AggregateRoot<Guid>
 
     public Money Total { get; private set; } = null!;
 
+    // Fixes the Checkout Session's expiry, so a retried create sends the same parameters under its
+    // idempotency key (D14).
+    public DateTimeOffset CreatedAt { get; private set; }
+
     public string? CheckoutSessionId { get; private set; }
 
     public string? CheckoutUrl { get; private set; }
@@ -38,7 +42,7 @@ public sealed class OrderPayment : AggregateRoot<Guid>
 
     private OrderPayment() { }
 
-    public static Result<OrderPayment> Create(Guid orderId, Guid studentId, IReadOnlyCollection<OrderPaymentLineRequest> lines, decimal tutorShareRate)
+    public static Result<OrderPayment> Create(Guid orderId, Guid studentId, IReadOnlyCollection<OrderPaymentLineRequest> lines, decimal tutorShareRate, DateTimeOffset createdAt)
     {
         if (lines.Count == 0)
             return Result<OrderPayment>.Failure(OrderPaymentErrors.NoLines);
@@ -49,6 +53,7 @@ public sealed class OrderPayment : AggregateRoot<Guid>
             OrderId = orderId,
             StudentId = studentId,
             Status = OrderPaymentStatus.AwaitingPayment,
+            CreatedAt = createdAt,
         };
 
         foreach (var line in lines)
@@ -60,7 +65,7 @@ public sealed class OrderPayment : AggregateRoot<Guid>
             if (price.Value.Amount <= 0)
                 return Result<OrderPayment>.Failure(OrderPaymentErrors.NonPositivePrice);
 
-            payment._lines.Add(OrderPaymentLine.Create(payment.Id, line.OrderLineId, line.CourseId, line.TutorId, price.Value, tutorShareRate));
+            payment._lines.Add(OrderPaymentLine.Create(payment.Id, line.OrderLineId, line.CourseId, line.TutorId, line.CourseTitle, price.Value, tutorShareRate));
         }
 
         // Money supports USD only, so all lines share one currency and the sum can't mix currencies.

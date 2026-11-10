@@ -20,6 +20,8 @@ internal sealed class OrderPaymentConfiguration : IEntityTypeConfiguration<Order
 
         builder.Property(e => e.Status).IsRequired().HasConversion<string>().HasMaxLength(32);
 
+        builder.Property(e => e.CreatedAt).IsRequired();
+
         builder.ComplexProperty(e => e.Total, money =>
         {
             money.Property(m => m.Amount).IsRequired().HasPrecision(19, 4);
