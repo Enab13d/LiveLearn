@@ -1,10 +1,13 @@
 ﻿using LiveLearn.BuildingBlocks;
+using LiveLearn.Ordering.Application.Configuration;
 using LiveLearn.Ordering.Application.Repositories;
+using LiveLearn.Ordering.Application.Services;
 using LiveLearn.Ordering.Infrastructure.Configuration;
 using LiveLearn.Ordering.Infrastructure.Contexts;
 using LiveLearn.Ordering.Infrastructure.Messaging;
 using LiveLearn.Ordering.Infrastructure.Messaging.Consumers;
 using LiveLearn.Ordering.Infrastructure.Repositories;
+using LiveLearn.Ordering.Infrastructure.Services;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -98,6 +101,14 @@ public static class DependencyInjectionExtensions
         var redisOptions = ConfigurationOptions.Parse(redisConnectionString);
         redisOptions.AbortOnConnectFail = false;
         services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(redisOptions));
+
+        // The section is optional — CartOptions carries the O3 defaults.
+        services.AddOptions<CartOptions>()
+            .Bind(configuration.GetSection(CartOptions.SectionName))
+            .Validate(o => o.MaxItems > 0, "Cart:MaxItems must be positive")
+            .Validate(o => o.Ttl > TimeSpan.Zero, "Cart:Ttl must be positive")
+            .ValidateOnStart();
+        services.AddScoped<ICartStore, RedisCartStore>();
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DependencyInjectionExtensions).Assembly));
 
