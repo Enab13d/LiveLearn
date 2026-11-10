@@ -21,6 +21,10 @@ public sealed class OrderLine : Entity<Guid>
 
     public OrderLineStatus Status { get; private set; }
 
+    // Enrolled, or EnrollmentFailed with its refund requested, or refunded / refund failed (O6).
+    public bool IsFinal => Status is OrderLineStatus.Enrolled or OrderLineStatus.EnrollmentFailed
+        or OrderLineStatus.Refunded or OrderLineStatus.RefundFailed;
+
     private OrderLine() { }
 
     internal static OrderLine Create(Guid orderId, Guid studentId, OrderLineSnapshot snapshot)
@@ -35,5 +39,34 @@ public sealed class OrderLine : Entity<Guid>
             Price = snapshot.Price,
             Status = OrderLineStatus.Pending,
         };
+    }
+
+    // Each transition applies only from its source status; anything else is a no-op, so redelivered
+    // or out-of-order messages (e.g. a late payment's refund of a Cancelled line) change nothing.
+    internal void MarkEnrolled()
+    {
+        if (Status == OrderLineStatus.Pending) Status = OrderLineStatus.Enrolled;
+    }
+
+    internal void MarkEnrollmentFailed()
+    {
+        if (Status == OrderLineStatus.Pending) Status = OrderLineStatus.EnrollmentFailed;
+    }
+
+    internal void MarkRefunded()
+    {
+        // A student refunds only an Enrolled line; the saga refunds an EnrollmentFailed one.
+        if (Status is OrderLineStatus.Enrolled or OrderLineStatus.EnrollmentFailed)
+            Status = OrderLineStatus.Refunded;
+    }
+
+    internal void MarkRefundFailed()
+    {
+        if (Status == OrderLineStatus.Refunded) Status = OrderLineStatus.RefundFailed;
+    }
+
+    internal void Cancel()
+    {
+        if (Status == OrderLineStatus.Pending) Status = OrderLineStatus.Cancelled;
     }
 }
