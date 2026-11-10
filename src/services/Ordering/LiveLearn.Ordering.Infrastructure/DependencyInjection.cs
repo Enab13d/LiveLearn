@@ -92,6 +92,9 @@ public static class DependencyInjectionExtensions
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IOrderRepository, OrderRepository>();
+        services.AddScoped<ICourseProjectionLookup, CourseProjectionLookup>();
+        services.AddScoped<IEnrollmentLookup, EnrollmentLookup>();
+        services.AddScoped<IActiveOrderLineLookup, ActiveOrderLineLookup>();
 
         var redisConnectionString = configuration.GetConnectionString("Redis")
             ?? throw new InvalidOperationException("Connection string 'Redis' is not configured.");

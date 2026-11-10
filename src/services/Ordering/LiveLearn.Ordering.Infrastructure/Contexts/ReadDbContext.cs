@@ -8,6 +8,8 @@ internal sealed class ReadDbContext(DbContextOptions<ReadDbContext> options) : D
 {
     public DbSet<OrderReadModel> Orders { get; set; } = null!;
     public DbSet<OrderLineReadModel> OrderLines { get; set; } = null!;
+    public DbSet<CourseProjectionReadModel> CourseProjections { get; set; } = null!;
+    public DbSet<EnrollmentProjectionReadModel> EnrollmentProjections { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
