@@ -1,7 +1,7 @@
 ﻿namespace LiveLearn.Ordering.Domain.Enums;
 
-// Pending → Enrolled → Refunded → RefundFailed, Pending → EnrollmentFailed → Refunded,
-// Pending → Cancelled.
+// Pending → Enrolled → Refunded → RefundFailed, Pending → EnrollmentFailed → Refunded → RefundFailed,
+// Pending → Cancelled. RefundFailed may skip Refunded when its message arrives first (O6).
 public enum OrderLineStatus
 {
     Pending,

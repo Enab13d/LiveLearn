@@ -62,7 +62,10 @@ public sealed class OrderLine : Entity<Guid>
 
     internal void MarkRefundFailed()
     {
-        if (Status == OrderLineStatus.Refunded) Status = OrderLineStatus.RefundFailed;
+        // Not only from Refunded: OrderLineRefundFailed can overtake OrderLineRefunded, and it is published
+        // only for a confirmed refund, so the line skips Refunded; the late refund then finds a final line.
+        if (Status is OrderLineStatus.Enrolled or OrderLineStatus.EnrollmentFailed or OrderLineStatus.Refunded)
+            Status = OrderLineStatus.RefundFailed;
     }
 
     internal void Cancel()
