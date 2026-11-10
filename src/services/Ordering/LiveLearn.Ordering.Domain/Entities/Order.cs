@@ -1,5 +1,6 @@
 ﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Ordering.Domain.Common;
+using LiveLearn.Ordering.Domain.DomainEvents;
 using LiveLearn.Ordering.Domain.Enums;
 using LiveLearn.Ordering.Domain.Errors;
 
@@ -36,6 +37,8 @@ public sealed class Order : AggregateRoot<Guid>
         };
 
         order._lines.AddRange(lines.Select(e => OrderLine.Create(id, studentId, e)));
+
+        order.RaiseDomainEvent(new OrderPlacedDomainEvent(id, studentId, placedAt));
 
         return order;
     }
