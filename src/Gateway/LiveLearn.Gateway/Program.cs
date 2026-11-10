@@ -149,6 +149,7 @@ try
             options.AddDocument("assessment", "Assessment", "/assessment/openapi/v1.json");
             options.AddDocument("enrollment", "Enrollment", "/enrollment/openapi/v1.json");
             options.AddDocument("ordering", "Ordering", "/ordering/openapi/v1.json");
+            options.AddDocument("payment", "Payment", "/payment/openapi/v1.json");
             options
             .AddPreferredSecuritySchemes("OAuth2")
             .AddAuthorizationCodeFlow("OAuth2", flow =>

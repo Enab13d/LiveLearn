@@ -92,6 +92,22 @@ services:
     networks:
       - livelearn-private-network
 
+  payment-service:
+    image: ${DOCKER_REGISTRY-}payment-service
+    build:
+      context: .
+      dockerfile: src/services/Payment/LiveLearn.Payment.API/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
+      - ConnectionStrings__PaymentDb=Host=postgres;Port=5432;Database=livelearn_payment;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};GSS Encryption Mode=Disable
+    networks:
+      - livelearn-private-network
+
   postgres:
     image: postgres
     restart: unless-stopped
