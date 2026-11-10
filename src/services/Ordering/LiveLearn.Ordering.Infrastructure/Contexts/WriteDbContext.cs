@@ -1,4 +1,5 @@
-﻿using LiveLearn.Ordering.Infrastructure.Models;
+﻿using LiveLearn.Ordering.Domain.Entities;
+using LiveLearn.Ordering.Infrastructure.Models;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,6 +10,7 @@ public sealed class WriteDbContext(DbContextOptions<WriteDbContext> options) : D
 {
     public DbSet<CourseProjection> CourseProjections { get; set; } = null!;
     public DbSet<EnrollmentProjection> EnrollmentProjections { get; set; } = null!;
+    public DbSet<Order> Orders { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

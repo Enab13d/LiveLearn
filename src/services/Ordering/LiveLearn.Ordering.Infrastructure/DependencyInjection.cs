@@ -1,8 +1,10 @@
 ﻿using LiveLearn.BuildingBlocks;
+using LiveLearn.Ordering.Application.Repositories;
 using LiveLearn.Ordering.Infrastructure.Configuration;
 using LiveLearn.Ordering.Infrastructure.Contexts;
 using LiveLearn.Ordering.Infrastructure.Messaging;
 using LiveLearn.Ordering.Infrastructure.Messaging.Consumers;
+using LiveLearn.Ordering.Infrastructure.Repositories;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -84,6 +86,7 @@ public static class DependencyInjectionExtensions
             options.UseNpgsql(connectionString).UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IOrderRepository, OrderRepository>();
 
         var redisConnectionString = configuration.GetConnectionString("Redis")
             ?? throw new InvalidOperationException("Connection string 'Redis' is not configured.");
