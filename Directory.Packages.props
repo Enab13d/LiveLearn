@@ -32,6 +32,10 @@
     <PackageVersion Include="StackExchange.Redis" Version="2.13.1" />
     <PackageVersion Include="AWSSDK.S3" Version="4.0.102.4" />
   </ItemGroup>
+  <!-- Payments -->
+  <ItemGroup>
+    <PackageVersion Include="Stripe.net" Version="53.1.0" />
+  </ItemGroup>
   <!-- Documents / Email -->
   <ItemGroup>
     <PackageVersion Include="QuestPDF" Version="2026.5.0" />

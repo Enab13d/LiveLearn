@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Stripe;
 
 namespace LiveLearn.Payment.Infrastructure;
 
@@ -77,6 +79,18 @@ public static class DependencyInjectionExtensions
             options.UseNpgsql(connectionString).UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        services.AddOptions<StripeOptions>()
+            .Bind(configuration.GetSection(StripeOptions.SectionName))
+            .Validate(o => !string.IsNullOrWhiteSpace(o.SecretKey), "Stripe:SecretKey is required")
+            .Validate(o => !string.IsNullOrWhiteSpace(o.PlatformWebhookSecret), "Stripe:PlatformWebhookSecret is required")
+            .Validate(o => !string.IsNullOrWhiteSpace(o.ConnectWebhookSecret), "Stripe:ConnectWebhookSecret is required")
+            .Validate(o => !string.IsNullOrWhiteSpace(o.ThinWebhookSecret), "Stripe:ThinWebhookSecret is required")
+            .Validate(o => Uri.IsWellFormedUriString(o.CheckoutSuccessUrl, UriKind.Absolute), "Stripe:CheckoutSuccessUrl must be an absolute URL")
+            .Validate(o => Uri.IsWellFormedUriString(o.CheckoutCancelUrl, UriKind.Absolute), "Stripe:CheckoutCancelUrl must be an absolute URL")
+            .ValidateOnStart();
+        // StripeClient is thread-safe and reuses its HTTP connections, so one instance serves the app (D9).
+        services.AddSingleton(sp => new StripeClient(sp.GetRequiredService<IOptions<StripeOptions>>().Value.SecretKey));
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DependencyInjectionExtensions).Assembly));
 
