@@ -8,25 +8,15 @@ namespace LiveLearn.Ordering.Application.Commands;
 
 internal sealed class AddToCartCommandHandler(
     ICurrentUser currentUser,
-    ICourseProjectionLookup courseLookup,
-    IEnrollmentLookup enrollmentLookup,
-    IActiveOrderLineLookup activeOrderLineLookup,
+    PurchaseFactsReader purchaseFactsReader,
     ICartStore cartStore,
     TimeProvider timeProvider) : ICommandHandler<AddToCartCommand>
 {
     public async Task<Result> Handle(AddToCartCommand request, CancellationToken ct)
     {
         var studentId = currentUser.UserId;
-        Guid[] courseIds = [request.CourseId];
 
-        var courses = await courseLookup.GetByIdsAsync(courseIds, ct);
-        var enrolled = await enrollmentLookup.GetEnrolledCourseIdsAsync(studentId, courseIds, ct);
-        var activeOrders = await activeOrderLineLookup.GetOrderIdsByCourseAsync(studentId, courseIds, ct);
-
-        var facts = new PurchaseFacts(
-            courses.GetValueOrDefault(request.CourseId),
-            enrolled.Contains(request.CourseId),
-            activeOrders.TryGetValue(request.CourseId, out var orderId) ? orderId : null);
+        var facts = (await purchaseFactsReader.ReadAsync(studentId, [request.CourseId], ct))[request.CourseId];
 
         var availability = PurchaseRules.Evaluate(facts, studentId);
         if (!availability.IsAvailable) return Result.Failure(CartErrors.Unavailable(availability));

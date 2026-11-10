@@ -1,5 +1,6 @@
 using FluentValidation;
 using LiveLearn.BuildingBlocks;
+using LiveLearn.Ordering.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LiveLearn.Ordering.Application;
@@ -16,6 +17,8 @@ public static class DependencyInjectionExtensions
             cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
             cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
         });
+
+        services.AddScoped<PurchaseFactsReader>();
 
         return services;
     }
