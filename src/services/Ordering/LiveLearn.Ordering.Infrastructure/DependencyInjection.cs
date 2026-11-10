@@ -57,6 +57,8 @@ public static class DependencyInjectionExtensions
             x.AddConsumer<CoursePublishedConsumer, CoursePublishedConsumerDefinition>();
             x.AddConsumer<EnrollmentActivatedConsumer, EnrollmentActivatedConsumerDefinition>();
             x.AddConsumer<EnrollmentRevokedConsumer, EnrollmentRevokedConsumerDefinition>();
+            x.AddConsumer<OrderLineRefundedConsumer, OrderLineRefundedConsumerDefinition>();
+            x.AddConsumer<OrderLineRefundFailedConsumer, OrderLineRefundFailedConsumerDefinition>();
             x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("ordering", false));
             x.UsingRabbitMq((context, cfg) =>
             {
