@@ -1,7 +1,10 @@
 ﻿using LiveLearn.BuildingBlocks;
+using LiveLearn.Payment.Application.Configuration;
+using LiveLearn.Payment.Application.Repositories;
 using LiveLearn.Payment.Infrastructure.Configuration;
 using LiveLearn.Payment.Infrastructure.Contexts;
 using LiveLearn.Payment.Infrastructure.Messaging;
+using LiveLearn.Payment.Infrastructure.Repositories;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -79,6 +82,17 @@ public static class DependencyInjectionExtensions
             options.UseNpgsql(connectionString).UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IOrderPaymentRepository, OrderPaymentRepository>();
+
+        // Both sections are optional — the options carry the D5 / D6 defaults.
+        services.AddOptions<RevenueShareOptions>()
+            .Bind(configuration.GetSection(RevenueShareOptions.SectionName))
+            .Validate(o => o.TutorShareRate is > 0 and < 1, "RevenueShare:TutorShareRate must be between 0 and 1")
+            .ValidateOnStart();
+        services.AddOptions<RefundOptions>()
+            .Bind(configuration.GetSection(RefundOptions.SectionName))
+            .Validate(o => o.WindowDays > 0, "Refund:WindowDays must be positive")
+            .ValidateOnStart();
 
         services.AddOptions<StripeOptions>()
             .Bind(configuration.GetSection(StripeOptions.SectionName))
