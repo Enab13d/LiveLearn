@@ -14,7 +14,5 @@ public static class EnrollmentErrors
 
     public static Error AlreadyEnrolled => Error.Conflict($"{_prefix}.AlreadyEnrolled", "Student already has access to this course");
 
-    public static Error NotRevokedByRefund => Error.Conflict($"{_prefix}.NotRevokedByRefund", "Enrollment is not revoked by this order line's refund");
-
     public static Error CourseStructureUnavailable => Error.Conflict($"{_prefix}.CourseStructureUnavailable", "Course structure is not available yet");
 }
