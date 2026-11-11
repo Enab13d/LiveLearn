@@ -2,7 +2,7 @@
 
 // No API version here: Stripe.net pins it per package version (StripeConfiguration.ApiVersion); webhook
 // destinations must be created with that same version.
-internal sealed class StripeOptions
+public sealed class StripeOptions
 {
     public static string SectionName => "Stripe";
 
