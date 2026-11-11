@@ -1,8 +1,12 @@
-﻿using LiveLearn.Payment.Infrastructure.Configuration;
+﻿using LiveLearn.BuildingBlocks;
+using LiveLearn.Payment.Application.Commands;
+using LiveLearn.Payment.Infrastructure.Configuration;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Stripe;
+using Stripe.Checkout;
 
 namespace LiveLearn.Payment.API.Controllers;
 
@@ -12,8 +16,10 @@ namespace LiveLearn.Payment.API.Controllers;
 [Authorize]
 [ApiController]
 [Route("webhooks")]
-public sealed class WebhooksController(IOptions<StripeOptions> stripeOptions, ILogger<WebhooksController> logger)
-    : ControllerBase
+public sealed class WebhooksController(
+    ISender mediator,
+    IOptions<StripeOptions> stripeOptions,
+    ILogger<WebhooksController> logger) : ControllerBase
 {
     [AllowAnonymous]
     [HttpPost("stripe")]
@@ -36,18 +42,34 @@ public sealed class WebhooksController(IOptions<StripeOptions> stripeOptions, IL
             return BadRequest();
         }
 
+        Result result;
         switch (stripeEvent.Data.Object)
         {
+            case Session session when stripeEvent.Type == EventTypes.CheckoutSessionCompleted:
+                result = await mediator.Send(new ConfirmPaymentCommand(session.Id), ct);
+                break;
+
+            case Session session when stripeEvent.Type == EventTypes.CheckoutSessionExpired:
+                result = await mediator.Send(new ExpirePaymentCommand(session.Id), ct);
+                break;
+
             // Disputes are out of scope: logged for a person to handle (D7).
             case Dispute dispute:
                 logger.LogWarning(
                     "ALERT: Stripe dispute event {EventType} {EventId} for dispute {DisputeId}",
                     stripeEvent.Type, stripeEvent.Id, dispute.Id);
-                break;
+                return Ok();
 
             default:
                 logger.LogInformation("Ignored Stripe event {EventType} {EventId}", stripeEvent.Type, stripeEvent.Id);
-                break;
+                return Ok();
+        }
+
+        // 5xx, not the error's own status: any failure here is worth a redelivery (D15).
+        if (!result.IsSuccess)
+        {
+            logger.LogError("Stripe event {EventType} {EventId} failed: {@Errors}", stripeEvent.Type, stripeEvent.Id, result.Errors);
+            return StatusCode(StatusCodes.Status500InternalServerError);
         }
 
         return Ok();
