@@ -4,5 +4,7 @@ public enum OrderPaymentStatus
 {
     AwaitingPayment,
     Paid,
-    Expired
+    Expired,
+    // Stripe refused the Checkout Session itself; terminal (D14).
+    Rejected
 }

@@ -58,6 +58,7 @@ public static class DependencyInjectionExtensions
         {
             x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("payment", false));
 
+            x.AddConsumer<CreateCheckoutSessionConsumer, CreateCheckoutSessionConsumerDefinition>();
             x.AddConsumer<RequestPaymentConsumer, RequestPaymentConsumerDefinition>();
 
             x.UsingRabbitMq((context, cfg) =>

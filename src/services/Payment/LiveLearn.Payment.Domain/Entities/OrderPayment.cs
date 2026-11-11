@@ -85,6 +85,16 @@ public sealed class OrderPayment : AggregateRoot<Guid>
         CheckoutUrl = url;
     }
 
+    // Only before a session exists: once the student can pay, the outcome comes from Stripe (paid / expired).
+    public void Reject(string reason, DateTimeOffset rejectedAt)
+    {
+        if (Status != OrderPaymentStatus.AwaitingPayment || CheckoutSessionId is not null) return;
+
+        Status = OrderPaymentStatus.Rejected;
+
+        RaiseDomainEvent(new OrderPaymentRejectedDomainEvent(Id, OrderId, reason, rejectedAt));
+    }
+
     public void MarkPaid(string chargeId, Money fee, DateTimeOffset paidAt, TimeSpan refundWindow)
     {
         if (Status != OrderPaymentStatus.AwaitingPayment) return;
