@@ -61,6 +61,7 @@ public static class DependencyInjectionExtensions
             x.AddConsumer<CreateCheckoutSessionConsumer, CreateCheckoutSessionConsumerDefinition>();
             x.AddConsumer<RequestPaymentConsumer, RequestPaymentConsumerDefinition>();
             x.AddConsumer<OrderLineEnrolledConsumer, OrderLineEnrolledConsumerDefinition>();
+            x.AddConsumer<RefundOrderLineConsumer, RefundOrderLineConsumerDefinition>();
 
             x.UsingRabbitMq((context, cfg) =>
             {
