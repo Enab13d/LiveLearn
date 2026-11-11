@@ -130,4 +130,76 @@ public sealed class OrderPayment : AggregateRoot<Guid>
 
         return Result.Success();
     }
+
+    // By the student (needs an enrolled line) or by the saga as compensation; same window either way (D6).
+    // Not a no-op when repeated: a second request is a conflict, and the refund is issued only once.
+    public Result RequestLineRefund(Guid orderLineId, bool byStudent, DateTimeOffset now)
+    {
+        var line = _lines.FirstOrDefault(e => e.OrderLineId == orderLineId);
+        if (line is null) return Result.Failure(OrderPaymentErrors.LineNotFound);
+
+        if (line.Status == OrderPaymentLineStatus.AwaitingPayment)
+            return Result.Failure(OrderPaymentErrors.LineNotPaid);
+
+        if (line.Status != OrderPaymentLineStatus.Paid)
+            return Result.Failure(OrderPaymentErrors.RefundAlreadyRequested);
+
+        // A Paid line means the payment is paid, so the window is set.
+        if (now >= RefundWindowEndsAt!.Value)
+            return Result.Failure(OrderPaymentErrors.RefundWindowClosed);
+
+        if (byStudent && !line.IsEnrolled)
+            return Result.Failure(OrderPaymentErrors.LineNotEnrolled);
+
+        line.MarkRefundRequested();
+
+        RaiseDomainEvent(new LineRefundRequestedDomainEvent(Id, OrderId, orderLineId, now));
+
+        return Result.Success();
+    }
+
+    // Stripe reported the refund succeeded; repeated or late (after a failure) reports are no-ops.
+    public Result MarkLineRefunded(Guid orderLineId, string refundId, DateTimeOffset refundedAt)
+    {
+        var line = _lines.FirstOrDefault(e => e.OrderLineId == orderLineId);
+        if (line is null) return Result.Failure(OrderPaymentErrors.LineNotFound);
+
+        if (line.Status != OrderPaymentLineStatus.RefundRequested) return Result.Success();
+
+        line.MarkRefunded(refundId);
+        RecomputeRefundStatus();
+
+        RaiseDomainEvent(new LineRefundedDomainEvent(Id, OrderId, orderLineId, line.CourseId, StudentId, refundedAt));
+
+        return Result.Success();
+    }
+
+    // Stripe reported the refund failed or canceled, before or after it succeeded; final (D6).
+    public Result MarkLineRefundFailed(Guid orderLineId, DateTimeOffset failedAt)
+    {
+        var line = _lines.FirstOrDefault(e => e.OrderLineId == orderLineId);
+        if (line is null) return Result.Failure(OrderPaymentErrors.LineNotFound);
+
+        if (line.Status is not (OrderPaymentLineStatus.RefundRequested or OrderPaymentLineStatus.Refunded))
+            return Result.Success();
+
+        var wasConfirmed = line.Status == OrderPaymentLineStatus.Refunded;
+
+        line.MarkRefundFailed();
+        RecomputeRefundStatus();
+
+        RaiseDomainEvent(new LineRefundFailedDomainEvent(Id, OrderId, orderLineId, line.CourseId, StudentId, wasConfirmed, failedAt));
+
+        return Result.Success();
+    }
+
+    // Only lines whose money went back count; a failed refund is not a refund.
+    private void RecomputeRefundStatus()
+    {
+        var refunded = _lines.Count(e => e.Status == OrderPaymentLineStatus.Refunded);
+
+        Status = refunded == 0 ? OrderPaymentStatus.Paid
+            : refunded == _lines.Count ? OrderPaymentStatus.Refunded
+            : OrderPaymentStatus.PartiallyRefunded;
+    }
 }

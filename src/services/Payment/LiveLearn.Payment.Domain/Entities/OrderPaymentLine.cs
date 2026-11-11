@@ -54,4 +54,14 @@ public sealed class OrderPaymentLine : Entity<Guid>
     internal void MarkPaid() => Status = OrderPaymentLineStatus.Paid;
 
     internal void MarkEnrolled() => IsEnrolled = true;
+
+    internal void MarkRefundRequested() => Status = OrderPaymentLineStatus.RefundRequested;
+
+    internal void MarkRefunded(string refundId)
+    {
+        Status = OrderPaymentLineStatus.Refunded;
+        RefundId = refundId;
+    }
+
+    internal void MarkRefundFailed() => Status = OrderPaymentLineStatus.RefundFailed;
 }
