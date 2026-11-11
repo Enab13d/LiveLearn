@@ -5,6 +5,7 @@ using LiveLearn.Payment.Application.Services;
 using LiveLearn.Payment.Infrastructure.Configuration;
 using LiveLearn.Payment.Infrastructure.Contexts;
 using LiveLearn.Payment.Infrastructure.Messaging;
+using LiveLearn.Payment.Infrastructure.Messaging.Consumers;
 using LiveLearn.Payment.Infrastructure.Repositories;
 using LiveLearn.Payment.Infrastructure.Services;
 using MassTransit;
@@ -56,6 +57,9 @@ public static class DependencyInjectionExtensions
         services.AddMassTransit(x =>
         {
             x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("payment", false));
+
+            x.AddConsumer<RequestPaymentConsumer, RequestPaymentConsumerDefinition>();
+
             x.UsingRabbitMq((context, cfg) =>
             {
                 cfg.Host(rabbitMQOptions.Host, rabbitMQOptions.VirtualHost, h =>

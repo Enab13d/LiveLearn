@@ -71,6 +71,8 @@ public sealed class OrderPayment : AggregateRoot<Guid>
         // Money supports USD only, so all lines share one currency and the sum can't mix currencies.
         payment.Total = payment._lines.Skip(1).Aggregate(payment._lines[0].Price, (sum, e) => sum + e.Price);
 
+        payment.RaiseDomainEvent(new OrderPaymentCreatedDomainEvent(payment.Id, payment.OrderId));
+
         return payment;
     }
 

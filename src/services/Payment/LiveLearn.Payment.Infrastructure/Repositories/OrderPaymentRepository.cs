@@ -36,6 +36,13 @@ internal sealed class OrderPaymentRepository(WriteDbContext dbContext) : IOrderP
             .FirstOrDefaultAsync(e => e.Id == id, ct);
     }
 
+    public async Task<OrderPayment?> GetByOrderIdAsync(Guid orderId, CancellationToken ct = default)
+    {
+        return await dbContext.OrderPayments
+            .Include(e => e.Lines)
+            .FirstOrDefaultAsync(e => e.OrderId == orderId, ct);
+    }
+
     public void Update(OrderPayment entity)
     {
         dbContext.OrderPayments.Update(entity);
