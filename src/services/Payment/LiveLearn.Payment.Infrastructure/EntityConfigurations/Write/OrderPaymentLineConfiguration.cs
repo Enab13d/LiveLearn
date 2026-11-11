@@ -23,5 +23,11 @@ internal sealed class OrderPaymentLineConfiguration : IEntityTypeConfiguration<O
         });
 
         builder.Property(e => e.TutorShareRate).IsRequired().HasPrecision(5, 4);
+
+        builder.Property(e => e.Status).IsRequired().HasConversion<string>().HasMaxLength(32);
+
+        builder.Property(e => e.IsEnrolled).IsRequired();
+
+        builder.Property(e => e.RefundId).HasMaxLength(255);
     }
 }
