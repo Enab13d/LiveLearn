@@ -105,6 +105,9 @@ public sealed class OrderPayment : AggregateRoot<Guid>
         PaidAt = paidAt;
         RefundWindowEndsAt = paidAt + refundWindow;
 
+        foreach (var line in _lines)
+            line.MarkPaid();
+
         RaiseDomainEvent(new OrderPaymentPaidDomainEvent(Id, OrderId, _lines.Select(e => e.OrderLineId).ToList(), paidAt));
     }
 
@@ -115,5 +118,16 @@ public sealed class OrderPayment : AggregateRoot<Guid>
         Status = OrderPaymentStatus.Expired;
 
         RaiseDomainEvent(new OrderPaymentExpiredDomainEvent(Id, OrderId, expiredAt));
+    }
+
+    // From Ordering's OrderLineEnrolled; only unlocks the student's refund request, so a redelivery is a no-op (D6).
+    public Result MarkLineEnrolled(Guid orderLineId)
+    {
+        var line = _lines.FirstOrDefault(e => e.OrderLineId == orderLineId);
+        if (line is null) return Result.Failure(OrderPaymentErrors.LineNotFound);
+
+        line.MarkEnrolled();
+
+        return Result.Success();
     }
 }

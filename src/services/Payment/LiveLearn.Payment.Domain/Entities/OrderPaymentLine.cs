@@ -1,5 +1,6 @@
 ﻿using LiveLearn.BuildingBlocks;
 using LiveLearn.Payment.Domain.Common;
+using LiveLearn.Payment.Domain.Enums;
 
 namespace LiveLearn.Payment.Domain.Entities;
 
@@ -23,6 +24,15 @@ public sealed class OrderPaymentLine : Entity<Guid>
     // Snapshotted at creation so a later rate change never touches existing sales (D5).
     public decimal TutorShareRate { get; private set; }
 
+    public OrderPaymentLineStatus Status { get; private set; }
+
+    // Set from Ordering's OrderLineEnrolled; a student may refund only an enrolled line, so the revoke
+    // never reaches Enrollment before the enrollment (D6).
+    public bool IsEnrolled { get; private set; }
+
+    // Stripe refund of this line; set once the refund is confirmed.
+    public string? RefundId { get; private set; }
+
     private OrderPaymentLine() { }
 
     internal static OrderPaymentLine Create(Guid orderPaymentId, Guid orderLineId, Guid courseId, Guid tutorId, string courseTitle, Money price, decimal tutorShareRate)
@@ -37,6 +47,11 @@ public sealed class OrderPaymentLine : Entity<Guid>
             CourseTitle = courseTitle,
             Price = price,
             TutorShareRate = tutorShareRate,
+            Status = OrderPaymentLineStatus.AwaitingPayment,
         };
     }
+
+    internal void MarkPaid() => Status = OrderPaymentLineStatus.Paid;
+
+    internal void MarkEnrolled() => IsEnrolled = true;
 }
