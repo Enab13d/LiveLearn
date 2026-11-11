@@ -2,7 +2,6 @@
 using LiveLearn.BuildingBlocks;
 using LiveLearn.Payment.Application.Errors;
 using LiveLearn.Payment.Application.Services;
-using LiveLearn.Payment.Domain.Common;
 using LiveLearn.Payment.Infrastructure.Configuration;
 using Microsoft.Extensions.Options;
 using Stripe;
@@ -39,7 +38,7 @@ internal sealed class StripeCheckoutGateway(StripeClient stripeClient, IOptions<
                 PriceData = new SessionLineItemPriceDataOptions
                 {
                     Currency = item.Price.Currency.ToLowerInvariant(),
-                    UnitAmount = ToMinorUnits(item.Price),
+                    UnitAmount = StripeAmounts.ToMinorUnits(item.Price),
                     ProductData = new SessionLineItemPriceDataProductDataOptions
                     {
                         Name = item.CourseTitle,
@@ -93,19 +92,8 @@ internal sealed class StripeCheckoutGateway(StripeClient stripeClient, IOptions<
         var balanceTransaction = charge.BalanceTransaction
             ?? throw new InvalidOperationException($"Charge '{charge.Id}' has no balance transaction yet.");
 
-        var fee = FromMinorUnits(balanceTransaction.Fee, balanceTransaction.Currency);
+        var fee = StripeAmounts.FromMinorUnits(balanceTransaction.Fee, balanceTransaction.Currency);
 
         return new CompletedCheckoutSession(orderId, IsPaid: true, charge.Id, fee, new DateTimeOffset(charge.Created, TimeSpan.Zero));
-    }
-
-    // Minor units exist only here (D8). USD only (D1): two decimal places.
-    private static long ToMinorUnits(Money money) => (long)(money.Round().Amount * 100);
-
-    private static Money FromMinorUnits(long amount, string currency)
-    {
-        var money = Money.Create(amount / 100m, currency.ToUpperInvariant());
-        return money.IsSuccess
-            ? money.Value
-            : throw new InvalidOperationException($"Stripe returned an unsupported currency '{currency}'.");
     }
 }

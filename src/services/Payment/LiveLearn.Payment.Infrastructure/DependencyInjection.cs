@@ -113,6 +113,7 @@ public static class DependencyInjectionExtensions
         // StripeClient is thread-safe and reuses its HTTP connections, so one instance serves the app (D9).
         services.AddSingleton(sp => new StripeClient(sp.GetRequiredService<IOptions<StripeOptions>>().Value.SecretKey));
         services.AddScoped<ICheckoutGateway, StripeCheckoutGateway>();
+        services.AddScoped<IRefundGateway, StripeRefundGateway>();
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DependencyInjectionExtensions).Assembly));
 
